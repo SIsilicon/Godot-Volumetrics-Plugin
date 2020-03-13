@@ -1,0 +1,24 @@
+[remap]
+
+importer="texture_3d"
+type="Texture3D"
+path="res://.import/cup_volume.png-d1b1e4fcd94e9fca63245ef127a30111.tex3d"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://cup_volume.png"
+dest_files=[ "res://.import/cup_volume.png-d1b1e4fcd94e9fca63245ef127a30111.tex3d" ]
+
+[params]
+
+compress/mode=0
+compress/no_bptc_if_rgb=false
+flags/repeat=0
+flags/filter=true
+flags/mipmaps=false
+flags/srgb=1
+slices/horizontal=8
+slices/vertical=16
