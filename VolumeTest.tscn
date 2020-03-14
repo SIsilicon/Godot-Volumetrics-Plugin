@@ -1,9 +1,10 @@
-[gd_scene load_steps=10 format=2]
+[gd_scene load_steps=11 format=2]
 
 [ext_resource path="res://addons/Silicon.vfx.volumetrics/VolumeMaterial/volumetric_material.gd" type="Script" id=1]
 [ext_resource path="res://Camera.gd" type="Script" id=2]
 [ext_resource path="res://addons/Silicon.vfx.volumetrics/volume_sprite.gd" type="Script" id=3]
 [ext_resource path="res://sphere_volume.png" type="Texture3D" id=4]
+[ext_resource path="res://VolumeTest.gd" type="Script" id=5]
 
 [sub_resource type="PlaneMesh" id=1]
 size = Vector2( 40, 40 )
@@ -17,8 +18,8 @@ render_priority = -1
 
 [sub_resource type="Resource" id=4]
 script = ExtResource( 1 )
-scatter_color = Color( 0.152941, 1, 0.145098, 1 )
-density = 3.0
+scatter_color = Color( 1, 1, 1, 1 )
+density = 5.0
 density_map = ExtResource( 4 )
 absorption_color = Color( 1, 1, 1, 1 )
 
@@ -30,6 +31,7 @@ absorption_color = Color( 1, 1, 1, 1 )
 
 [node name="Node" type="Node"]
 process_priority = 1
+script = ExtResource( 5 )
 
 [node name="Example" type="Spatial" parent="."]
 
@@ -54,8 +56,27 @@ transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.56392, 0 )
 mesh = SubResource( 2 )
 material/0 = SubResource( 3 )
 
+[node name="CSGBox" type="CSGBox" parent="Example"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.61113, 3.8743e-05 )
+
+[node name="CSGSphere" type="CSGSphere" parent="Example/CSGBox"]
+operation = 2
+radius = 1.269
+radial_segments = 43
+rings = 58
+
 [node name="Local Cloud" type="Spatial" parent="."]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.403108, 0.905205, 0 )
+script = ExtResource( 3 )
+material = SubResource( 4 )
+
+[node name="Local Cloud2" type="Spatial" parent="."]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.785387, 1.26743, 0.74952 )
+script = ExtResource( 3 )
+material = SubResource( 4 )
+
+[node name="Local Cloud3" type="Spatial" parent="."]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.56686, 0.905205, 0.231335 )
 script = ExtResource( 3 )
 material = SubResource( 4 )
 

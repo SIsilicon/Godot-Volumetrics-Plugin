@@ -1,9 +1,11 @@
-[gd_scene load_steps=30 format=2]
+[gd_scene load_steps=32 format=2]
 
 [ext_resource path="res://addons/Silicon.vfx.volumetrics/Renderer/volume_copy.shader" type="Shader" id=1]
 [ext_resource path="res://addons/Silicon.vfx.volumetrics/Renderer/volume_integration.shader" type="Shader" id=2]
-[ext_resource path="res://addons/Silicon.vfx.volumetrics/Renderer/volume_temporal_reprojection.shader" type="Shader" id=3]
+[ext_resource path="res://addons/Silicon.vfx.volumetrics/Renderer/volume_lighting_and_taa.shader" type="Shader" id=3]
 [ext_resource path="res://addons/Silicon.vfx.volumetrics/Renderer/volumetric_renderer.gd" type="Script" id=4]
+[ext_resource path="res://addons/Silicon.vfx.volumetrics/Renderer/scene_scatter.shader" type="Shader" id=6]
+
 
 [sub_resource type="ViewportTexture" id=1]
 viewport_path = NodePath("LightScatter")
@@ -27,88 +29,126 @@ viewport_path = NodePath("Scatter")
 [sub_resource type="ViewportTexture" id=6]
 viewport_path = NodePath("Extinction")
 
-[sub_resource type="ViewportTexture" id=7]
+[sub_resource type="Image" id=27]
+data = {
+"data": PoolByteArray( 0, 0, 0, 0 ),
+"format": "RFloat",
+"height": 1,
+"mipmaps": false,
+"width": 1
+}
+
+[sub_resource type="ImageTexture" id=8]
+flags = 0
+flags = 0
+image = SubResource( 27 )
+size = Vector2( 1, 1 )
+
+[sub_resource type="ViewportTexture" id=9]
 viewport_path = NodePath("Motion")
 
-[sub_resource type="ViewportTexture" id=8]
+[sub_resource type="ViewportTexture" id=10]
 viewport_path = NodePath("PrevScatter")
 
-[sub_resource type="ShaderMaterial" id=9]
+[sub_resource type="ShaderMaterial" id=11]
 resource_local_to_scene = true
 shader = ExtResource( 3 )
 shader_param/is_transmission = false
-shader_param/blend = 0.934167
-shader_param/tile_factor = Vector2( 8, 16 )
+shader_param/blend = 0.0
+shader_param/tile_factor = Vector2( 8, 8 )
 shader_param/vol_depth_params = Vector3( 0.99238, -0.076201, 0.4964 )
-shader_param/projection_matrix0 = Plane( 1.01006, 0, 0, 0 )
+shader_param/projection_matrix0 = Plane( 0.571603, 0, 0, 0 )
 shader_param/projection_matrix1 = Plane( 0, 1.42815, 0, 0 )
 shader_param/projection_matrix2 = Plane( 0, 0, -1.0002, -1 )
 shader_param/projection_matrix3 = Plane( 0, 0, -0.10001, 0 )
-shader_param/curr_view_matrix = Transform( 0.664258, -0.140068, 0.734263, 0, 0.982287, 0.187381, -0.747503, -0.124469, 0.652492, 2.21193, 1.72925, 2.33087 )
-shader_param/prev_inv_view_matrix = Transform( 0.664258, 0, -0.747503, -0.140068, 0.982287, -0.124469, 0.734263, 0.187381, 0.652492, 0.273043, -1.09868, -3.46905 )
+shader_param/curr_view_matrix = Transform( 0.00432629, -0.63537, 0.772196, 0, 0.772203, 0.635376, -0.999991, -0.00274882, 0.00334077, 2.64814, 2.17893, 0.0114567 )
+shader_param/prev_inv_view_matrix = Transform( 0.00432629, 0, -0.999991, -0.63537, 0.772203, -0.00274882, 0.772196, 0.635376, 0.00334077, 0, -9.80617e-08, -3.42936 )
+shader_param/use_light_data = false
 shader_param/current_volume = SubResource( 5 )
-shader_param/previous_volume = SubResource( 8 )
+shader_param/previous_volume = SubResource( 10 )
 shader_param/extinction_volume = SubResource( 6 )
-shader_param/motion_volume = SubResource( 7 )
-
-[sub_resource type="ViewportTexture" id=10]
-viewport_path = NodePath("Extinction")
-
-[sub_resource type="ViewportTexture" id=11]
-viewport_path = NodePath("Motion")
+shader_param/motion_volume = SubResource( 9 )
+shader_param/light_data = SubResource( 8 )
 
 [sub_resource type="ViewportTexture" id=12]
-viewport_path = NodePath("PrevTransmit")
+viewport_path = NodePath("Extinction")
 
-[sub_resource type="ShaderMaterial" id=13]
-resource_local_to_scene = true
-shader = ExtResource( 3 )
-shader_param/is_transmission = true
-shader_param/blend = 0.934167
-shader_param/tile_factor = Vector2( 8, 16 )
-shader_param/vol_depth_params = Vector3( 0.99238, -0.076201, 0.4964 )
-shader_param/projection_matrix0 = Plane( 1.01006, 0, 0, 0 )
-shader_param/projection_matrix1 = Plane( 0, 1.42815, 0, 0 )
-shader_param/projection_matrix2 = Plane( 0, 0, -1.0002, -1 )
-shader_param/projection_matrix3 = Plane( 0, 0, -0.10001, 0 )
-shader_param/curr_view_matrix = Transform( 0.664258, -0.140068, 0.734263, 0, 0.982287, 0.187381, -0.747503, -0.124469, 0.652492, 2.21193, 1.72925, 2.33087 )
-shader_param/prev_inv_view_matrix = Transform( 0.664258, 0, -0.747503, -0.140068, 0.982287, -0.124469, 0.734263, 0.187381, 0.652492, 0.273043, -1.09868, -3.46905 )
-shader_param/current_volume = SubResource( 10 )
-shader_param/previous_volume = SubResource( 12 )
-shader_param/motion_volume = SubResource( 11 )
+[sub_resource type="ViewportTexture" id=13]
+viewport_path = NodePath("Motion")
 
 [sub_resource type="ViewportTexture" id=14]
-viewport_path = NodePath("LightTransmit")
+viewport_path = NodePath("PrevTransmit")
 
 [sub_resource type="ShaderMaterial" id=15]
 resource_local_to_scene = true
-shader = ExtResource( 2 )
-shader_param/is_transmittance = false
-shader_param/tile_factor = Vector2( 8, 16 )
+shader = ExtResource( 3 )
+shader_param/is_transmission = true
+shader_param/blend = 0.0
+shader_param/tile_factor = Vector2( 8, 8 )
 shader_param/vol_depth_params = Vector3( 0.99238, -0.076201, 0.4964 )
-shader_param/volume_scattering = SubResource( 1 )
-shader_param/volume_transmittance = SubResource( 14 )
+shader_param/projection_matrix0 = Plane( 0.571603, 0, 0, 0 )
+shader_param/projection_matrix1 = Plane( 0, 1.42815, 0, 0 )
+shader_param/projection_matrix2 = Plane( 0, 0, -1.0002, -1 )
+shader_param/projection_matrix3 = Plane( 0, 0, -0.10001, 0 )
+shader_param/curr_view_matrix = Transform( 0.00432629, -0.63537, 0.772196, 0, 0.772203, 0.635376, -0.999991, -0.00274882, 0.00334077, 2.64814, 2.17893, 0.0114567 )
+shader_param/prev_inv_view_matrix = Transform( 0.00432629, 0, -0.999991, -0.63537, 0.772203, -0.00274882, 0.772196, 0.635376, 0.00334077, 0, -9.80617e-08, -3.42936 )
+shader_param/use_light_data = false
+shader_param/current_volume = SubResource( 12 )
+shader_param/previous_volume = SubResource( 14 )
+shader_param/motion_volume = SubResource( 13 )
 
-[sub_resource type="QuadMesh" id=16]
-size = Vector2( 2, 2 )
+[sub_resource type="ViewportTexture" id=16]
+viewport_path = NodePath("LightTransmit")
 
 [sub_resource type="ShaderMaterial" id=17]
 resource_local_to_scene = true
 shader = ExtResource( 2 )
-shader_param/is_transmittance = true
-shader_param/tile_factor = Vector2( 8, 16 )
+shader_param/is_transmittance = false
+shader_param/tile_factor = Vector2( 8, 8 )
 shader_param/vol_depth_params = Vector3( 0.99238, -0.076201, 0.4964 )
 shader_param/volume_scattering = SubResource( 1 )
-shader_param/volume_transmittance = SubResource( 14 )
+shader_param/volume_transmittance = SubResource( 16 )
 
-[sub_resource type="Shader" id=18]
+[sub_resource type="QuadMesh" id=18]
+size = Vector2( 2, 2 )
+
+[sub_resource type="ShaderMaterial" id=19]
+resource_local_to_scene = true
+shader = ExtResource( 2 )
+shader_param/is_transmittance = true
+shader_param/tile_factor = Vector2( 8, 8 )
+shader_param/vol_depth_params = Vector3( 0.99238, -0.076201, 0.4964 )
+shader_param/volume_scattering = SubResource( 1 )
+shader_param/volume_transmittance = SubResource( 16 )
+
+[sub_resource type="ViewportTexture" id=20]
+flags = 4
+viewport_path = NodePath("ResolveScatter")
+
+[sub_resource type="ViewportTexture" id=21]
+flags = 4
+viewport_path = NodePath("ResolveTransmit")
+
+[sub_resource type="ShaderMaterial" id=22]
+resource_local_to_scene = true
+render_priority = -16
+shader = ExtResource( 6 )
+shader_param/volume_size = Vector2( 101, 68 )
+shader_param/tile_factor = Vector2( 8, 8 )
+shader_param/vol_depth_params = Vector3( 0.99238, -0.076201, 0.4964 )
+shader_param/volume_scattering = SubResource( 20 )
+shader_param/volume_transmittance = SubResource( 21 )
+
+[sub_resource type="QuadMesh" id=23]
+size = Vector2( 2, 2 )
+
+[sub_resource type="Shader" id=24]
 code = "shader_type spatial;
 render_mode unshaded, blend_mul;
 
 uniform sampler2D volume_transmittance;
 
 uniform vec2 volume_size;
-
 uniform vec2 tile_factor;
 
 uniform vec3 vol_depth_params;
@@ -195,134 +235,18 @@ void fragment() {
 }
 "
 
-[sub_resource type="ViewportTexture" id=19]
+[sub_resource type="ViewportTexture" id=25]
 flags = 4
 viewport_path = NodePath("ResolveTransmit")
 
-[sub_resource type="ShaderMaterial" id=20]
+[sub_resource type="ShaderMaterial" id=26]
 resource_local_to_scene = true
 render_priority = -17
-shader = SubResource( 18 )
+shader = SubResource( 24 )
 shader_param/volume_size = Vector2( 101, 68 )
-shader_param/tile_factor = Vector2( 8, 16 )
+shader_param/tile_factor = Vector2( 8, 8 )
 shader_param/vol_depth_params = Vector3( 0.99238, -0.076201, 0.4964 )
-shader_param/volume_transmittance = SubResource( 19 )
-
-[sub_resource type="QuadMesh" id=21]
-size = Vector2( 2, 2 )
-
-[sub_resource type="Shader" id=22]
-code = "shader_type spatial;
-render_mode unshaded, blend_add;
-
-uniform sampler2D volume_scattering;
-uniform sampler2D volume_transmittance;
-
-uniform vec2 volume_size;
-
-uniform vec2 tile_factor;
-
-uniform vec3 vol_depth_params;
-
-void vertex() {
-	POSITION = vec4(VERTEX.xy, -1.0, 1.0);
-}
-
-vec4 cubic(float v) {
-	vec4 n = vec4(1.0, 2.0, 3.0, 4.0) - v;
-	vec4 s = n * n * n;
-	float x = s.x;
-	float y = s.y - 4.0 * s.x;
-	float z = s.z - 4.0 * s.y + 6.0 * s.x;
-	float w = 6.0 - x - y - z;
-	return vec4(x, y, z, w) * (1.0/6.0);
-}
-
-vec4 texture_bicubic(sampler2D sampler, vec2 tex_coords) {
-	vec2 tex_size = vec2(textureSize(sampler, 0));
-	vec2 inv_tex_size = 1.0 / tex_size;
-	
-	tex_coords = tex_coords * tex_size - 0.5;
-	
-	vec2 fxy = fract(tex_coords);
-	tex_coords -= fxy;
-	
-	vec4 xcubic = cubic(fxy.x);
-	vec4 ycubic = cubic(fxy.y);
-	
-	vec4 c = tex_coords.xxyy + vec2 (-0.5, +1.5).xyxy;
-	
-	vec4 s = vec4(xcubic.xz + xcubic.yw, ycubic.xz + ycubic.yw);
-	vec4 offset = c + vec4 (xcubic.yw, ycubic.yw) / s;
-	
-	offset *= inv_tex_size.xxyy;
-	
-	vec4 sample0 = textureLod(sampler, offset.xz, 0.0);
-	vec4 sample1 = textureLod(sampler, offset.yz, 0.0);
-	vec4 sample2 = textureLod(sampler, offset.xw, 0.0);
-	vec4 sample3 = textureLod(sampler, offset.yw, 0.0);
-	
-	float sx = s.x / (s.x + s.y);
-	float sy = s.z / (s.z + s.w);
-	
-	return mix(mix(sample3, sample2, sx), mix(sample1, sample0, sx), sy);
-}
-
-vec4 texture3D(sampler2D tex, vec3 uvw, vec2 tiling) {
-	float zCoord = uvw.z * tiling.x * tiling.y;
-	float zOffset = fract(zCoord);
-	
-	vec2 uv = uvw.xy / tiling;
-	float ratio = tiling.y / tiling.x;
-	vec2 slice0Offset = vec2(float(int(zCoord) % int(tiling.x)), floor(ratio * zCoord / tiling.y));
-	zCoord++;
-	vec2 slice1Offset = vec2(float(int(zCoord) % int(tiling.x)), floor(ratio * zCoord / tiling.y));
-	
-	vec4 slice0colour = texture_bicubic(tex, slice0Offset/tiling + uv);
-	vec4 slice1colour = texture_bicubic(tex, slice1Offset/tiling + uv);
-	
-//	return slice0colour; //no filtering.
-	return mix(slice0colour, slice1colour, zOffset);
-}
-
-vec3 ndc_to_volume(vec3 coords, mat4 projection_matrix) {
-	float z = 2.0 * coords.z - 1.0;
-	z = -projection_matrix[3][2] / (z + projection_matrix[2][2]);
-	z = vol_depth_params.z * log2(z * vol_depth_params.y + vol_depth_params.x);
-	return vec3(coords.xy, z);
-}
-
-void fragment() {
-	vec3 tile_margin = 1.0 / vec3(volume_size, tile_factor.x * tile_factor.y);
-	
-	vec3 ndc = vec3(SCREEN_UV, texture(DEPTH_TEXTURE, SCREEN_UV).r);
-	ndc = ndc_to_volume(ndc, PROJECTION_MATRIX);
-	ndc = clamp(ndc, tile_margin * vec3(1,1,0), 1.0 - tile_margin);
-	
-	vec3 transmittance = texture3D(volume_transmittance, ndc, tile_factor).rgb;
-	ALPHA = 1.0 - dot(transmittance, vec3(1.0 / 3.0));
-	
-	ALBEDO = texture3D(volume_scattering, ndc, tile_factor).rgb;
-}
-"
-
-[sub_resource type="ViewportTexture" id=23]
-flags = 4
-viewport_path = NodePath("ResolveScatter")
-
-[sub_resource type="ViewportTexture" id=24]
-flags = 4
-viewport_path = NodePath("ResolveTransmit")
-
-[sub_resource type="ShaderMaterial" id=25]
-resource_local_to_scene = true
-render_priority = -16
-shader = SubResource( 22 )
-shader_param/volume_size = Vector2( 101, 68 )
-shader_param/tile_factor = Vector2( 8, 16 )
-shader_param/vol_depth_params = Vector3( 0.99238, -0.076201, 0.4964 )
-shader_param/volume_scattering = SubResource( 23 )
-shader_param/volume_transmittance = SubResource( 24 )
+shader_param/volume_transmittance = SubResource( 25 )
 
 [node name="Node" type="Node"]
 process_priority = 512
@@ -333,7 +257,7 @@ distribution = 0.922
 enabled = false
 
 [node name="PrevScatter" type="Viewport" parent="."]
-size = Vector2( 193, 273 )
+size = Vector2( 416, 166 )
 own_world = true
 transparent_bg = true
 keep_3d_linear = true
@@ -349,7 +273,7 @@ __meta__ = {
 }
 
 [node name="PrevTransmit" type="Viewport" parent="."]
-size = Vector2( 193, 273 )
+size = Vector2( 416, 166 )
 own_world = true
 transparent_bg = true
 keep_3d_linear = true
@@ -365,7 +289,7 @@ __meta__ = {
 }
 
 [node name="Scatter" type="Viewport" parent="."]
-size = Vector2( 193, 273 )
+size = Vector2( 416, 166 )
 own_world = true
 transparent_bg = true
 keep_3d_linear = true
@@ -373,12 +297,12 @@ usage = 3
 render_target_update_mode = 0
 
 [node name="Camera" type="Camera" parent="Scatter"]
-transform = Transform( 0.664258, -0.140068, 0.734263, 0, 0.982287, 0.187381, -0.747503, -0.124469, 0.652492, 2.21193, 1.72925, 2.33087 )
+transform = Transform( 0.00432629, -0.63537, 0.772196, 0, 0.772203, 0.635376, -0.999991, -0.00274882, 0.00334077, 2.64814, 2.17893, 0.0114567 )
 near = 0.1
 far = 40.0
 
 [node name="Extinction" type="Viewport" parent="."]
-size = Vector2( 193, 273 )
+size = Vector2( 416, 166 )
 own_world = true
 transparent_bg = true
 keep_3d_linear = true
@@ -386,12 +310,12 @@ usage = 3
 render_target_update_mode = 0
 
 [node name="Camera" type="Camera" parent="Extinction"]
-transform = Transform( 0.664258, -0.140068, 0.734263, 0, 0.982287, 0.187381, -0.747503, -0.124469, 0.652492, 2.21193, 1.72925, 2.33087 )
+transform = Transform( 0.00432629, -0.63537, 0.772196, 0, 0.772203, 0.635376, -0.999991, -0.00274882, 0.00334077, 2.64814, 2.17893, 0.0114567 )
 near = 0.1
 far = 40.0
 
 [node name="Motion" type="Viewport" parent="."]
-size = Vector2( 193, 273 )
+size = Vector2( 416, 166 )
 own_world = true
 transparent_bg = true
 keep_3d_linear = true
@@ -399,12 +323,12 @@ usage = 3
 render_target_update_mode = 0
 
 [node name="Camera" type="Camera" parent="Motion"]
-transform = Transform( 0.664258, -0.140068, 0.734263, 0, 0.982287, 0.187381, -0.747503, -0.124469, 0.652492, 2.21193, 1.72925, 2.33087 )
+transform = Transform( 0.00432629, -0.63537, 0.772196, 0, 0.772203, 0.635376, -0.999991, -0.00274882, 0.00334077, 2.64814, 2.17893, 0.0114567 )
 near = 0.1
 far = 40.0
 
 [node name="LightScatter" type="Viewport" parent="."]
-size = Vector2( 193, 273 )
+size = Vector2( 416, 166 )
 own_world = true
 transparent_bg = true
 keep_3d_linear = true
@@ -412,7 +336,7 @@ usage = 3
 render_target_update_mode = 0
 
 [node name="ColorRect" type="ColorRect" parent="LightScatter"]
-material = SubResource( 9 )
+material = SubResource( 11 )
 anchor_right = 1.0
 anchor_bottom = 1.0
 __meta__ = {
@@ -420,7 +344,7 @@ __meta__ = {
 }
 
 [node name="LightTransmit" type="Viewport" parent="."]
-size = Vector2( 193, 273 )
+size = Vector2( 416, 166 )
 own_world = true
 transparent_bg = true
 keep_3d_linear = true
@@ -428,7 +352,7 @@ usage = 3
 render_target_update_mode = 0
 
 [node name="ColorRect" type="ColorRect" parent="LightTransmit"]
-material = SubResource( 13 )
+material = SubResource( 15 )
 anchor_right = 1.0
 anchor_bottom = 1.0
 __meta__ = {
@@ -436,7 +360,7 @@ __meta__ = {
 }
 
 [node name="ResolveScatter" type="Viewport" parent="."]
-size = Vector2( 193, 273 )
+size = Vector2( 416, 166 )
 own_world = true
 transparent_bg = true
 keep_3d_linear = true
@@ -444,18 +368,18 @@ debug_draw = 1
 render_target_update_mode = 0
 
 [node name="Camera" type="Camera" parent="ResolveScatter"]
-transform = Transform( 0.664258, -0.140068, 0.734263, 0, 0.982287, 0.187381, -0.747503, -0.124469, 0.652492, 2.21193, 1.72925, 2.33087 )
+transform = Transform( 0.00432629, -0.63537, 0.772196, 0, 0.772203, 0.635376, -0.999991, -0.00274882, 0.00334077, 2.64814, 2.17893, 0.0114567 )
 near = 0.1
 far = 40.0
 
 [node name="Canvas" type="MeshInstance" parent="ResolveScatter"]
-material_override = SubResource( 15 )
+material_override = SubResource( 17 )
 extra_cull_margin = 16384.0
-mesh = SubResource( 16 )
+mesh = SubResource( 18 )
 material/0 = null
 
 [node name="ResolveTransmit" type="Viewport" parent="."]
-size = Vector2( 193, 273 )
+size = Vector2( 416, 166 )
 own_world = true
 keep_3d_linear = true
 usage = 3
@@ -463,26 +387,26 @@ debug_draw = 1
 render_target_update_mode = 0
 
 [node name="Camera" type="Camera" parent="ResolveTransmit"]
-transform = Transform( 0.664258, -0.140068, 0.734263, 0, 0.982287, 0.187381, -0.747503, -0.124469, 0.652492, 2.21193, 1.72925, 2.33087 )
+transform = Transform( 0.00432629, -0.63537, 0.772196, 0, 0.772203, 0.635376, -0.999991, -0.00274882, 0.00334077, 2.64814, 2.17893, 0.0114567 )
 near = 0.1
 far = 40.0
 
 [node name="Canvas" type="MeshInstance" parent="ResolveTransmit"]
-material_override = SubResource( 17 )
+material_override = SubResource( 19 )
 extra_cull_margin = 16384.0
-mesh = SubResource( 16 )
-material/0 = null
-
-[node name="SolidTransmit" type="MeshInstance" parent="."]
-visible = false
-material_override = SubResource( 20 )
-extra_cull_margin = 16384.0
-mesh = SubResource( 21 )
+mesh = SubResource( 18 )
 material/0 = null
 
 [node name="SolidScatter" type="MeshInstance" parent="."]
 visible = false
-material_override = SubResource( 25 )
+material_override = SubResource( 22 )
 extra_cull_margin = 16384.0
-mesh = SubResource( 21 )
+mesh = SubResource( 23 )
+material/0 = null
+
+[node name="SolidTransmit" type="MeshInstance" parent="."]
+visible = false
+material_override = SubResource( 26 )
+extra_cull_margin = 16384.0
+mesh = SubResource( 23 )
 material/0 = null

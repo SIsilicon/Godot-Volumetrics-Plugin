@@ -79,7 +79,6 @@ void fragment() {
 	/* Ortho */
 	float prev_ray_len = view_cell.z;
 	float orig_ray_len = 1.0;
-	
 	/* Persp */
 	if (PROJECTION_MATRIX[3][3] == 0.0) {
 		prev_ray_len = length(view_cell);

@@ -28,13 +28,38 @@ var canvas := QuadMesh.new()
 
 var volumes := {}
 
-var blue_random = BlueNoise.new(randi())
+var lights := {}
+var light_texture := ImageTexture.new()
+var temp_light_img : Image = null
+
+var halton := Halton.genearate_sequence_3D(Vector3(5,7,11), 128)
+
+func _enter_tree() -> void:
+	var image := Image.new()
+	image.create(1, 1, false, Image.FORMAT_RF)
+	light_texture.create_from_image(image, 0)
 
 func _ready() -> void:
-	canvas.size = Vector2(2, 2)
+	$LightScatter/ColorRect.material.set_shader_param("light_data", light_texture)
 	
+	canvas.size = Vector2(2, 2)
 	if Engine.editor_hint and get_tree().edited_scene_root == self:
 		set_enabled(false)
+	
+	add_light(0, 0)
+	set_light_param(0, "position", Vector3(2, 3, 1))
+	set_light_param(0, "color", Color(0, 1.0, 0.5))
+	set_light_param(0, "energy", 20.0)
+	
+	add_light(1, 0)
+	set_light_param(1, "position", Vector3(-2, 3, 1))
+	set_light_param(1, "color", Color(1.0, 0.5, 0.0))
+	set_light_param(1, "energy", 20.0)
+	
+	add_light(2, 0)
+	set_light_param(2, "position", Vector3(0, 3, -2))
+	set_light_param(2, "color", Color(0.0, 0.5, 1.0))
+	set_light_param(2, "energy", 20.0)
 	
 	process_priority = 512
 	resize(Vector2.ONE)
@@ -92,7 +117,7 @@ func _process(_delta : float) -> void:
 		resolver.material_override.set_shader_param("vol_depth_params", vol_depth_params)
 		resolver.material_override.set_shader_param("tile_factor", tiling)
 	
-	var sample_offset := Vector3(blue_random.next() / size.x, blue_random.next() / size.y, blue_random.next() / samples)
+	var sample_offset : Vector3 = halton[Engine.get_frames_drawn() % halton.size()] / Vector3(size.x, size.y, samples)
 	for child in $Scatter.get_children() + $Extinction.get_children() + $Motion.get_children():
 		if child is Camera:
 			continue
@@ -120,6 +145,12 @@ func _process(_delta : float) -> void:
 	var blend = float(base_blend) / (1.0 + Engine.get_frames_per_second()) * Engine.get_frames_per_second()
 	$LightScatter/ColorRect.material.set_shader_param("blend", blend)
 	$LightTransmit/ColorRect.material.set_shader_param("blend", blend)
+	
+	# Apply all changes to light texture
+	if temp_light_img:
+		temp_light_img.unlock()
+		light_texture.create_from_image(temp_light_img, 0)
+		temp_light_img = null
 
 func set_samples(value : int) -> void:
 	samples = value
@@ -156,7 +187,7 @@ func set_enabled(value : bool) -> void:
 			$SolidScatter.visible = enabled
 			$SolidTransmit.visible = enabled
 		
-		if get_tree():
+		if is_inside_tree():
 			reset_taa()
 
 func get_viewports() -> Array:
@@ -217,3 +248,105 @@ func set_volume_param(key, param : String, value) -> void:
 	else:
 		for mesh in volumes[key]:
 			mesh.material_override.set_shader_param(param, value)
+
+# type 0 = PointLight
+# type 1 = SpotLight
+# type 2 = DirectionalLight
+func add_light(key, type : int, data := {}) -> void:
+	if not temp_light_img:
+		temp_light_img = light_texture.get_data()
+	
+	var light_data := {
+		type = type,
+		position = Vector3(),
+		color = Color.white,
+		energy = 1.0
+	} if data.empty() else data
+	light_data.index = temp_light_img.get_height() if temp_light_img.get_width() == 9 else 0
+	
+	temp_light_img.unlock()
+	temp_light_img.crop(9, (temp_light_img.get_height() + 1) if temp_light_img.get_width() == 9 else 1)
+	temp_light_img.lock()
+	
+	# type
+	temp_light_img.set_pixel(0, light_data.index, val_to_col(type))
+	# position
+	temp_light_img.set_pixel(1, light_data.index, val_to_col(light_data.position.x))
+	temp_light_img.set_pixel(2, light_data.index, val_to_col(light_data.position.y))
+	temp_light_img.set_pixel(3, light_data.index, val_to_col(light_data.position.z))
+	# color and energy
+	temp_light_img.set_pixel(4, light_data.index, val_to_col(light_data.color.r * light_data.energy))
+	temp_light_img.set_pixel(5, light_data.index, val_to_col(light_data.color.g * light_data.energy))
+	temp_light_img.set_pixel(6, light_data.index, val_to_col(light_data.color.b * light_data.energy))
+	
+	# If not directional light...
+	if type != 2:
+		if not light_data.has("range"):
+			light_data.range = 5.0
+			light_data.falloff = 2.0
+		temp_light_img.set_pixel(7, light_data.index, val_to_col(light_data.range))
+		temp_light_img.set_pixel(8, light_data.index, val_to_col(light_data.falloff))
+	
+	lights[key] = light_data
+	
+	$LightScatter/ColorRect.material.set_shader_param("use_light_data", true)
+
+func remove_light(key) -> void:
+	var index : int = lights[key].index
+	lights.erase(key)
+	
+	if not temp_light_img:
+		temp_light_img = light_texture.get_data()
+	
+	temp_light_img.unlock()
+	temp_light_img.crop(9 if index != 0 else 1, max(index, 1))
+	temp_light_img.lock()
+	
+	if lights.empty():
+		$LightScatter/ColorRect.material.set_shader_param("use_light_data", true)
+	elif index <= temp_light_img.get_height():
+		var other_lights : Array = lights.values()
+		other_lights.sort_custom(LightIndexSorter, "sort_ascending")
+		for light_data in other_lights:
+			if light_data.index <= index:
+				continue
+			add_light(lights.keys()[lights.values().find(light_data)], light_data.type, light_data)
+
+func set_light_param(key, param : String, value) -> void:
+	if not temp_light_img:
+		temp_light_img = light_texture.get_data().duplicate()
+		temp_light_img.lock()
+	
+	var light_data : Dictionary = lights[key]
+	var index : int = light_data.index
+	match param:
+		"position":
+			light_data.position = value
+			temp_light_img.set_pixel(1, index, val_to_col(value.x))
+			temp_light_img.set_pixel(2, index, val_to_col(value.y))
+			temp_light_img.set_pixel(3, index, val_to_col(value.z))
+		"color", "energy":
+			if typeof(value) == TYPE_COLOR:
+				light_data.color = value
+			else:
+				light_data.energy = value
+			
+			temp_light_img.set_pixel(4, index, val_to_col(light_data.color.r * light_data.energy))
+			temp_light_img.set_pixel(5, index, val_to_col(light_data.color.g * light_data.energy))
+			temp_light_img.set_pixel(6, index, val_to_col(light_data.color.b * light_data.energy))
+		"range":
+			light_data.range = value
+			temp_light_img.set_pixel(7, index, val_to_col(light_data.range))
+		"falloff":
+			light_data.falloff = value
+			temp_light_img.set_pixel(8, index, val_to_col(light_data.falloff))
+
+func val_to_col(value) -> Color:
+	return Color(value, 0,0,0)
+
+class LightIndexSorter:
+	static func sort_ascending(a, b) -> bool:
+		if a.index < b.index:
+			return true
+		return false
+

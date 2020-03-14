@@ -22,6 +22,9 @@ uniform vec4 projection_matrix3 = vec4(0, 0, 0, 1);
 uniform mat4 curr_view_matrix;
 uniform mat4 prev_inv_view_matrix;
 
+uniform bool use_light_data = false;
+uniform sampler2D light_data;
+
 const float M_PI = 3.141592653;
 
 vec4 texture3D(sampler2D tex, vec3 uvw, vec2 tiling) {
@@ -77,6 +80,38 @@ float phase_function(vec3 v, vec3 l, float g) {
   return (1.0 - sqr_g) / max(1e-8, 4.0 * M_PI * pow(1.0 + sqr_g - 2.0 * g * cos_theta, 3.0 / 2.0));
 }
 
+void calculate_light(int light_index, vec3 wpos, vec3 wdir, float anisotropy, inout vec3 lighting) {
+	int type = int(texelFetch(light_data, ivec2(0, light_index), 0).r);
+	vec3 light_pos = vec3(
+		texelFetch(light_data, ivec2(1, light_index), 0).r,
+		texelFetch(light_data, ivec2(2, light_index), 0).r,
+		texelFetch(light_data, ivec2(3, light_index), 0).r
+	);
+	vec3 light_energy = vec3(
+		texelFetch(light_data, ivec2(4, light_index), 0).r,
+		texelFetch(light_data, ivec2(5, light_index), 0).r,
+		texelFetch(light_data, ivec2(6, light_index), 0).r
+	);
+	
+	vec4 light_dir = vec4(light_pos - wpos.xyz, 0.0);
+	light_dir.w = length(light_dir.xyz);
+	
+	// light is not directional
+	vec3 attenuation = light_energy;
+	if(type != 2) {
+		float range = texelFetch(light_data, ivec2(7, light_index), 0).r;
+		float falloff = texelFetch(light_data, ivec2(8, light_index), 0).r;
+		
+		if(light_dir.w > range) return;
+		
+		attenuation *= pow(max(1.0 - light_dir.w/range, 0.0), falloff);
+	}
+	
+	float phase = phase_function(wdir, light_dir.xyz / light_dir.w, 0.6);
+	
+	lighting += attenuation * phase;
+}
+
 void fragment() {
 	vec3 volume_sample = texture(current_volume, SCREEN_UV).rgb;
 	
@@ -98,15 +133,18 @@ void fragment() {
 		COLOR.rgb = volume_sample;
 	} else {
 		COLOR.rgb = volume_sample * 0.4;
-		const vec3 light_pos = vec3(0.0, 3.0, 0.0);
-
-		vec3 wdir = curr_view_matrix[2].xyz;
-		vec4 light_dir = vec4(light_pos - wpos.xyz, 0.0);
-		light_dir.w = length(light_dir.xyz);
-
-		float phase = phase_function(-wdir, light_dir.xyz / light_dir.w, 0.3);
-		vec3 attenuation = 1.0 / distance(wpos.xyz, light_pos) * vec3(0.0, 1.0, 0.5) * 8.0;
-		COLOR.rgb += attenuation * volume_sample * phase;
+		
+		
+		if(use_light_data) {
+			ivec2 light_data_size = textureSize(light_data, 0);
+			vec3 wdir = normalize(wpos.xyz - curr_view_matrix[3].xyz);
+			vec3 lighting = vec3(0.0);
+			
+			for(int i = 0; i < light_data_size.y; i++) {
+				calculate_light(i, wpos.xyz, wdir, 0.3, lighting);
+			}
+			COLOR.rgb += lighting * volume_sample;
+		}
 	}
 	
 	vec4 motion = vec4(texture(motion_volume, SCREEN_UV).xyz, 0.0);
@@ -114,25 +152,6 @@ void fragment() {
 	vec4 prev_ndc = projection_matrix * prev_inv_view_matrix * (wpos - motion);
 	prev_ndc = (prev_ndc / prev_ndc.w) * 0.5 + 0.5;
 	vec3 prev_uvw = ndc_to_volume(prev_ndc.xyz, projection_matrix);
-	
-//	vec3 neighbourhood[9];
-//	vec3 pixel_size = 1.0 / vec3(vec2(textureSize(current_volume, 0)) / tile_factor, tile_factor.x*tile_factor.y);
-//	neighbourhood[0] = texture3D(current_volume, uvw + vec3(-1.0, -1.0, 0.0) * pixel_size, tile_factor).rgb;
-//	neighbourhood[1] = texture3D(current_volume, uvw + vec3(+0.0, -1.0, 0.0) * pixel_size, tile_factor).rgb;
-//	neighbourhood[2] = texture3D(current_volume, uvw + vec3(+1.0, -1.0, 0.0) * pixel_size, tile_factor).rgb;
-//	neighbourhood[3] = texture3D(current_volume, uvw + vec3(-1.0, +0.0, 0.0) * pixel_size, tile_factor).rgb;
-//	neighbourhood[4] = volume_sample;
-//	neighbourhood[5] = texture3D(current_volume, uvw + vec3(+1.0, +0.0, 0.0) * pixel_size, tile_factor).rgb;
-//	neighbourhood[6] = texture3D(current_volume, uvw + vec3(-1.0, +1.0, 0.0) * pixel_size, tile_factor).rgb;
-//	neighbourhood[7] = texture3D(current_volume, uvw + vec3(+0.0, +1.0, 0.0) * pixel_size, tile_factor).rgb;
-//	neighbourhood[8] = texture3D(current_volume, uvw + vec3(+1.0, +1.0, 0.0) * pixel_size, tile_factor).rgb;
-//
-//	vec3 nmin = neighbourhood[0];
-//	vec3 nmax = neighbourhood[0];   
-//	for(int i = 1; i < 9; ++i) {
-//		nmin = min(nmin, neighbourhood[i]);
-//		nmax = max(nmax, neighbourhood[i]);
-//	}
 	
 	if(clamp(prev_uvw.xyz, 0.0, 1.0) == prev_uvw.xyz) {
 		vec3 previous_vol_sample = texture3D(previous_volume, prev_uvw, tile_factor).rgb;
