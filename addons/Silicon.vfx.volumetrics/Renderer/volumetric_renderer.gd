@@ -11,12 +11,11 @@ export var end := 100.0
 export var tile_size := 4
 export var samples := 64 setget set_samples
 export(float, 0.0, 1.0) var distribution := 0.7
-
-export var density_multiplier := 1.0
+export var volumetric_shadows := false
 
 var tiling := Vector2(8, 16)
 
-var base_blend := 0.0
+var blend := 0.0
 
 var camera : Camera
 var camera_transform := Transform()
@@ -32,9 +31,10 @@ var lights := {}
 var light_texture := ImageTexture.new()
 var temp_light_img : Image = null
 
-var halton := Halton.genearate_sequence_3D(Vector3(5,7,11), 128)
+var halton := Halton.genearate_sequence_3D(Vector3(3,7,5), 128)
 
 func _enter_tree() -> void:
+	
 	var image := Image.new()
 	image.create(1, 1, false, Image.FORMAT_RF)
 	light_texture.create_from_image(image, 0)
@@ -46,20 +46,22 @@ func _ready() -> void:
 	if Engine.editor_hint and get_tree().edited_scene_root == self:
 		set_enabled(false)
 	
-	add_light(0, 0)
-	set_light_param(0, "position", Vector3(2, 3, 1))
-	set_light_param(0, "color", Color(0, 1.0, 0.5))
-	set_light_param(0, "energy", 20.0)
-	
-	add_light(1, 0)
-	set_light_param(1, "position", Vector3(-2, 3, 1))
-	set_light_param(1, "color", Color(1.0, 0.5, 0.0))
-	set_light_param(1, "energy", 20.0)
-	
-	add_light(2, 0)
-	set_light_param(2, "position", Vector3(0, 3, -2))
-	set_light_param(2, "color", Color(0.0, 0.5, 1.0))
-	set_light_param(2, "energy", 20.0)
+#	Test Lights
+#	
+#	add_light(0, 0)
+#	set_light_param(0, "position", Vector3(2, 3, 1))
+#	set_light_param(0, "color", Color(0, 1.0, 0.5))
+#	set_light_param(0, "energy", 20.0)
+#
+#	add_light(1, 0)
+#	set_light_param(1, "position", Vector3(-2, 3, 1))
+#	set_light_param(1, "color", Color(1.0, 0.5, 0.0))
+#	set_light_param(1, "energy", 20.0)
+#
+#	add_light(2, 0)
+#	set_light_param(2, "position", Vector3(0, 3, -2))
+#	set_light_param(2, "color", Color(0.0, 0.5, 1.0))
+#	set_light_param(2, "energy", 20.0)
 	
 	process_priority = 512
 	resize(Vector2.ONE)
@@ -112,6 +114,7 @@ func _process(_delta : float) -> void:
 		viewport.get_child(0).material.set_shader_param("prev_inv_view_matrix", prev_cam_transform.inverse())
 		viewport.get_child(0).material.set_shader_param("curr_view_matrix", camera_transform)
 		CameraMatrix.pass_as_uniform(viewport.get_child(0).material, "projection_matrix", camera_projection)
+	$LightScatter/ColorRect.material.set_shader_param("volumetric_shadows", volumetric_shadows)
 	
 	for resolver in [$ResolveScatter/Canvas, $ResolveTransmit/Canvas, $SolidTransmit, $SolidScatter]:
 		resolver.material_override.set_shader_param("vol_depth_params", vol_depth_params)
@@ -142,7 +145,6 @@ func _process(_delta : float) -> void:
 		material.set_shader_param("prev_world_matrix", previous_transform)
 		child.set_meta("previous_transform", child.global_transform)
 	
-	var blend = float(base_blend) / (1.0 + Engine.get_frames_per_second()) * Engine.get_frames_per_second()
 	$LightScatter/ColorRect.material.set_shader_param("blend", blend)
 	$LightTransmit/ColorRect.material.set_shader_param("blend", blend)
 	
@@ -199,15 +201,15 @@ func get_viewports() -> Array:
 
 func resize(size : Vector2) -> void:
 	if size != $PrevScatter.size:
-		for viewport in get_viewports():
-			viewport.size = size
 		reset_taa()
+	
+	for viewport in get_viewports():
+		viewport.size = size
 
 func reset_taa() -> void:
-	base_blend = 0.0
+	blend = 0.0
 	yield(get_tree(), "idle_frame")
-	yield(get_tree(), "idle_frame")
-	base_blend = 0.95
+	blend = 0.95
 
 func add_volume(key) -> void:
 	var meshes := []
@@ -249,7 +251,7 @@ func set_volume_param(key, param : String, value) -> void:
 		for mesh in volumes[key]:
 			mesh.material_override.set_shader_param(param, value)
 
-# type 0 = PointLight
+# type 0 = OmniLight
 # type 1 = SpotLight
 # type 2 = DirectionalLight
 func add_light(key, type : int, data := {}) -> void:
@@ -313,11 +315,14 @@ func remove_light(key) -> void:
 			add_light(lights.keys()[lights.values().find(light_data)], light_data.type, light_data)
 
 func set_light_param(key, param : String, value) -> void:
+	var light_data : Dictionary = lights[key]
+	if light_data[param] == value:
+		return
+	
 	if not temp_light_img:
 		temp_light_img = light_texture.get_data().duplicate()
 		temp_light_img.lock()
 	
-	var light_data : Dictionary = lights[key]
 	var index : int = light_data.index
 	match param:
 		"position":

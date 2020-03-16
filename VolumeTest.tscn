@@ -3,31 +3,40 @@
 [ext_resource path="res://addons/Silicon.vfx.volumetrics/VolumeMaterial/volumetric_material.gd" type="Script" id=1]
 [ext_resource path="res://Camera.gd" type="Script" id=2]
 [ext_resource path="res://addons/Silicon.vfx.volumetrics/volume_sprite.gd" type="Script" id=3]
-[ext_resource path="res://sphere_volume.png" type="Texture3D" id=4]
+[ext_resource path="res://suzanne_volume.png" type="Texture3D" id=4]
 [ext_resource path="res://VolumeTest.gd" type="Script" id=5]
 
 [sub_resource type="PlaneMesh" id=1]
 size = Vector2( 40, 40 )
 
-[sub_resource type="SphereMesh" id=2]
-radius = 0.375
-height = 0.75
+[sub_resource type="SpatialMaterial" id=2]
+emission_enabled = true
+emission = Color( 0.482353, 0.623529, 1, 1 )
+emission_energy = 5.89
+emission_operator = 0
+emission_on_uv2 = false
 
-[sub_resource type="SpatialMaterial" id=3]
-render_priority = -1
-
-[sub_resource type="Resource" id=4]
+[sub_resource type="Resource" id=3]
 script = ExtResource( 1 )
 scatter_color = Color( 1, 1, 1, 1 )
-density = 5.0
-density_map = ExtResource( 4 )
+density = 0.074
 absorption_color = Color( 1, 1, 1, 1 )
 
 [sub_resource type="Resource" id=5]
 script = ExtResource( 1 )
 scatter_color = Color( 1, 1, 1, 1 )
-density = 0.04
+density = 7.209
+density_map = ExtResource( 4 )
 absorption_color = Color( 1, 1, 1, 1 )
+
+[sub_resource type="Environment" id=4]
+background_mode = 1
+background_color = Color( 0.337255, 0.337255, 0.337255, 1 )
+ambient_light_color = Color( 0.364706, 0.364706, 0.364706, 1 )
+ambient_light_energy = 0.56
+tonemap_mode = 2
+tonemap_exposure = 0.61
+tonemap_white = 0.72
 
 [node name="Node" type="Node"]
 process_priority = 1
@@ -35,11 +44,25 @@ script = ExtResource( 5 )
 
 [node name="Example" type="Spatial" parent="."]
 
-[node name="OmniLight" type="OmniLight" parent="Example"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.98959, 0 )
-light_color = Color( 0.368627, 0.823529, 0.482353, 1 )
-light_energy = 0.3
+[node name="OmniLight2" type="OmniLight" parent="Example"]
+transform = Transform( -4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 4.63148, 3.35693, 0.114054 )
+light_color = Color( 0.556863, 0.109804, 1, 1 )
+light_energy = 4.0
+shadow_enabled = true
 omni_range = 22.8038
+__meta__ = {
+"vol_id": 0
+}
+
+[node name="OmniLight3" type="OmniLight" parent="Example"]
+transform = Transform( -4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, -4.63148, 3.35693, 0.114055 )
+light_color = Color( 0.2, 0.866667, 0.211765, 1 )
+light_energy = 4.0
+shadow_enabled = true
+omni_range = 22.8038
+__meta__ = {
+"vol_id": 1
+}
 
 [node name="Floor" type="MeshInstance" parent="Example"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0786009, -0.0132582, -0.0451484 )
@@ -51,36 +74,64 @@ transform = Transform( 1, 0, 0, 0, 0.932557, 0.361022, 0, -0.361022, 0.932557, 0
 script = ExtResource( 2 )
 mouse_mode = 0
 
-[node name="Sphere" type="MeshInstance" parent="Example"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.56392, 0 )
-mesh = SubResource( 2 )
-material/0 = SubResource( 3 )
-
 [node name="CSGBox" type="CSGBox" parent="Example"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.61113, 3.8743e-05 )
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.54333, 3.8743e-05 )
 
 [node name="CSGSphere" type="CSGSphere" parent="Example/CSGBox"]
 operation = 2
-radius = 1.269
-radial_segments = 43
-rings = 58
+radius = 1.211
+radial_segments = 24
+rings = 12
 
-[node name="Local Cloud" type="Spatial" parent="."]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.403108, 0.905205, 0 )
-script = ExtResource( 3 )
-material = SubResource( 4 )
+[node name="CSGSphere2" type="CSGSphere" parent="Example/CSGBox"]
+radius = 0.256
+radial_segments = 24
+rings = 12
+material = SubResource( 2 )
 
-[node name="Local Cloud2" type="Spatial" parent="."]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.785387, 1.26743, 0.74952 )
-script = ExtResource( 3 )
-material = SubResource( 4 )
+[node name="OmniLight" type="OmniLight" parent="Example/CSGBox/CSGSphere2"]
+light_energy = 2.01
+shadow_enabled = true
+omni_range = 40.0
+omni_attenuation = 5.65685
+__meta__ = {
+"vol_id": 2
+}
 
-[node name="Local Cloud3" type="Spatial" parent="."]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.56686, 0.905205, 0.231335 )
-script = ExtResource( 3 )
-material = SubResource( 4 )
+[node name="CSGCylinder" type="CSGCylinder" parent="Example/CSGBox"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.28181, 0 )
+radius = 0.183
+height = 2.421
 
 [node name="Fog" type="Spatial" parent="."]
 transform = Transform( 50, 0, 0, 0, 50, 0, 0, 0, 50, 0, 0, 0 )
 script = ExtResource( 3 )
+material = SubResource( 3 )
+is_global = true
+
+[node name="LocalVolume" type="Spatial" parent="."]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.816537 )
+script = ExtResource( 3 )
 material = SubResource( 5 )
+is_global = false
+
+[node name="LocalVolume2" type="Spatial" parent="."]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -1.03973, 0, -0.506625 )
+script = ExtResource( 3 )
+material = SubResource( 5 )
+is_global = false
+
+[node name="LocalVolume3" type="Spatial" parent="."]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 1.35443, 0, -0.506625 )
+script = ExtResource( 3 )
+material = SubResource( 5 )
+is_global = false
+
+[node name="LocalVolume4" type="Spatial" parent="."]
+transform = Transform( 0.865694, 0.500574, 0, -0.500574, 0.865694, 0, 0, 0, 1, 0.575638, 0.00847161, -1.13493 )
+script = ExtResource( 3 )
+material = SubResource( 5 )
+is_global = false
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource( 4 )

@@ -23,16 +23,13 @@ func _ready() -> void:
 		print("Ignore the errors above. This is normal.")
 	
 	add_project_prop({name="rendering/quality/volumetric/start", type=TYPE_REAL}, 0.1, "near_clip")
-	add_project_prop({name="rendering/quality/volumetric/end", type=TYPE_REAL}, 40.0, "far_clip")
-	add_project_prop({name="rendering/quality/volumetric/distribution", type=TYPE_REAL, hint=PROPERTY_HINT_RANGE, hint_string="0,1"}, 0.0, "distribution")
-	add_project_prop({name="rendering/quality/volumetric/tile_size", type=TYPE_INT}, 4, "tile_size")
+	add_project_prop({name="rendering/quality/volumetric/end", type=TYPE_REAL}, 50.0, "far_clip")
+	add_project_prop({name="rendering/quality/volumetric/distribution", type=TYPE_REAL, hint=PROPERTY_HINT_RANGE, hint_string="0,1"}, 0.8, "distribution")
+	add_project_prop({name="rendering/quality/volumetric/tile_size", type=TYPE_INT, hint=PROPERTY_HINT_ENUM, hint_string="2x,4x,8x,16x"}, 2, "tile_size")
 	add_project_prop({name="rendering/quality/volumetric/samples", type=TYPE_INT, hint=PROPERTY_HINT_ENUM, hint_string="32,64,128,256,512"}, 2, "samples")
-	add_project_prop({name="rendering/quality/volumetric/density_multiplier", type=TYPE_REAL}, 4, "density_multiplier")
+	add_project_prop({name="rendering/quality/volumetric/volumetric_shadows", type=TYPE_BOOL}, false, "volumetric_shadows")
 	
 	add_autoload_singleton("VolumetricServer", folder + "volumetric_server.gd")
-#	add_custom_type("VolumetricMaterial", "Resource",
-#			load(folder + "VolumeMaterial/volumetric_material.gd"), icon
-#	)
 	add_custom_type("VolumeSprite", "Spatial",
 			load(folder + "volume_sprite.gd"), icon
 	)
@@ -41,7 +38,6 @@ func _ready() -> void:
 
 func _exit_tree() -> void:
 	remove_custom_type("VolumeSprite")
-#	remove_custom_type("VolumetricMaterial")
 	remove_autoload_singleton("VolumetricServer")
 	
 	print("volumetrics plugin exit tree")
@@ -58,5 +54,5 @@ func forward_spatial_gui_input(p_camera : Camera, p_event : InputEvent) -> bool:
 		editor_camera = p_camera
 	return false
 
-func handles(object):
+func handles(object) -> bool:
 	return true

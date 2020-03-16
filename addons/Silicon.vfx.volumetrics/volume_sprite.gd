@@ -2,26 +2,33 @@ tool
 extends Spatial
 
 var material : VolumetricMaterial setget set_material
+var is_global := false setget set_global
 
 var vol_id := -1
+var vis_notifier := VisibilityNotifier.new()
 
 func _get_property_list() -> Array:
 	var properties := [
 		{name="VolumeSprite", type=TYPE_NIL, usage=PROPERTY_USAGE_CATEGORY},
-		{name="material", type=TYPE_OBJECT, hint=PROPERTY_HINT_RESOURCE_TYPE, hint_string="VolumetricMaterial"}
+		{name="material", type=TYPE_OBJECT, hint=PROPERTY_HINT_RESOURCE_TYPE, hint_string="VolumetricMaterial"},
+		{name="is_global", type=TYPE_BOOL}
 	]
 	
 	return properties
 
 func _ready() -> void:
-	var state = VolumetricServer.add_volume()
-	vol_id = state
+	add_child(vis_notifier)
+	vol_id = VolumetricServer.add_volume()
 	set_material(material)
 
 func _process(delta : float) -> void:
 	if not VolumetricServer.set_volume_param(vol_id, "transform", global_transform):
 		_ready()
-	VolumetricServer.set_volume_param(vol_id, "visible", visible)
+	
+	var vol_visible := is_visible_in_tree()
+	if not is_global:
+		vol_visible = vol_visible and vis_notifier.is_on_screen()
+	VolumetricServer.set_volume_param(vol_id, "visible", vol_visible)
 
 func _exit_tree() -> void:
 	VolumetricServer.remove_volume(vol_id)
@@ -46,3 +53,8 @@ func set_material(value : VolumetricMaterial) -> void:
 		if material.material_flags_dirty:
 			yield(material, "shader_changed")
 		VolumetricServer.set_volume_param(vol_id, "shader", material.shaders)
+
+func set_global(value : bool) -> void:
+	is_global = value
+	if vol_id != -1:
+		VolumetricServer.set_volume_param(vol_id, "global", is_global)

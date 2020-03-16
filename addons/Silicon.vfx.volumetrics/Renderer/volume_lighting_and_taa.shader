@@ -23,6 +23,7 @@ uniform mat4 curr_view_matrix;
 uniform mat4 prev_inv_view_matrix;
 
 uniform bool use_light_data = false;
+uniform bool volumetric_shadows = true;
 uniform sampler2D light_data;
 
 const float M_PI = 3.141592653;
@@ -73,14 +74,38 @@ vec3 ndc_to_volume(vec3 coords, mat4 projection_matrix) {
 }
 
 float phase_function(vec3 v, vec3 l, float g) {
-  /* Henyey-Greenstein */
-  float cos_theta = dot(v, l);
-  g = clamp(g, -1.0 + 1e-3, 1.0 - 1e-3);
-  float sqr_g = g * g;
-  return (1.0 - sqr_g) / max(1e-8, 4.0 * M_PI * pow(1.0 + sqr_g - 2.0 * g * cos_theta, 3.0 / 2.0));
+	/* Henyey-Greenstein */
+	float cos_theta = dot(v, l);
+	g = clamp(g, -1.0 + 1e-3, 1.0 - 1e-3);
+	float sqr_g = g * g;
+	return (1.0 - sqr_g) / max(1e-8, 4.0 * M_PI * pow(1.0 + sqr_g - 2.0 * g * cos_theta, 3.0 / 2.0));
 }
 
-void calculate_light(int light_index, vec3 wpos, vec3 wdir, float anisotropy, inout vec3 lighting) {
+vec3 participating_media_extinction(vec3 wpos, mat4 view_projection_matrix, mat4 projection_matrix) {
+	vec4 ndc = view_projection_matrix * vec4(wpos, 1.0);
+	ndc /= ndc.w;
+	vec3 volume_co = ndc_to_volume(ndc.xyz * 0.5 + 0.5, projection_matrix);
+	
+	return texture3D(extinction_volume, clamp(volume_co, 0.0, 1.0), tile_factor).rgb;
+}
+
+const float VOL_SHADOW_MAX_STEPS = 32.0;
+
+vec3 light_volume_shadow(vec3 ray_wpos, vec4 l_vector, mat4 view_projection_matrix, mat4 projection_matrix) {
+	/* Heterogeneous volume shadows */
+	float dd = l_vector.w / VOL_SHADOW_MAX_STEPS;
+	vec3 L = l_vector.xyz * l_vector.w;
+	vec3 shadow = vec3(1.0);
+	for (float s = 0.5; s < VOL_SHADOW_MAX_STEPS; s += 1.0) {
+		vec3 pos = ray_wpos + L * (s / VOL_SHADOW_MAX_STEPS);
+		vec3 s_extinction = participating_media_extinction(pos, view_projection_matrix, projection_matrix);
+		shadow *= exp(-s_extinction * dd);
+	}
+	
+	return shadow;
+}
+
+void calculate_light(int light_index, vec3 wpos, vec3 wdir, float anisotropy, mat4 view_projection_matrix, mat4 projection_matrix, inout vec3 lighting) {
 	int type = int(texelFetch(light_data, ivec2(0, light_index), 0).r);
 	vec3 light_pos = vec3(
 		texelFetch(light_data, ivec2(1, light_index), 0).r,
@@ -93,11 +118,17 @@ void calculate_light(int light_index, vec3 wpos, vec3 wdir, float anisotropy, in
 		texelFetch(light_data, ivec2(6, light_index), 0).r
 	);
 	
-	vec4 light_dir = vec4(light_pos - wpos.xyz, 0.0);
+	vec4 light_dir = vec4(light_pos - wpos, 0.0);
 	light_dir.w = length(light_dir.xyz);
 	
-	// light is not directional
 	vec3 attenuation = light_energy;
+	if(volumetric_shadows) {
+		attenuation *= light_volume_shadow(wpos, light_dir, view_projection_matrix, projection_matrix);
+	}
+	
+	if(all(lessThan(attenuation, vec3(0.001)))) return;
+	
+	// light is not directional
 	if(type != 2) {
 		float range = texelFetch(light_data, ivec2(7, light_index), 0).r;
 		float falloff = texelFetch(light_data, ivec2(8, light_index), 0).r;
@@ -132,16 +163,16 @@ void fragment() {
 	if(is_transmission) {
 		COLOR.rgb = volume_sample;
 	} else {
-		COLOR.rgb = volume_sample * 0.4;
-		
-		
+		COLOR.rgb = volume_sample * 0.0;
 		if(use_light_data) {
+			mat4 view_projection_matrix = projection_matrix * inverse(curr_view_matrix);
+			
 			ivec2 light_data_size = textureSize(light_data, 0);
 			vec3 wdir = normalize(wpos.xyz - curr_view_matrix[3].xyz);
 			vec3 lighting = vec3(0.0);
 			
 			for(int i = 0; i < light_data_size.y; i++) {
-				calculate_light(i, wpos.xyz, wdir, 0.3, lighting);
+				calculate_light(i, wpos.xyz, wdir, 0.0, view_projection_matrix, projection_matrix, lighting);
 			}
 			COLOR.rgb += lighting * volume_sample;
 		}

@@ -27,7 +27,7 @@ func _get_property_list() -> Array:
 		{name="scatter_color", type=TYPE_COLOR, hint=PROPERTY_HINT_COLOR_NO_ALPHA},
 		{name="density", type=TYPE_REAL},
 		{name="density_map", type=TYPE_OBJECT, hint=PROPERTY_HINT_RESOURCE_TYPE, hint_string="Texture3D"},
-		{name="absorption_color", type=TYPE_COLOR, hint=PROPERTY_HINT_COLOR_NO_ALPHA}
+		{name="absorption_color", type=TYPE_COLOR, hint=PROPERTY_HINT_COLOR_NO_ALPHA},
 	]
 	
 	return properties
@@ -56,7 +56,7 @@ func set_absorption_color(value : Color) -> void:
 	absorption_color = value
 	var absorption := Vector3(absorption_color.r, absorption_color.g, absorption_color.b);
 	for volume in volumes:
-		VolumetricServer.set_volume_param(volume, "absorption", absorption_color)
+		VolumetricServer.set_volume_param(volume, "absorption", absorption)
 
 func set_density_map(value : Texture3D) -> void:
 	density_map = value
@@ -97,10 +97,10 @@ func update_shaders() -> void:
 			("uniform sampler3D density_map;" if has_density_map else ""),
 		fragment_code =\
 			"vec3 dens = " + ("textureLod(density_map, UVW, 0.0).rgb * density;" if has_density_map else "vec3(density);") + """
-			vec3 scatter_color = scatter * dens;
+			vec3 scatter_color = scatter;
 			vec3 absorption_color = sqrt(absorption);
-			absorption_color = max(1.0 - scatter_color, 0.0) * max(1.0 - absorption_color, 0.0) * dens;
-			ALBEDO = scatter_color + absorption_color;
+			absorption_color = max(1.0 - scatter_color, 0.0) * max(1.0 - absorption_color, 0.0);
+			ALBEDO = (scatter_color + absorption_color) * dens;
 		"""
 	},{
 		# Motion shader
