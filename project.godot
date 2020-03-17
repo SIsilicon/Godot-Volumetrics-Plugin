@@ -33,7 +33,7 @@ _global_script_class_icons={
 "BlueNoise": "",
 "CameraMatrix": "",
 "Halton": "",
-"VolumetricMaterial": "res://addons/Silicon.vfx.volumetrics/volume_sprite.svg"
+"VolumetricMaterial": "res://addons/Silicon.vfx.volumetrics/VolumeMaterial/volumetric_material.svg"
 }
 
 [application]
@@ -111,5 +111,4 @@ quality/filters/msaa=2
 environment/default_environment="res://default_env.tres"
 quality/volumetric/distribution=0.949
 quality/volumetric/tile_size=3
-quality/volumetric/samples=1
 quality/volumetric/volumetric_shadows=true

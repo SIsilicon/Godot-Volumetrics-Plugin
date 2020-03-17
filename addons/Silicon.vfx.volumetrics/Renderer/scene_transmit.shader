@@ -56,6 +56,9 @@ vec4 texture3D(sampler2D tex, vec3 uvw, vec2 tiling) {
 	float zCoord = uvw.z * tiling.x * tiling.y;
 	float zOffset = fract(zCoord);
 	
+	vec3 margin = 1.0 / vec3(vec2(textureSize(tex, 0)) / tiling, tiling.x * tiling.y);
+	uvw = clamp(uvw, margin, 1.0 - margin);
+	
 	vec2 uv = uvw.xy / tiling;
 	float ratio = tiling.y / tiling.x;
 	vec2 slice0Offset = vec2(float(int(zCoord) % int(tiling.x)), floor(ratio * zCoord / tiling.y));

@@ -1,7 +1,7 @@
 tool
 extends Node
 
-const SHADER_TEMPLATE = preload("volume_injection.shader")
+const LIGHT_DATA_SIZE = 14
 
 var plugin
 
@@ -15,7 +15,8 @@ export var volumetric_shadows := false
 
 var tiling := Vector2(8, 16)
 
-var blend := 0.0
+var blend := 0.95
+var frames_since_resize := 0
 
 var camera : Camera
 var camera_transform := Transform()
@@ -24,6 +25,7 @@ var prev_cam_transform := Transform()
 export var enabled := true setget set_enabled
 
 var canvas := QuadMesh.new()
+onready var v_buffers := [$Scatter, $Extinction, $Emission, $Phase, $Motion]
 
 var volumes := {}
 
@@ -31,9 +33,10 @@ var lights := {}
 var light_texture := ImageTexture.new()
 var temp_light_img : Image = null
 
-var halton := Halton.genearate_sequence_3D(Vector3(3,7,5), 128)
+var halton := Halton.genearate_sequence_3D(Vector3(2,5,3), 128)
 
 func _enter_tree() -> void:
+	halton.shuffle()
 	
 	var image := Image.new()
 	image.create(1, 1, false, Image.FORMAT_RF)
@@ -45,23 +48,6 @@ func _ready() -> void:
 	canvas.size = Vector2(2, 2)
 	if Engine.editor_hint and get_tree().edited_scene_root == self:
 		set_enabled(false)
-	
-#	Test Lights
-#	
-#	add_light(0, 0)
-#	set_light_param(0, "position", Vector3(2, 3, 1))
-#	set_light_param(0, "color", Color(0, 1.0, 0.5))
-#	set_light_param(0, "energy", 20.0)
-#
-#	add_light(1, 0)
-#	set_light_param(1, "position", Vector3(-2, 3, 1))
-#	set_light_param(1, "color", Color(1.0, 0.5, 0.0))
-#	set_light_param(1, "energy", 20.0)
-#
-#	add_light(2, 0)
-#	set_light_param(2, "position", Vector3(0, 3, -2))
-#	set_light_param(2, "color", Color(0.0, 0.5, 1.0))
-#	set_light_param(2, "energy", 20.0)
 	
 	process_priority = 512
 	resize(Vector2.ONE)
@@ -121,38 +107,42 @@ func _process(_delta : float) -> void:
 		resolver.material_override.set_shader_param("tile_factor", tiling)
 	
 	var sample_offset : Vector3 = halton[Engine.get_frames_drawn() % halton.size()] / Vector3(size.x, size.y, samples)
-	for child in $Scatter.get_children() + $Extinction.get_children() + $Motion.get_children():
-		if child is Camera:
-			continue
-		
-		var material = child.material_override
-		if not material:
-			continue
-		
-		material.set_shader_param("distribution", distribution)
-		material.set_shader_param("tile_factor", tiling)
-		material.set_shader_param("camera_near", start)
-		material.set_shader_param("camera_far", end)
-		material.set_shader_param("vol_depth_params", vol_depth_params)
-		material.set_shader_param("sample_offset", sample_offset)
-		
-		# For motion materials
-		var previous_transform : Transform
-		if child.has_meta("previous_transform"):
-			previous_transform = child.get_meta("previous_transform")
-		else:
-			previous_transform = child.global_transform
-		material.set_shader_param("prev_world_matrix", previous_transform)
-		child.set_meta("previous_transform", child.global_transform)
+	for buffer in v_buffers:
+		for child in buffer.get_children():
+			if child is Camera:
+				continue
+			
+			var material = child.material_override
+			if not material:
+				continue
+			
+			material.set_shader_param("distribution", distribution)
+			material.set_shader_param("tile_factor", tiling)
+			material.set_shader_param("camera_near", start)
+			material.set_shader_param("camera_far", end)
+			material.set_shader_param("vol_depth_params", vol_depth_params)
+			material.set_shader_param("sample_offset", sample_offset)
+			
+			# For motion materials
+			if buffer == $Motion:
+				var previous_transform : Transform
+				if child.has_meta("previous_transform"):
+					previous_transform = child.get_meta("previous_transform")
+				else:
+					previous_transform = child.global_transform
+				material.set_shader_param("prev_world_matrix", previous_transform)
+				child.set_meta("previous_transform", child.global_transform)
 	
-	$LightScatter/ColorRect.material.set_shader_param("blend", blend)
-	$LightTransmit/ColorRect.material.set_shader_param("blend", blend)
+	$LightScatter/ColorRect.material.set_shader_param("blend", blend * min(frames_since_resize, 1))
+	$LightTransmit/ColorRect.material.set_shader_param("blend", blend * min(frames_since_resize, 1))
 	
 	# Apply all changes to light texture
 	if temp_light_img:
 		temp_light_img.unlock()
 		light_texture.create_from_image(temp_light_img, 0)
 		temp_light_img = null
+	
+	frames_since_resize += 1
 
 func set_samples(value : int) -> void:
 	samples = value
@@ -189,8 +179,7 @@ func set_enabled(value : bool) -> void:
 			$SolidScatter.visible = enabled
 			$SolidTransmit.visible = enabled
 		
-		if is_inside_tree():
-			reset_taa()
+		frames_since_resize = 0
 
 func get_viewports() -> Array:
 	var viewports := []
@@ -200,26 +189,21 @@ func get_viewports() -> Array:
 	return viewports
 
 func resize(size : Vector2) -> void:
-	if size != $PrevScatter.size:
-		reset_taa()
+	if size.floor() != $PrevScatter.size:
+		frames_since_resize = 0
 	
 	for viewport in get_viewports():
 		viewport.size = size
 
-func reset_taa() -> void:
-	blend = 0.0
-	yield(get_tree(), "idle_frame")
-	blend = 0.95
-
 func add_volume(key) -> void:
 	var meshes := []
 	
-	for buffer in [$Scatter, $Extinction, $Motion]:
+	for buffer in v_buffers:
 		var canvas_inst := MeshInstance.new()
 		canvas_inst.extra_cull_margin = 16384
 		canvas_inst.mesh = canvas
 		canvas_inst.material_override = ShaderMaterial.new()
-		canvas_inst.material_override.shader = SHADER_TEMPLATE
+		canvas_inst.material_override.shader = preload("volume_injection.shader")
 		buffer.add_child(canvas_inst)
 		meshes.append(canvas_inst)
 	
@@ -241,12 +225,7 @@ func set_volume_param(key, param : String, value) -> void:
 		for idx in volumes[key].size():
 			var mesh : MeshInstance = volumes[key][idx]
 			var material := mesh.material_override
-			
-			var shader_fragments : Dictionary = value[idx]
-			var code := SHADER_TEMPLATE.code.replace("/**GLOBALS**/", shader_fragments.globals)
-			code = code.replace("/**FRAGMENT CODE**/", shader_fragments.fragment_code)
-			material.shader = Shader.new()
-			material.shader.code = code
+			material.shader = value[idx]
 	else:
 		for mesh in volumes[key]:
 			mesh.material_override.set_shader_param(param, value)
@@ -264,30 +243,41 @@ func add_light(key, type : int, data := {}) -> void:
 		color = Color.white,
 		energy = 1.0
 	} if data.empty() else data
-	light_data.index = temp_light_img.get_height() if temp_light_img.get_width() == 9 else 0
+	light_data.index = temp_light_img.get_height() if temp_light_img.get_width() == LIGHT_DATA_SIZE else 0
 	
 	temp_light_img.unlock()
-	temp_light_img.crop(9, (temp_light_img.get_height() + 1) if temp_light_img.get_width() == 9 else 1)
+	temp_light_img.crop(LIGHT_DATA_SIZE, (temp_light_img.get_height() + 1) if temp_light_img.get_width() == LIGHT_DATA_SIZE else 1)
 	temp_light_img.lock()
 	
 	# type
-	temp_light_img.set_pixel(0, light_data.index, val_to_col(type))
+	pass_light_data(0, light_data.index, type)
 	# position
-	temp_light_img.set_pixel(1, light_data.index, val_to_col(light_data.position.x))
-	temp_light_img.set_pixel(2, light_data.index, val_to_col(light_data.position.y))
-	temp_light_img.set_pixel(3, light_data.index, val_to_col(light_data.position.z))
+	pass_light_data(1, light_data.index, light_data.position.x)
+	pass_light_data(2, light_data.index, light_data.position.y)
+	pass_light_data(3, light_data.index, light_data.position.z)
 	# color and energy
-	temp_light_img.set_pixel(4, light_data.index, val_to_col(light_data.color.r * light_data.energy))
-	temp_light_img.set_pixel(5, light_data.index, val_to_col(light_data.color.g * light_data.energy))
-	temp_light_img.set_pixel(6, light_data.index, val_to_col(light_data.color.b * light_data.energy))
+	pass_light_data(4, light_data.index, light_data.color.r * light_data.energy)
+	pass_light_data(5, light_data.index, light_data.color.g * light_data.energy)
+	pass_light_data(6, light_data.index, light_data.color.b * light_data.energy)
 	
 	# If not directional light...
 	if type != 2:
 		if not light_data.has("range"):
 			light_data.range = 5.0
 			light_data.falloff = 2.0
-		temp_light_img.set_pixel(7, light_data.index, val_to_col(light_data.range))
-		temp_light_img.set_pixel(8, light_data.index, val_to_col(light_data.falloff))
+		pass_light_data(7, light_data.index, light_data.range)
+		pass_light_data(8, light_data.index, light_data.falloff)
+		
+		if type == 1:
+			if not light_data.has("direction"):
+				light_data.direction = Vector3.FORWARD
+				light_data.spot_angle = deg2rad(45.0)
+				light_data.spot_angle_attenuation = 1.0
+			pass_light_data(9, light_data.index, light_data.direction.x)
+			pass_light_data(10, light_data.index, light_data.direction.y)
+			pass_light_data(11, light_data.index, light_data.direction.z)
+			pass_light_data(12, light_data.index, light_data.spot_angle_attenuation)
+			pass_light_data(13, light_data.index, light_data.spot_angle)
 	
 	lights[key] = light_data
 	
@@ -301,7 +291,7 @@ func remove_light(key) -> void:
 		temp_light_img = light_texture.get_data()
 	
 	temp_light_img.unlock()
-	temp_light_img.crop(9 if index != 0 else 1, max(index, 1))
+	temp_light_img.crop(LIGHT_DATA_SIZE if index != 0 else 1, max(index, 1))
 	temp_light_img.lock()
 	
 	if lights.empty():
@@ -327,27 +317,38 @@ func set_light_param(key, param : String, value) -> void:
 	match param:
 		"position":
 			light_data.position = value
-			temp_light_img.set_pixel(1, index, val_to_col(value.x))
-			temp_light_img.set_pixel(2, index, val_to_col(value.y))
-			temp_light_img.set_pixel(3, index, val_to_col(value.z))
+			pass_light_data(1, index, value.x)
+			pass_light_data(2, index, value.y)
+			pass_light_data(3, index, value.z)
 		"color", "energy":
 			if typeof(value) == TYPE_COLOR:
 				light_data.color = value
 			else:
 				light_data.energy = value
 			
-			temp_light_img.set_pixel(4, index, val_to_col(light_data.color.r * light_data.energy))
-			temp_light_img.set_pixel(5, index, val_to_col(light_data.color.g * light_data.energy))
-			temp_light_img.set_pixel(6, index, val_to_col(light_data.color.b * light_data.energy))
+			pass_light_data(4, index, light_data.color.r * light_data.energy)
+			pass_light_data(5, index, light_data.color.g * light_data.energy)
+			pass_light_data(6, index, light_data.color.b * light_data.energy)
 		"range":
 			light_data.range = value
-			temp_light_img.set_pixel(7, index, val_to_col(light_data.range))
+			pass_light_data(7, index, light_data.range)
 		"falloff":
 			light_data.falloff = value
-			temp_light_img.set_pixel(8, index, val_to_col(light_data.falloff))
+			pass_light_data(8, index, light_data.falloff)
+		"direction":
+			light_data.direction = value
+			pass_light_data(9, light_data.index, light_data.direction.x)
+			pass_light_data(10, light_data.index, light_data.direction.y)
+			pass_light_data(11, light_data.index, light_data.direction.z)
+		"spot_angle_attenuation":
+			light_data.spot_angle_attenuation = value
+			pass_light_data(12, light_data.index, light_data.spot_angle_attenuation)
+		"spot_angle":
+			light_data.spot_angle = cos(deg2rad(value))
+			pass_light_data(13, light_data.index, light_data.spot_angle)
 
-func val_to_col(value) -> Color:
-	return Color(value, 0,0,0)
+func pass_light_data(index : int, light_index : int, value) -> void:
+	temp_light_img.set_pixel(index, light_index, Color(value, 0,0,0))
 
 class LightIndexSorter:
 	static func sort_ascending(a, b) -> bool:

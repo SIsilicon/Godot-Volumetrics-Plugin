@@ -5,9 +5,12 @@ uniform bool is_transmission;
 
 uniform sampler2D current_volume;
 uniform sampler2D previous_volume;
-
-uniform sampler2D extinction_volume; // If not transmission
 uniform sampler2D motion_volume;
+
+// If is not transmission
+uniform sampler2D extinction_volume;
+uniform sampler2D emission_volume;
+uniform sampler2D phase_volume;
 
 uniform float blend : hint_range(0.0, 1.0) = 0.0;
 
@@ -31,6 +34,9 @@ const float M_PI = 3.141592653;
 vec4 texture3D(sampler2D tex, vec3 uvw, vec2 tiling) {
 	float zCoord = uvw.z * tiling.x * tiling.y;
 	float zOffset = fract(zCoord);
+	
+	vec3 margin = 1.0 / vec3(vec2(textureSize(tex, 0)) / tiling, tiling.x * tiling.y);
+	uvw = clamp(uvw, margin * vec3(1,1,0), 1.0 - margin);
 	
 	vec2 uv = uvw.xy / tiling;
 	float ratio = tiling.y / tiling.x;
@@ -118,27 +124,42 @@ void calculate_light(int light_index, vec3 wpos, vec3 wdir, float anisotropy, ma
 		texelFetch(light_data, ivec2(6, light_index), 0).r
 	);
 	
-	vec4 light_dir = vec4(light_pos - wpos, 0.0);
-	light_dir.w = length(light_dir.xyz);
+	vec4 light_dir = vec4(light_pos, 1.0);
 	
 	vec3 attenuation = light_energy;
+	
+	// light is not directional
+	if(type != 2) {
+		light_dir = vec4(light_pos - wpos, 0.0);
+		light_dir.w = length(light_dir.xyz);
+		
+		float range = texelFetch(light_data, ivec2(7, light_index), 0).r;
+		float falloff = texelFetch(light_data, ivec2(8, light_index), 0).r;
+		if(light_dir.w > range) return;
+		
+		attenuation *= pow(max(1.0 - light_dir.w/range, 0.0), falloff);
+		
+		if(type == 1) {
+			vec3 spot_dir = vec3(
+				texelFetch(light_data, ivec2(9, light_index), 0).r,
+				texelFetch(light_data, ivec2(10, light_index), 0).r,
+				texelFetch(light_data, ivec2(11, light_index), 0).r
+			);
+			vec2 spot_att_angle = vec2(
+				texelFetch(light_data, ivec2(12, light_index), 0).r,
+				texelFetch(light_data, ivec2(13, light_index), 0).r
+			);
+			float scos = max(dot(normalize(light_dir.xyz), spot_dir), spot_att_angle.y);
+			float spot_rim = max(0.0001, (1.0 - scos) / (1.0 - spot_att_angle.y));
+			attenuation *= 1.0 - pow(spot_rim, spot_att_angle.x);
+		}
+	}
+	
 	if(volumetric_shadows) {
 		attenuation *= light_volume_shadow(wpos, light_dir, view_projection_matrix, projection_matrix);
 	}
 	
-	if(all(lessThan(attenuation, vec3(0.001)))) return;
-	
-	// light is not directional
-	if(type != 2) {
-		float range = texelFetch(light_data, ivec2(7, light_index), 0).r;
-		float falloff = texelFetch(light_data, ivec2(8, light_index), 0).r;
-		
-		if(light_dir.w > range) return;
-		
-		attenuation *= pow(max(1.0 - light_dir.w/range, 0.0), falloff);
-	}
-	
-	float phase = phase_function(wdir, light_dir.xyz / light_dir.w, 0.6);
+	float phase = phase_function(wdir, light_dir.xyz / light_dir.w, anisotropy);
 	
 	lighting += attenuation * phase;
 }
@@ -163,7 +184,11 @@ void fragment() {
 	if(is_transmission) {
 		COLOR.rgb = volume_sample;
 	} else {
+		float anisotropy = texture(phase_volume, SCREEN_UV).r / max(1.0, texture(phase_volume, SCREEN_UV).g);
+		
 		COLOR.rgb = volume_sample * 0.0;
+		COLOR.rgb += texture(emission_volume, SCREEN_UV).rgb;
+		
 		if(use_light_data) {
 			mat4 view_projection_matrix = projection_matrix * inverse(curr_view_matrix);
 			
@@ -172,7 +197,7 @@ void fragment() {
 			vec3 lighting = vec3(0.0);
 			
 			for(int i = 0; i < light_data_size.y; i++) {
-				calculate_light(i, wpos.xyz, wdir, 0.0, view_projection_matrix, projection_matrix, lighting);
+				calculate_light(i, wpos.xyz, wdir, anisotropy, view_projection_matrix, projection_matrix, lighting);
 			}
 			COLOR.rgb += lighting * volume_sample;
 		}

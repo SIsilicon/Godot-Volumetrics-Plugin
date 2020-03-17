@@ -26,7 +26,7 @@ func _ready() -> void:
 	add_project_prop({name="rendering/quality/volumetric/end", type=TYPE_REAL}, 50.0, "far_clip")
 	add_project_prop({name="rendering/quality/volumetric/distribution", type=TYPE_REAL, hint=PROPERTY_HINT_RANGE, hint_string="0,1"}, 0.8, "distribution")
 	add_project_prop({name="rendering/quality/volumetric/tile_size", type=TYPE_INT, hint=PROPERTY_HINT_ENUM, hint_string="2x,4x,8x,16x"}, 2, "tile_size")
-	add_project_prop({name="rendering/quality/volumetric/samples", type=TYPE_INT, hint=PROPERTY_HINT_ENUM, hint_string="32,64,128,256,512"}, 2, "samples")
+	add_project_prop({name="rendering/quality/volumetric/samples", type=TYPE_INT, hint=PROPERTY_HINT_ENUM, hint_string="32,64,128,256,512"}, 1, "samples")
 	add_project_prop({name="rendering/quality/volumetric/volumetric_shadows", type=TYPE_BOOL}, false, "volumetric_shadows")
 	
 	add_autoload_singleton("VolumetricServer", folder + "volumetric_server.gd")

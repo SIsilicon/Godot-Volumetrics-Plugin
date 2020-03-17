@@ -17,9 +17,13 @@ func _get_property_list() -> Array:
 	return properties
 
 func _ready() -> void:
-	add_child(vis_notifier)
+	if not vis_notifier.is_inside_tree():
+		add_child(vis_notifier)
+	
 	vol_id = VolumetricServer.add_volume()
+	
 	set_material(material)
+	set_global(is_global)
 
 func _process(delta : float) -> void:
 	if not VolumetricServer.set_volume_param(vol_id, "transform", global_transform):
@@ -56,5 +60,17 @@ func set_material(value : VolumetricMaterial) -> void:
 
 func set_global(value : bool) -> void:
 	is_global = value
+	
+	if not is_inside_tree():
+		return
+	
+	if is_global:
+		for volume in get_tree().get_nodes_in_group("_global_volume"):
+			volume.set_global(false)
+		is_global = value
+		add_to_group("_global_volume")
+	elif is_in_group("_global_volume"):
+		remove_from_group("_global_volume")
+	
 	if vol_id != -1:
 		VolumetricServer.set_volume_param(vol_id, "global", is_global)

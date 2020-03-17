@@ -3,13 +3,13 @@ extends Node
 
 var plugin
 
-var project_properties := [
-	"rendering/quality/volumetric/start",
-	"rendering/quality/volumetric/end",
-	"rendering/quality/volumetric/distribution",
-	"rendering/quality/volumetric/tile_size",
-	"rendering/quality/volumetric/samples",
-	"rendering/quality/volumetric/volumetric_shadows",
+const PROJECT_PROPERTIES := [
+	["rendering/quality/volumetric/start", 0.1],
+	["rendering/quality/volumetric/end", 50],
+	["rendering/quality/volumetric/distribution", 0.8],
+	["rendering/quality/volumetric/tile_size", 2],
+	["rendering/quality/volumetric/samples", 1],
+	["rendering/quality/volumetric/volumetric_shadows", false]
 ]
 
 var default_material := preload("VolumeMaterial/default_material.tres")
@@ -77,12 +77,17 @@ func set_volume_param(vol_id : int, param : String, value) -> bool:
 func _process(_delta : float) -> void:
 	renderer.enabled = not volumes.empty()
 	
-	for property in project_properties:
-		var name : String = property.split("/")[-1]
-		var value = ProjectSettings.get_setting(property)
+	for light in lights:
+		update_light(light)
+	
+	for property in PROJECT_PROPERTIES:
+		var name : String = property[0].split("/")[-1]
 		
-		if value == null:
-			return
+		var value
+		if ProjectSettings.has_setting(property[0]):
+			value = ProjectSettings.get_setting(property[0])
+		else:
+			value = property[1]
 		
 		if name == "samples":
 			value = [32,64,128,256,512][value]
@@ -90,23 +95,6 @@ func _process(_delta : float) -> void:
 			value = [2,4,8,16][value]
 		
 		self.set(name, value)
-	
-	for light in lights:
-		var id = light.get_meta("vol_id")
-		renderer.set_light_param(id, "color", light.light_color * -(float(light.light_negative) * 2.0 - 1.0))
-		renderer.set_light_param(id, "energy", light.light_energy * float(light.is_visible_in_tree()))
-		
-		if light is DirectionalLight:
-			renderer.set_light_param(id, "position", light.global_transform.basis.z)
-		else:
-			renderer.set_light_param(id, "position", light.global_transform.origin)
-			
-			if light is OmniLight:
-				renderer.set_light_param(id, "range", light.omni_range)
-				renderer.set_light_param(id, "falloff", light.omni_attenuation)
-			else:
-				renderer.set_light_param(id, "range", light.spot_range)
-				renderer.set_light_param(id, "falloff", light.spot_attenuation)
 
 func _exit_tree() -> void:
 	for volume in volumes:
@@ -150,10 +138,33 @@ func set_volumetric_shadows(value : bool) -> void:
 		yield(self, "ready")
 	renderer.volumetric_shadows = volumetric_shadows
 
-func update_lights_in_tree(node) -> void:
+func update_lights_in_tree(node : Node) -> void:
 	_on_node_added(node)
 	for child in node.get_children():
 		update_lights_in_tree(child)
+
+func update_light(light : Light) -> void:
+	if not light.has_meta("vol_id"):
+		return
+	
+	var id = light.get_meta("vol_id")
+	renderer.set_light_param(id, "color", light.light_color * (2.0 * float(not light.light_negative) - 1.0))
+	renderer.set_light_param(id, "energy", light.light_energy * float(light.is_visible_in_tree()))
+	
+	if light is DirectionalLight:
+		renderer.set_light_param(id, "position", light.global_transform.basis.z)
+	else:
+		renderer.set_light_param(id, "position", light.global_transform.origin)
+		
+		if light is OmniLight:
+			renderer.set_light_param(id, "range", light.omni_range)
+			renderer.set_light_param(id, "falloff", light.omni_attenuation)
+		else:
+			renderer.set_light_param(id, "range", light.spot_range)
+			renderer.set_light_param(id, "falloff", light.spot_attenuation)
+			renderer.set_light_param(id, "direction", light.global_transform.basis.z)
+			renderer.set_light_param(id, "spot_angle", light.spot_angle)
+			renderer.set_light_param(id, "spot_angle_attenuation", light.spot_angle_attenuation)
 
 func _on_node_added(node : Node) -> void:
 	if node is Light and not lights.has(node):
@@ -166,23 +177,10 @@ func _on_node_added(node : Node) -> void:
 			"DirectionalLight": type = 2
 		
 		renderer.add_light(volume_id, type)
-		
-		renderer.set_light_param(volume_id, "color", node.light_color)
-		renderer.set_light_param(volume_id, "energy", node.light_energy)
-		
-		if node is DirectionalLight:
-			renderer.set_light_param(volume_id, "position", node.global_transform.basis.z)
-		else:
-			renderer.set_light_param(volume_id, "position", node.global_transform.origin)
-			
-			if node is OmniLight:
-				renderer.set_light_param(volume_id, "range", node.omni_range)
-				renderer.set_light_param(volume_id, "falloff", node.omni_attenuation)
-			else:
-				renderer.set_light_param(volume_id, "range", node.spot_range)
-				renderer.set_light_param(volume_id, "falloff", node.spot_attenuation)
-		
 		node.set_meta("vol_id", volume_id)
+		
+		update_light(node)
+		
 		volume_id += 1
 
 func _on_node_removed(node : Node) -> void:
