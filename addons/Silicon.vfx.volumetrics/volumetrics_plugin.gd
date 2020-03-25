@@ -4,50 +4,43 @@ extends EditorPlugin
 const folder = "res://addons/Silicon.vfx.volumetrics/"
 
 var editor_camera : Camera
-
-var project_properties = {}
+var inspector_plugin : EditorInspectorPlugin
 
 func _ready() -> void:
 	name = "VolumetricsPlugin"
 	
-	# There's this quirk where the icon's import file isn't immemiately loaded.
-	# This will loop until that file is generated , i.e. it can be loaded in.
+	# There's this quirk where the icon's import file isn't immediately loaded.
+	# This will loop until that file is generated, i.e. it can be loaded in.
 	var icon : StreamTexture
 	var no_import := false
 	while not icon:
-		icon = load(folder + "volume_sprite.svg")
+		icon = load(folder + "local_volume.svg")
 		if not icon:
 			no_import = true
 			yield(get_tree(), "idle_frame")
 	if no_import:
 		print("Ignore the errors above. This is normal.")
 	
-	add_project_prop({name="rendering/quality/volumetric/start", type=TYPE_REAL}, 0.1, "near_clip")
-	add_project_prop({name="rendering/quality/volumetric/end", type=TYPE_REAL}, 50.0, "far_clip")
-	add_project_prop({name="rendering/quality/volumetric/distribution", type=TYPE_REAL, hint=PROPERTY_HINT_RANGE, hint_string="0,1"}, 0.8, "distribution")
-	add_project_prop({name="rendering/quality/volumetric/tile_size", type=TYPE_INT, hint=PROPERTY_HINT_ENUM, hint_string="2x,4x,8x,16x"}, 2, "tile_size")
-	add_project_prop({name="rendering/quality/volumetric/samples", type=TYPE_INT, hint=PROPERTY_HINT_ENUM, hint_string="32,64,128,256,512"}, 1, "samples")
-	add_project_prop({name="rendering/quality/volumetric/volumetric_shadows", type=TYPE_BOOL}, false, "volumetric_shadows")
-	
 	add_autoload_singleton("VolumetricServer", folder + "volumetric_server.gd")
-	add_custom_type("VolumeSprite", "Spatial",
-			load(folder + "volume_sprite.gd"), icon
+	add_custom_type("VolumetricFog", "Node",
+			load(folder + "volumetric_fog.gd"), load(folder + "volumetric_fog.svg")
 	)
+	add_custom_type("LocalVolume", "Spatial",
+			load(folder + "local_volume.gd"), icon
+	)
+	
+	inspector_plugin = preload("inspector_plugin.gd").new()
+	add_inspector_plugin(inspector_plugin)
 	
 	print("volumetrics plugin enter tree")
 
 func _exit_tree() -> void:
-	remove_custom_type("VolumeSprite")
+	remove_custom_type("LocalVolume")
+	remove_custom_type("VolumetricFog")
 	remove_autoload_singleton("VolumetricServer")
+	remove_inspector_plugin(inspector_plugin)
 	
 	print("volumetrics plugin exit tree")
-
-func add_project_prop(property_info : Dictionary, default, server_var : String) -> void:
-	if not ProjectSettings.has_setting(property_info.name):
-		ProjectSettings.set_setting(property_info.name, default)
-	ProjectSettings.add_property_info(property_info)
-	ProjectSettings.set_initial_value(property_info.name, default)
-	project_properties[property_info.name] = server_var
 
 func forward_spatial_gui_input(p_camera : Camera, p_event : InputEvent) -> bool:
 	if not editor_camera:

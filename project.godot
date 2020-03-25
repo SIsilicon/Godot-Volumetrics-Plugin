@@ -10,19 +10,14 @@ config_version=4
 
 _global_script_classes=[ {
 "base": "Reference",
-"class": "BlueNoise",
-"language": "GDScript",
-"path": "res://addons/Silicon.vfx.volumetrics/Utilities/BlueNoise.gd"
-}, {
-"base": "Object",
-"class": "CameraMatrix",
-"language": "GDScript",
-"path": "res://addons/Silicon.vfx.volumetrics/Utilities/CameraMatrix.gd"
-}, {
-"base": "Reference",
 "class": "Halton",
 "language": "GDScript",
 "path": "res://addons/Silicon.vfx.volumetrics/Utilities/Halton.gd"
+}, {
+"base": "Reference",
+"class": "Matrix4",
+"language": "GDScript",
+"path": "res://addons/Silicon.vfx.volumetrics/Utilities/Matrix4.gd"
 }, {
 "base": "Resource",
 "class": "VolumetricMaterial",
@@ -30,16 +25,15 @@ _global_script_classes=[ {
 "path": "res://addons/Silicon.vfx.volumetrics/VolumeMaterial/volumetric_material.gd"
 } ]
 _global_script_class_icons={
-"BlueNoise": "",
-"CameraMatrix": "",
 "Halton": "",
+"Matrix4": "",
 "VolumetricMaterial": "res://addons/Silicon.vfx.volumetrics/VolumeMaterial/volumetric_material.svg"
 }
 
 [application]
 
 config/name="Volumetrics Plugin"
-run/main_scene="res://VolumeTest.tscn"
+run/main_scene="res://demo scene/Volumetrics Demo.tscn"
 config/icon="res://icon.png"
 
 [autoload]
@@ -57,7 +51,7 @@ window/size/height=720
 
 [editor_plugins]
 
-enabled=PoolStringArray( "Silicon.vfx.volumetrics" )
+enabled=PoolStringArray( "Silicon.vfx.volumetrics", "zylann.editor_debugger" )
 
 [importer_defaults]
 
@@ -109,6 +103,3 @@ vram_compression/import_etc=true
 vram_compression/import_etc2=false
 quality/filters/msaa=2
 environment/default_environment="res://default_env.tres"
-quality/volumetric/distribution=0.949
-quality/volumetric/tile_size=3
-quality/volumetric/volumetric_shadows=true

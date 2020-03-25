@@ -22,7 +22,7 @@ vec4 cubic(float v) {
 	return vec4(x, y, z, w) * (1.0/6.0);
 }
 
-vec4 texture_bicubic(sampler2D sampler, vec2 tex_coords) {
+vec4 texture_bicubic(sampler2D sampler, vec2 tex_coords, vec4 rect) {
 	vec2 tex_size = vec2(textureSize(sampler, 0));
 	vec2 inv_tex_size = 1.0 / tex_size;
 	
@@ -41,10 +41,10 @@ vec4 texture_bicubic(sampler2D sampler, vec2 tex_coords) {
 	
 	offset *= inv_tex_size.xxyy;
 	
-	vec4 sample0 = textureLod(sampler, offset.xz, 0.0);
-	vec4 sample1 = textureLod(sampler, offset.yz, 0.0);
-	vec4 sample2 = textureLod(sampler, offset.xw, 0.0);
-	vec4 sample3 = textureLod(sampler, offset.yw, 0.0);
+	vec4 sample0 = textureLod(sampler, clamp(offset.xz, rect.xy, rect.zw), 0.0);
+	vec4 sample1 = textureLod(sampler, clamp(offset.yz, rect.xy, rect.zw), 0.0);
+	vec4 sample2 = textureLod(sampler, clamp(offset.xw, rect.xy, rect.zw), 0.0);
+	vec4 sample3 = textureLod(sampler, clamp(offset.yw, rect.xy, rect.zw), 0.0);
 	
 	float sx = s.x / (s.x + s.y);
 	float sy = s.z / (s.z + s.w);
@@ -53,11 +53,11 @@ vec4 texture_bicubic(sampler2D sampler, vec2 tex_coords) {
 }
 
 vec4 texture3D(sampler2D tex, vec3 uvw, vec2 tiling) {
-	float zCoord = uvw.z * tiling.x * tiling.y;
+	float tile_count = tiling.x * tiling.y;
+	float zCoord = uvw.z * tile_count;
 	float zOffset = fract(zCoord);
 	
-	vec3 margin = 1.0 / vec3(vec2(textureSize(tex, 0)) / tiling, tiling.x * tiling.y);
-	uvw = clamp(uvw, margin, 1.0 - margin);
+	vec2 margin = 0.5 / vec2(textureSize(tex, 0));
 	
 	vec2 uv = uvw.xy / tiling;
 	float ratio = tiling.y / tiling.x;
@@ -65,8 +65,11 @@ vec4 texture3D(sampler2D tex, vec3 uvw, vec2 tiling) {
 	zCoord++;
 	vec2 slice1Offset = vec2(float(int(zCoord) % int(tiling.x)), floor(ratio * zCoord / tiling.y));
 	
-	vec4 slice0colour = texture_bicubic(tex, slice0Offset/tiling + uv);
-	vec4 slice1colour = texture_bicubic(tex, slice1Offset/tiling + uv);
+	vec4 rect0 = vec4(slice0Offset/tiling + margin, slice0Offset/tiling + 1.0 / tiling - margin);
+	vec4 rect1 = vec4(slice1Offset/tiling + margin, slice1Offset/tiling + 1.0 / tiling - margin);
+	
+	vec4 slice0colour = texture_bicubic(tex, slice0Offset/tiling + uv, rect0);
+	vec4 slice1colour = texture_bicubic(tex, slice1Offset/tiling + uv, rect1);
 	
 //	return slice0colour; //no filtering.
 	return mix(slice0colour, slice1colour, zOffset);

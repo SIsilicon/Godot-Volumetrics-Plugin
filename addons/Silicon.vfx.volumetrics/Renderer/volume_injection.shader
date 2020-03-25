@@ -37,10 +37,6 @@ vec3 uv_to_uvw(vec2 uv, vec2 tiling) {
 	return uvw;
 }
 
-float rand(vec2 co) {
-    return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);
-}
-
 void fragment() {
 	ALBEDO = vec3(0.0);
 	

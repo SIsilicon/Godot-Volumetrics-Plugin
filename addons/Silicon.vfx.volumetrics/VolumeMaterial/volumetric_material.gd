@@ -47,9 +47,9 @@ func _init() -> void:
 	update_shaders()
 
 func set_all_params() -> void:
+	set_density_map(density_map)
 	set_scatter_color(scatter_color)
 	set_density(density)
-	set_density_map(density_map)
 	set_absorption_color(absorption_color)
 	set_anisotropy(anisotropy)
 	set_emission_color(emission_color)
@@ -59,18 +59,18 @@ func set_scatter_color(value : Color) -> void:
 	scatter_color = value
 	var scatter := Vector3(scatter_color.r, scatter_color.g, scatter_color.b);
 	for volume in volumes:
-		VolumetricServer.set_volume_param(volume, "scatter", scatter)
+		VolumetricServer.volume_set_param(volume, "scatter", scatter)
 
 func set_density(value : float) -> void:
 	density = max(value, 0.0)
 	for volume in volumes:
-		VolumetricServer.set_volume_param(volume, "density", density)
+		VolumetricServer.volume_set_param(volume, "density", density)
 
 func set_absorption_color(value : Color) -> void:
 	absorption_color = value
 	var absorption := Vector3(absorption_color.r, absorption_color.g, absorption_color.b);
 	for volume in volumes:
-		VolumetricServer.set_volume_param(volume, "absorption", absorption)
+		VolumetricServer.volume_set_param(volume, "absorption", absorption)
 
 func set_density_map(value : Texture3D) -> void:
 	density_map = value
@@ -80,24 +80,24 @@ func set_density_map(value : Texture3D) -> void:
 		set_material_flags(material_flags & ~DENSITY_MAP)
 	
 	for volume in volumes:
-		VolumetricServer.set_volume_param(volume, "density_map", density_map)
+		VolumetricServer.volume_set_param(volume, "density_map", density_map)
 
 func set_emission_color(value : Color) -> void:
 	emission_color = value
 	var emission := Vector3(emission_color.r, emission_color.g, emission_color.b) * emission_strength;
 	for volume in volumes:
-		VolumetricServer.set_volume_param(volume, "emission", emission)
+		VolumetricServer.volume_set_param(volume, "emission", emission)
 
 func set_emission_strength(value : float) -> void:
 	emission_strength = max(value, 0.0)
 	var emission := Vector3(emission_color.r, emission_color.g, emission_color.b) * emission_strength;
 	for volume in volumes:
-		VolumetricServer.set_volume_param(volume, "emission", emission)
+		VolumetricServer.volume_set_param(volume, "emission", emission)
 
 func set_anisotropy(value : float) -> void:
 	anisotropy = value
 	for volume in volumes:
-		VolumetricServer.set_volume_param(volume, "anisotropy", anisotropy * 0.99)
+		VolumetricServer.volume_set_param(volume, "anisotropy", anisotropy * 0.99)
 
 func set_material_flags(value : int) -> void:
 	if material_flags != value or material_flags & MAX_FLAG:
@@ -169,7 +169,7 @@ func update_shaders() -> void:
 		shaders[idx].code = code
 	
 	for volume in volumes:
-		VolumetricServer.set_volume_param(volume, "shader", shaders)
+		VolumetricServer.volume_set_param(volume, "shader", shaders)
 	
 	set_all_params()
 	material_flags_dirty = false

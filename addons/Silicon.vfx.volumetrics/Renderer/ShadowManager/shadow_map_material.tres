@@ -1,0 +1,31 @@
+[gd_resource type="ShaderMaterial" load_steps=2 format=2]
+
+[sub_resource type="Shader" id=1]
+code = "shader_type spatial;
+render_mode unshaded;
+
+void vertex() {
+	POSITION = vec4(VERTEX.xy, -1.0, 1.0);
+}
+
+float get_camera_range(mat4 projection_matrix) {
+	float C = projection_matrix[2][2];
+	float D = projection_matrix[3][2];
+	return D / (C + 1.0);
+}
+
+void fragment() {
+	ALBEDO = vec3(0.0);
+	ALPHA = 1.0;
+	
+	vec4 ndc = vec4(SCREEN_UV, texture(DEPTH_TEXTURE, SCREEN_UV).r, 1.0);
+	ndc = ndc * 2.0 - 1.0;
+	ndc = INV_PROJECTION_MATRIX * ndc;
+	ndc /= ndc.w;
+	ALBEDO.r = length(ndc.xyz) / get_camera_range(PROJECTION_MATRIX);
+}
+"
+
+[resource]
+render_priority = 117
+shader = SubResource( 1 )

@@ -16,6 +16,7 @@ uniform float blend : hint_range(0.0, 1.0) = 0.0;
 
 uniform vec2 tile_factor;
 uniform vec3 vol_depth_params;
+uniform vec3 sample_offset;
 
 uniform vec4 projection_matrix0 = vec4(1, 0, 0, 0);
 uniform vec4 projection_matrix1 = vec4(0, 1, 0, 0);
@@ -28,15 +29,16 @@ uniform mat4 prev_inv_view_matrix;
 uniform bool use_light_data = false;
 uniform bool volumetric_shadows = true;
 uniform sampler2D light_data;
+uniform sampler2D shadow_atlas;
 
 const float M_PI = 3.141592653;
 
 vec4 texture3D(sampler2D tex, vec3 uvw, vec2 tiling) {
-	float zCoord = uvw.z * tiling.x * tiling.y;
+	float tile_count = tiling.x * tiling.y;
+	float zCoord = uvw.z * tile_count;
 	float zOffset = fract(zCoord);
 	
-	vec3 margin = 1.0 / vec3(vec2(textureSize(tex, 0)) / tiling, tiling.x * tiling.y);
-	uvw = clamp(uvw, margin * vec3(1,1,0), 1.0 - margin);
+	vec2 margin = 0.5 / vec2(textureSize(tex, 0));
 	
 	vec2 uv = uvw.xy / tiling;
 	float ratio = tiling.y / tiling.x;
@@ -44,10 +46,13 @@ vec4 texture3D(sampler2D tex, vec3 uvw, vec2 tiling) {
 	zCoord++;
 	vec2 slice1Offset = vec2(float(int(zCoord) % int(tiling.x)), floor(ratio * zCoord / tiling.y));
 	
-	vec4 slice0colour = texture(tex, slice0Offset/tiling + uv);
-	vec4 slice1colour = texture(tex, slice1Offset/tiling + uv);
+	vec4 rect0 = vec4(slice0Offset/tiling + margin, slice0Offset/tiling + 1.0 / tiling - margin);
+	vec4 rect1 = vec4(slice1Offset/tiling + margin, slice1Offset/tiling + 1.0 / tiling - margin);
 	
-	//return slice0colour; //no filtering.
+	vec4 slice0colour = texture(tex, clamp(slice0Offset/tiling + uv, rect0.xy, rect0.zw));
+	vec4 slice1colour = texture(tex, clamp(slice1Offset/tiling + uv, rect1.xy, rect1.zw));
+	
+//	return slice0colour; //no filtering.
 	return mix(slice0colour, slice1colour, zOffset);
 }
 
@@ -111,17 +116,34 @@ vec3 light_volume_shadow(vec3 ray_wpos, vec4 l_vector, mat4 view_projection_matr
 	return shadow;
 }
 
+float get_light_data(int offset, int index) {
+	return texelFetch(light_data, ivec2(offset, index), 0).r;
+}
+
+vec2 cube_to_paraboloid(vec3 norm) {
+	norm = normalize(norm);
+	norm.x = -norm.x;
+	
+	norm.xy /= 1.0 + abs(norm.z);
+	norm.xy = norm.xy * vec2(0.25, 0.5) + vec2(0.25, 0.5);
+	
+	norm.x *= step(norm.z, 0.0) * 2.0 - 1.0;
+	norm.x = mod(norm.x, 1.0);
+	
+	return norm.xy;
+}
+
 void calculate_light(int light_index, vec3 wpos, vec3 wdir, float anisotropy, mat4 view_projection_matrix, mat4 projection_matrix, inout vec3 lighting) {
-	int type = int(texelFetch(light_data, ivec2(0, light_index), 0).r);
+	int type = int(get_light_data(0, light_index));
 	vec3 light_pos = vec3(
-		texelFetch(light_data, ivec2(1, light_index), 0).r,
-		texelFetch(light_data, ivec2(2, light_index), 0).r,
-		texelFetch(light_data, ivec2(3, light_index), 0).r
+		get_light_data(1, light_index),
+		get_light_data(2, light_index),
+		get_light_data(3, light_index)
 	);
 	vec3 light_energy = vec3(
-		texelFetch(light_data, ivec2(4, light_index), 0).r,
-		texelFetch(light_data, ivec2(5, light_index), 0).r,
-		texelFetch(light_data, ivec2(6, light_index), 0).r
+		get_light_data(4, light_index),
+		get_light_data(5, light_index),
+		get_light_data(6, light_index)
 	);
 	
 	vec4 light_dir = vec4(light_pos, 1.0);
@@ -129,31 +151,66 @@ void calculate_light(int light_index, vec3 wpos, vec3 wdir, float anisotropy, ma
 	vec3 attenuation = light_energy;
 	
 	// light is not directional
+	float range;
 	if(type != 2) {
 		light_dir = vec4(light_pos - wpos, 0.0);
 		light_dir.w = length(light_dir.xyz);
 		
-		float range = texelFetch(light_data, ivec2(7, light_index), 0).r;
-		float falloff = texelFetch(light_data, ivec2(8, light_index), 0).r;
+		range = get_light_data(7, light_index);
+		float falloff = get_light_data(8, light_index);
 		if(light_dir.w > range) return;
 		
 		attenuation *= pow(max(1.0 - light_dir.w/range, 0.0), falloff);
 		
 		if(type == 1) {
 			vec3 spot_dir = vec3(
-				texelFetch(light_data, ivec2(9, light_index), 0).r,
-				texelFetch(light_data, ivec2(10, light_index), 0).r,
-				texelFetch(light_data, ivec2(11, light_index), 0).r
+				get_light_data(9, light_index),
+				get_light_data(10, light_index),
+				get_light_data(11, light_index)
 			);
 			vec2 spot_att_angle = vec2(
-				texelFetch(light_data, ivec2(12, light_index), 0).r,
-				texelFetch(light_data, ivec2(13, light_index), 0).r
+				get_light_data(12, light_index),
+				get_light_data(13, light_index)
 			);
 			float scos = max(dot(normalize(light_dir.xyz), spot_dir), spot_att_angle.y);
 			float spot_rim = max(0.0001, (1.0 - scos) / (1.0 - spot_att_angle.y));
 			attenuation *= 1.0 - pow(spot_rim, spot_att_angle.x);
 		}
 	}
+	
+	if(all(lessThanEqual(attenuation, vec3(0.001)))) return;
+	
+	mat4 shadow_matrix = mat4(get_light_data(14, light_index));
+	if(shadow_matrix[0][0] != 0.0) {
+		shadow_matrix = mat4(
+			vec4(get_light_data(14, light_index), get_light_data(15, light_index), get_light_data(16, light_index), get_light_data(17, light_index)),
+			vec4(get_light_data(18, light_index), get_light_data(19, light_index), get_light_data(20, light_index), get_light_data(21, light_index)),
+			vec4(get_light_data(22, light_index), get_light_data(23, light_index), get_light_data(24, light_index), get_light_data(25, light_index)),
+			vec4(get_light_data(26, light_index), get_light_data(27, light_index), get_light_data(28, light_index), get_light_data(29, light_index))
+		);
+		vec4 shadow_rect = vec4(
+			get_light_data(30, light_index), get_light_data(31, light_index), get_light_data(32, light_index), get_light_data(33, light_index)
+		);
+		
+		vec4 shadow_coords;
+		if(type == 1) {
+			shadow_coords = shadow_matrix * vec4(wpos, 1.0);
+			shadow_coords /= shadow_coords.w;
+			shadow_coords = shadow_coords * 0.5 + 0.5;
+		} else if(type == 0) {
+			shadow_coords = shadow_matrix * vec4(wpos, 1.0);
+			shadow_coords.xy = cube_to_paraboloid(shadow_coords.xyz);
+		}
+		shadow_coords.xy = shadow_coords.xy * shadow_rect.zw + shadow_rect.xy;
+		
+//		attenuation *= shadow_coords.xy;
+		
+		if(texture(shadow_atlas, shadow_coords.xy).r < light_dir.w / range) {
+			return;
+		}
+	}
+	
+//	if(all(lessThanEqual(attenuation, vec3(0.0)))) return;
 	
 	if(volumetric_shadows) {
 		attenuation *= light_volume_shadow(wpos, light_dir, view_projection_matrix, projection_matrix);
@@ -174,7 +231,7 @@ void fragment() {
 		projection_matrix3
 	);
 	
-	vec3 uvw = uv_to_uvw(SCREEN_UV, tile_factor);
+	vec3 uvw = uv_to_uvw(SCREEN_UV, tile_factor) + sample_offset;
 	vec4 ndc = 2.0 * vec4(volume_to_ndc(uvw, projection_matrix), 1.0) - 1.0;
 	vec4 view = inverse(projection_matrix) * ndc;
 	view /= view.w;
@@ -210,7 +267,7 @@ void fragment() {
 	vec3 prev_uvw = ndc_to_volume(prev_ndc.xyz, projection_matrix);
 	
 	if(clamp(prev_uvw.xyz, 0.0, 1.0) == prev_uvw.xyz) {
-		vec3 previous_vol_sample = texture3D(previous_volume, prev_uvw, tile_factor).rgb;
+		vec3 previous_vol_sample = texture3D(previous_volume, prev_uvw - sample_offset, tile_factor).rgb;
 		COLOR.rgb = mix(COLOR.rgb, previous_vol_sample, blend);
 	}
 	

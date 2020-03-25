@@ -65,6 +65,7 @@ vec3 ndc_to_volume(vec3 coords, mat4 projection_matrix) {
 
 void fragment() {
 	vec3 uvw = uv_to_uvw(SCREEN_UV, tile_factor);
+	
 	float tile_num = tile_factor.x * tile_factor.y;
 	float inv_tile_num = 1.0 / tile_num;
 	
