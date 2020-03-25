@@ -1,0 +1,36 @@
+[remap]
+
+importer="texture"
+type="StreamTexture"
+path.s3tc="res://.import/KAMEN-stup.JPG-d2bfa96cc7d8782bbc41b27b9c53795e.s3tc.stex"
+path.etc="res://.import/KAMEN-stup.JPG-d2bfa96cc7d8782bbc41b27b9c53795e.etc.stex"
+metadata={
+"imported_formats": [ "s3tc", "etc" ],
+"vram_texture": true
+}
+
+[deps]
+
+source_file="res://sponza_scene/KAMEN-stup.JPG"
+dest_files=[ "res://.import/KAMEN-stup.JPG-d2bfa96cc7d8782bbc41b27b9c53795e.s3tc.stex", "res://.import/KAMEN-stup.JPG-d2bfa96cc7d8782bbc41b27b9c53795e.etc.stex" ]
+
+[params]
+
+compress/mode=2
+compress/lossy_quality=0.7
+compress/hdr_mode=0
+compress/bptc_ldr=0
+compress/normal_map=2
+flags/repeat=true
+flags/filter=true
+flags/mipmaps=true
+flags/anisotropic=false
+flags/srgb=1
+process/fix_alpha_border=true
+process/premult_alpha=false
+process/HDR_as_SRGB=false
+process/invert_color=false
+stream=false
+size_limit=0
+detect_3d=false
+svg/scale=1.0

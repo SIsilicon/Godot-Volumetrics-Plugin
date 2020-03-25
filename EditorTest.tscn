@@ -1,9 +1,0 @@
-[gd_scene format=2]
-
-[node name="Spatial" type="Spatial"]
-
-[node name="OmniLight" type="OmniLight" parent="."]
-omni_range = 4.46903
-__meta__ = {
-"volumetric": false
-}

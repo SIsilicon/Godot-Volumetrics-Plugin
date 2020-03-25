@@ -1,0 +1,111 @@
+[gd_scene load_steps=9 format=2]
+
+[ext_resource path="res://addons/silicon.vfx.volumetrics/volume_proxy.gd" type="Script" id=1]
+[ext_resource path="res://addons/silicon.vfx.volumetrics/material/volumetric_material.gd" type="Script" id=2]
+[ext_resource path="res://volumetrics_demo.gd" type="Script" id=3]
+[ext_resource path="res://camera.gd" type="Script" id=4]
+[ext_resource path="res://addons/silicon.vfx.volumetrics/volumetric_fog.gd" type="Script" id=5]
+[ext_resource path="res://sponza_scene/sponza.obj" type="ArrayMesh" id=6]
+
+[sub_resource type="Environment" id=1]
+background_mode = 1
+background_color = Color( 0.105882, 0.105882, 0.105882, 1 )
+ambient_light_color = Color( 0.145098, 0.145098, 0.145098, 1 )
+
+[sub_resource type="Resource" id=2]
+script = ExtResource( 2 )
+scatter_color = Color( 0.75, 0.75, 0.75, 1 )
+density = 0.025
+absorption_color = Color( 0, 0, 0, 1 )
+anisotropy = 0.337
+emission_color = Color( 1, 1, 1, 1 )
+emission_strength = 0.0
+
+[node name="Spatial" type="Spatial"]
+script = ExtResource( 3 )
+
+[node name="sponza" type="MeshInstance" parent="."]
+mesh = ExtResource( 6 )
+material/0 = null
+material/1 = null
+material/2 = null
+material/3 = null
+material/4 = null
+material/5 = null
+material/6 = null
+material/7 = null
+material/8 = null
+material/9 = null
+material/10 = null
+material/11 = null
+material/12 = null
+material/13 = null
+material/14 = null
+material/15 = null
+material/16 = null
+material/17 = null
+material/18 = null
+material/19 = null
+material/20 = null
+material/21 = null
+material/22 = null
+material/23 = null
+material/24 = null
+material/25 = null
+material/26 = null
+material/27 = null
+material/28 = null
+material/29 = null
+material/30 = null
+material/31 = null
+material/32 = null
+material/33 = null
+material/34 = null
+material/35 = null
+material/36 = null
+material/37 = null
+
+[node name="Camera" type="Camera" parent="."]
+transform = Transform( -4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, -10.1269, 2.20875, -4.42659e-07 )
+script = ExtResource( 4 )
+max_speed = Vector3( 2, 2, 5 )
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource( 1 )
+
+[node name="VolumetricFog" type="Node" parent="WorldEnvironment"]
+script = ExtResource( 5 )
+start = 0.1
+end = 60.0
+tile_size = 3
+samples = 1
+distribution = 0.96
+temporal_blending = 0.92
+volumetric_shadows = false
+ambient_light_color = Color( 0.0823529, 0.0823529, 0.0823529, 1 )
+ambient_light_energy = 1.0
+
+[node name="VolumeProxy" type="Spatial" parent="."]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.692142, 0 )
+script = ExtResource( 1 )
+material = SubResource( 2 )
+is_global = true
+
+[node name="OmniLight" type="OmniLight" parent="."]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.33419, 0 )
+shadow_enabled = true
+omni_range = 13.664
+__meta__ = {
+"_vol_id": 2
+}
+
+[node name="SpotLight" type="SpotLight" parent="."]
+transform = Transform( -0.976152, 0, 0.217087, 0, 1, 0, -0.217087, 0, -0.976152, 0, 1.41782, 0 )
+light_color = Color( 0.207843, 0.937255, 0.164706, 1 )
+light_energy = 2.54
+shadow_enabled = true
+spot_range = 293.6
+__meta__ = {
+"_vol_id": 3,
+"volumetric": 4.22
+}

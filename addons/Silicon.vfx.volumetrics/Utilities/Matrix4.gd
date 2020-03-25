@@ -30,7 +30,7 @@ func mul(matrix : Matrix4):
 			for k in 4:
 				product[i][j] += matrix.members[i][k] * members[k][j];
 	
-	var product_mat = newMatrix4()
+	var product_mat = new_matrix4()
 	product_mat.members = product
 	return product_mat
 
@@ -87,11 +87,11 @@ static func perspective_matrix(fov : float, aspect : float, near : float, far : 
 	var sine := sin(radians)
 	
 	if (delta_z == 0) || (sine == 0) || (aspect == 0):
-		return newMatrix4()
+		return new_matrix4()
 	
 	var cotangent := cos(radians) / sine
 	
-	var matrix = newMatrix4()
+	var matrix = new_matrix4()
 	matrix.members[0][0] = cotangent / aspect
 	matrix.members[1][1] = cotangent
 	matrix.members[2][2] = -(far + near) / delta_z
@@ -102,7 +102,7 @@ static func perspective_matrix(fov : float, aspect : float, near : float, far : 
 	return matrix
 
 static func orthogonal_asym_matrix(left : float, right : float, bottom : float, top : float, near : float, far : float):
-	var matrix = newMatrix4()
+	var matrix = new_matrix4()
 	var members = matrix.members
 	members[0][0] = 2.0 / (right - left)
 	members[3][0] = -((right + left) / (right - left))
@@ -121,7 +121,7 @@ static func orthogonal_matrix(size : float, aspect : float, near : float, far : 
 	return orthogonal_asym_matrix(-size / 2, +size / 2, -size / aspect / 2, +size / aspect / 2, near, far)
 
 static func frustum_asym_matrix(left : float, right : float, bottom : float, top : float, near : float, far : float):
-	var matrix = newMatrix4()
+	var matrix = new_matrix4()
 	var x := 2 * near / (right - left)
 	var y := 2 * near / (top - bottom)
 	
@@ -147,5 +147,5 @@ static func frustum_matrix(size : float, aspect : float, offset : Vector2, near 
 static func get_fovy(fovx : float, aspect : float) -> float:
 	return rad2deg(atan(aspect * tan(deg2rad(fovx) * 0.5)) * 2.0)
 
-static func newMatrix4():
-	return load("res://addons/Silicon.vfx.volumetrics/Utilities/Matrix4.gd").new()
+static func new_matrix4():
+	return load("res://addons/silicon.vfx.volumetrics/utilities/matrix4.gd").new()

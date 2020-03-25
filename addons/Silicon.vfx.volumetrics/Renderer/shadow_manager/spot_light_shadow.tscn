@@ -1,0 +1,18 @@
+[gd_scene load_steps=3 format=2]
+
+[ext_resource path="res://addons/silicon.vfx.volumetrics/renderer/shadow_manager/shadow_map_env.tres" type="Environment" id=1]
+[ext_resource path="res://addons/silicon.vfx.volumetrics/renderer/shadow_manager/spot_light_shadow.gd" type="Script" id=2]
+
+[node name="SpotLightShadow" type="Viewport"]
+keep_3d_linear = true
+debug_draw = 1
+script = ExtResource( 2 )
+__meta__ = {
+"_spot_light": true
+}
+
+[node name="Camera" type="Camera" parent="."]
+cull_mask = 1572863
+environment = ExtResource( 1 )
+fov = 90.0
+near = 0.1

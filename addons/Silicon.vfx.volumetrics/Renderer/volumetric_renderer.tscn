@@ -1,10 +1,10 @@
 [gd_scene load_steps=37 format=2]
 
-[ext_resource path="res://addons/Silicon.vfx.volumetrics/Renderer/volume_copy.shader" type="Shader" id=1]
-[ext_resource path="res://addons/Silicon.vfx.volumetrics/Renderer/volume_integration.shader" type="Shader" id=2]
-[ext_resource path="res://addons/Silicon.vfx.volumetrics/Renderer/volume_lighting_and_taa.shader" type="Shader" id=3]
-[ext_resource path="res://addons/Silicon.vfx.volumetrics/Renderer/volumetric_renderer.gd" type="Script" id=4]
-[ext_resource path="res://addons/Silicon.vfx.volumetrics/Renderer/scene_scatter.shader" type="Shader" id=6]
+[ext_resource path="res://addons/silicon.vfx.volumetrics/renderer/volume_copy.shader" type="Shader" id=1]
+[ext_resource path="res://addons/silicon.vfx.volumetrics/renderer/volume_integration.shader" type="Shader" id=2]
+[ext_resource path="res://addons/silicon.vfx.volumetrics/renderer/volume_lighting_and_taa.shader" type="Shader" id=3]
+[ext_resource path="res://addons/silicon.vfx.volumetrics/renderer/scene_scatter.shader" type="Shader" id=4]
+[ext_resource path="res://addons/silicon.vfx.volumetrics/renderer/volumetric_renderer.gd" type="Script" id=5]
 
 [sub_resource type="ViewportTexture" id=1]
 viewport_path = NodePath("LightScatter")
@@ -85,6 +85,7 @@ shader_param/curr_view_matrix = Transform( 0.00432629, -0.63537, 0.772196, 0, 0.
 shader_param/prev_inv_view_matrix = Transform( 0.00432629, 0, -0.999991, -0.63537, 0.772203, -0.00274882, 0.772196, 0.635376, 0.00334077, 9.31323e-10, -2.22102e-07, -4.00001 )
 shader_param/use_light_data = false
 shader_param/volumetric_shadows = false
+shader_param/ambient_light = null
 shader_param/current_volume = SubResource( 7 )
 shader_param/previous_volume = SubResource( 14 )
 shader_param/motion_volume = SubResource( 12 )
@@ -120,6 +121,7 @@ shader_param/curr_view_matrix = Transform( 0.00432629, -0.63537, 0.772196, 0, 0.
 shader_param/prev_inv_view_matrix = Transform( 0.00432629, 0, -0.999991, -0.63537, 0.772203, -0.00274882, 0.772196, 0.635376, 0.00334077, 9.31323e-10, -2.22102e-07, -4.00001 )
 shader_param/use_light_data = false
 shader_param/volumetric_shadows = true
+shader_param/ambient_light = null
 shader_param/current_volume = SubResource( 17 )
 shader_param/previous_volume = SubResource( 19 )
 shader_param/motion_volume = SubResource( 18 )
@@ -159,7 +161,7 @@ viewport_path = NodePath("ResolveTransmit")
 [sub_resource type="ShaderMaterial" id=27]
 resource_local_to_scene = true
 render_priority = -16
-shader = ExtResource( 6 )
+shader = ExtResource( 4 )
 shader_param/volume_size = Vector2( 101, 68 )
 shader_param/tile_factor = Vector2( 8, 8 )
 shader_param/vol_depth_params = Vector3( 0.99238, -0.076201, 0.4964 )
@@ -277,7 +279,7 @@ shader_param/volume_transmittance = SubResource( 30 )
 
 [node name="VolumetricRenderer" type="Node"]
 process_priority = 512
-script = ExtResource( 4 )
+script = ExtResource( 5 )
 end = 40.0
 tile_size = 16
 distribution = 0.922

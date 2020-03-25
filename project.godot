@@ -12,33 +12,33 @@ _global_script_classes=[ {
 "base": "Reference",
 "class": "Halton",
 "language": "GDScript",
-"path": "res://addons/Silicon.vfx.volumetrics/Utilities/Halton.gd"
+"path": "res://addons/silicon.vfx.volumetrics/utilities/halton.gd"
 }, {
 "base": "Reference",
 "class": "Matrix4",
 "language": "GDScript",
-"path": "res://addons/Silicon.vfx.volumetrics/Utilities/Matrix4.gd"
+"path": "res://addons/silicon.vfx.volumetrics/utilities/matrix4.gd"
 }, {
 "base": "Resource",
 "class": "VolumetricMaterial",
 "language": "GDScript",
-"path": "res://addons/Silicon.vfx.volumetrics/VolumeMaterial/volumetric_material.gd"
+"path": "res://addons/silicon.vfx.volumetrics/material/volumetric_material.gd"
 } ]
 _global_script_class_icons={
 "Halton": "",
 "Matrix4": "",
-"VolumetricMaterial": "res://addons/Silicon.vfx.volumetrics/VolumeMaterial/volumetric_material.svg"
+"VolumetricMaterial": "res://addons/silicon.vfx.volumetrics/material/volumetric_material.svg"
 }
 
 [application]
 
 config/name="Volumetrics Plugin"
-run/main_scene="res://demo scene/Volumetrics Demo.tscn"
+run/main_scene="res://volumetrics_demo.tscn"
 config/icon="res://icon.png"
 
 [autoload]
 
-VolumetricServer="*res://addons/Silicon.vfx.volumetrics/volumetric_server.gd"
+VolumetricServer="*res://addons/silicon.vfx.volumetrics/volumetric_server.gd"
 
 [debug]
 
@@ -51,7 +51,7 @@ window/size/height=720
 
 [editor_plugins]
 
-enabled=PoolStringArray( "Silicon.vfx.volumetrics", "zylann.editor_debugger" )
+enabled=PoolStringArray( "silicon.vfx.volumetrics", "zylann.editor_debugger" )
 
 [importer_defaults]
 

@@ -13,10 +13,12 @@ export var samples := 64 setget set_samples
 export(float, 0.0, 1.0) var distribution := 0.7
 export var volumetric_shadows := false
 
+export var ambient_light := Vector3.ONE
+
 var tiling := Vector2(8, 16)
 
 export var blend := 0.0
-var frames_since_resize := 0
+var frames_till_blending := 0
 
 var camera : Camera
 var camera_transform := Transform()
@@ -25,7 +27,7 @@ var prev_cam_transform := Transform()
 export var enabled := true setget set_enabled
 
 var canvas := QuadMesh.new()
-var shadow_manager := preload("ShadowManager/shadow_manager.tscn").instance()
+var shadow_manager := preload("shadow_manager/shadow_manager.tscn").instance()
 onready var v_buffers := [$Scatter, $Extinction, $Emission, $Phase, $Motion]
 
 var volumes := {}
@@ -151,8 +153,9 @@ func _process(_delta : float) -> void:
 				material.set_shader_param("prev_world_matrix", previous_transform)
 				child.set_meta("previous_transform", child.global_transform)
 	
-	$LightScatter/ColorRect.material.set_shader_param("blend", blend * min(frames_since_resize, 1))
-	$LightTransmit/ColorRect.material.set_shader_param("blend", blend * min(frames_since_resize, 1))
+	$LightScatter/ColorRect.material.set_shader_param("ambient_light", ambient_light)
+	$LightScatter/ColorRect.material.set_shader_param("blend", blend * float(frames_till_blending == 0))
+	$LightTransmit/ColorRect.material.set_shader_param("blend", blend * float(frames_till_blending == 0))
 	
 	# Apply all changes to light texture
 	if temp_light_img:
@@ -160,7 +163,7 @@ func _process(_delta : float) -> void:
 		light_texture.create_from_image(temp_light_img, 0)
 		temp_light_img = null
 	
-	frames_since_resize += 1
+	frames_till_blending = max(frames_till_blending - 1, 0)
 
 func set_samples(value : int) -> void:
 	samples = value
@@ -197,7 +200,7 @@ func set_enabled(value : bool) -> void:
 			$SolidScatter.visible = enabled
 			$SolidTransmit.visible = enabled
 		
-		frames_since_resize = 0
+		frames_till_blending = 3
 
 func get_viewports() -> Array:
 	var viewports := []
@@ -208,7 +211,7 @@ func get_viewports() -> Array:
 
 func resize(size : Vector2) -> void:
 	if size.floor() != $PrevScatter.size:
-		frames_since_resize = 0
+		frames_till_blending = 3
 	
 	for viewport in get_viewports():
 		viewport.size = size

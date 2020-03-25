@@ -7,7 +7,7 @@ enum {
 	DIRECTIONAL_LIGHT = 2
 }
 
-var default_material := preload("VolumeMaterial/default_material.tres")
+var default_material := preload("material/default_material.tres")
 
 var id_counter := 0
 
@@ -19,7 +19,6 @@ var orphan_volumes := {}
 
 func _enter_tree() -> void:
 	process_priority = 512
-	
 	get_tree().connect("node_added", self, "_on_node_added")
 	get_tree().connect("node_removed", self, "_on_node_removed")
 
@@ -143,6 +142,9 @@ func renderer_set_samples(id : int, value : int) -> void:
 func renderer_set_distribution(id : int, value : float) -> void:
 	renderers[id].node.distribution = value
 
+func renderer_set_ambient_light(id : int, value : Vector3) -> void:
+	renderers[id].node.ambient_light = value
+
 func renderer_set_temporal_blending(id : int, value : float) -> void:
 	renderers[id].node.blend = value
 
@@ -184,8 +186,10 @@ func update_light(light : Light) -> void:
 		return
 	
 	var id : int = light.get_meta("_vol_id")
+	var energy : float = light.get_meta("volumetric") if light.has_meta("volumetric") else 1.0
+	energy *= light.light_energy
 	renderer.set_light_param(id, "color", light.light_color * (2.0 * float(not light.light_negative) - 1.0))
-	renderer.set_light_param(id, "energy", light.light_energy * float(light.is_visible_in_tree()) * light.get_meta("volumetric"))
+	renderer.set_light_param(id, "energy", energy * float(light.is_visible_in_tree()))
 	
 	if light is SpotLight or light is OmniLight:
 		renderer.set_light_param(id, "shadows", light.shadow_enabled)

@@ -31,6 +31,8 @@ uniform bool volumetric_shadows = true;
 uniform sampler2D light_data;
 uniform sampler2D shadow_atlas;
 
+uniform vec3 ambient_light;
+
 const float M_PI = 3.141592653;
 
 vec4 texture3D(sampler2D tex, vec3 uvw, vec2 tiling) {
@@ -160,7 +162,7 @@ void calculate_light(int light_index, vec3 wpos, vec3 wdir, float anisotropy, ma
 		float falloff = get_light_data(8, light_index);
 		if(light_dir.w > range) return;
 		
-		attenuation *= pow(max(1.0 - light_dir.w/range, 0.0), falloff);
+		attenuation *= pow(max(1.0 - light_dir.w/range, 0.0), falloff) * 2.0 * M_PI;
 		
 		if(type == 1) {
 			vec3 spot_dir = vec3(
@@ -176,6 +178,8 @@ void calculate_light(int light_index, vec3 wpos, vec3 wdir, float anisotropy, ma
 			float spot_rim = max(0.0001, (1.0 - scos) / (1.0 - spot_att_angle.y));
 			attenuation *= 1.0 - pow(spot_rim, spot_att_angle.x);
 		}
+	} else {
+		attenuation *= M_PI * 0.5;
 	}
 	
 	if(all(lessThanEqual(attenuation, vec3(0.001)))) return;
@@ -243,7 +247,7 @@ void fragment() {
 	} else {
 		float anisotropy = texture(phase_volume, SCREEN_UV).r / max(1.0, texture(phase_volume, SCREEN_UV).g);
 		
-		COLOR.rgb = volume_sample * 0.0;
+		COLOR.rgb = volume_sample * ambient_light;
 		COLOR.rgb += texture(emission_volume, SCREEN_UV).rgb;
 		
 		if(use_light_data) {

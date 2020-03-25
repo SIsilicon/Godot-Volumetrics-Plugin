@@ -1,7 +1,7 @@
 tool
 extends EditorPlugin
 
-const folder = "res://addons/Silicon.vfx.volumetrics/"
+const folder = "res://addons/silicon.vfx.volumetrics/"
 
 var editor_camera : Camera
 var inspector_plugin : EditorInspectorPlugin
@@ -14,7 +14,7 @@ func _ready() -> void:
 	var icon : StreamTexture
 	var no_import := false
 	while not icon:
-		icon = load(folder + "local_volume.svg")
+		icon = load(folder + "volume_proxy.svg")
 		if not icon:
 			no_import = true
 			yield(get_tree(), "idle_frame")
@@ -25,11 +25,11 @@ func _ready() -> void:
 	add_custom_type("VolumetricFog", "Node",
 			load(folder + "volumetric_fog.gd"), load(folder + "volumetric_fog.svg")
 	)
-	add_custom_type("LocalVolume", "Spatial",
-			load(folder + "local_volume.gd"), icon
+	add_custom_type("VolumeProxy", "Spatial",
+			load(folder + "volume_proxy.gd"), icon
 	)
 	
-	inspector_plugin = preload("inspector_plugin.gd").new()
+	inspector_plugin = preload("editor/inspector_plugin.gd").new()
 	add_inspector_plugin(inspector_plugin)
 	
 	print("volumetrics plugin enter tree")
