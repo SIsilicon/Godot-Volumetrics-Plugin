@@ -8,5 +8,4 @@ scatter_color = Color( 0.75, 0.75, 0.75, 1 )
 density = 1.0
 absorption_color = Color( 0, 0, 0, 1 )
 anisotropy = 0.0
-emission_color = Color( 1, 1, 1, 1 )
-emission_strength = 0.0
+emission_enabled = false

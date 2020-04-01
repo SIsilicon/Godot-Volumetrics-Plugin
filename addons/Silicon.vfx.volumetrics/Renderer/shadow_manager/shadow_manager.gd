@@ -6,52 +6,31 @@ signal atlas_changed(key)
 var shadows := {}
 
 var viewport_camera : Camera
-var size := 1024 setget set_size
+var size := 2048 setget set_size
 
 var atlas_spaces : Array
-var atlas_subdivs = [1, 4, 16, 64]
+var atlas_subdivs = [0, 0, 0, 0]
+
+var scene_bounds : SceneBounds
 
 func _enter_tree() -> void:
-	atlas_spaces = []
-	atlas_spaces.resize(atlas_subdivs[0] + atlas_subdivs[1] + atlas_subdivs[2] + atlas_subdivs[3])
-	for i in atlas_spaces.size():
-		var subdiv_root := 0
-		var quad_size := 0.0; var x := 0.0; var y := 0.0
-		
-		if get_quadrant(i) == 0:
-			subdiv_root = int(sqrt(atlas_subdivs[0]))
-			quad_size = 0.5 / subdiv_root
-			x = i % subdiv_root * quad_size
-			y = floor(float(i / subdiv_root)) * quad_size
-			
-		elif get_quadrant(i) == 1:
-			var j = i - atlas_subdivs[0]
-			subdiv_root = int(sqrt(atlas_subdivs[1]))
-			quad_size = 0.5 / subdiv_root
-			x = j % subdiv_root * quad_size + 0.5
-			y = floor(float(j / subdiv_root)) * quad_size
-			
-		elif get_quadrant(i) == 2:
-			var j = i - atlas_subdivs[0] - atlas_subdivs[1]
-			subdiv_root = int(sqrt(atlas_subdivs[2]))
-			quad_size = 0.5 / subdiv_root
-			x = j % subdiv_root * quad_size
-			y = floor(float(j / subdiv_root)) * quad_size + 0.5
-			
-		else:
-			var j = i - atlas_subdivs[0] - atlas_subdivs[1] - atlas_subdivs[2]
-			subdiv_root = int(sqrt(atlas_subdivs[3]))
-			quad_size = 0.5 / subdiv_root
-			x = j % subdiv_root * quad_size + 0.5
-			y = floor(float(j / subdiv_root)) * quad_size + 0.5
-		
-		atlas_spaces[i] = Rect2(x, y, quad_size, quad_size)
+	scene_bounds = SceneBounds.new(get_viewport())
+	add_child(scene_bounds)
 
 func _ready() -> void:
 	$ShadowAtlas.size = Vector2(size, size)
 	$ShadowRenderer.layers = 1 << 20
 
 func _process(_delta : float) -> void:
+	var subdivs := [1, 4, 16, 64, 256, 1024]
+	var s1 : int = subdivs[max(get_viewport().shadow_atlas_quad_0, 1)]
+	var s2 : int = subdivs[max(get_viewport().shadow_atlas_quad_1, 1)]
+	var s3 : int = subdivs[max(get_viewport().shadow_atlas_quad_2, 1)]
+	var s4 : int = subdivs[max(get_viewport().shadow_atlas_quad_3, 1)]
+	set_atlas_subdivs(s1, s2, s3, s4)
+	
+	var scene_aabb : AABB = scene_bounds.get_aabb()
+	
 	var shadows_ordered := shadows.values()
 	if viewport_camera:
 		for s in shadows_ordered:
@@ -64,6 +43,9 @@ func _process(_delta : float) -> void:
 		var shadow_dat : Dictionary = shadows_ordered[i]
 		var canvas : TextureRect = shadow_dat.canvas
 		var coords : Rect2 = atlas_spaces[i]
+		
+		if shadow_dat.type == VolumetricServer.DIRECTIONAL_LIGHT:
+			shadow_dat.shadow.scene_aabb = scene_aabb
 		
 		canvas.anchor_left = coords.position.x
 		canvas.anchor_right = coords.end.x
@@ -78,20 +60,24 @@ func _process(_delta : float) -> void:
 func add_shadow(key, light : Dictionary) -> void:
 	var shadow_map : Node
 	
-	if light.type == 1:
+	if light.type == VolumetricServer.SPOT_LIGHT:
 		shadow_map = preload("spot_light_shadow.tscn").instance()
 		add_child(shadow_map)
 		shadow_map.position = light.position
 		shadow_map.direction = light.direction
 		shadow_map.spot_range = light.range
 		shadow_map.spot_angle = light.spot_angle
-		shadow_map.size = Vector2(size, size)
-	elif light.type == 0:
+	elif light.type == VolumetricServer.OMNI_LIGHT:
 		shadow_map = preload("omni_light_shadow.tscn").instance()
 		add_child(shadow_map)
 		shadow_map._ready()
 		shadow_map.position = light.position
-		shadow_map.size = Vector2(size, size)
+		shadow_map.omni_range = light.range
+	elif light.type == VolumetricServer.DIRECTIONAL_LIGHT:
+		shadow_map = preload("directional_light_shadow.tscn").instance()
+		add_child(shadow_map)
+		shadow_map.direction = light.position
+		shadow_map.energy = light.energy
 	
 	if shadow_map:
 		var texture_rect := TextureRect.new()
@@ -103,11 +89,11 @@ func add_shadow(key, light : Dictionary) -> void:
 		texture_rect.anchor_bottom = 0
 		texture_rect.anchor_right = 0
 		
-		if light.type == VolumetricServer.SPOT_LIGHT:
+		if light.type in [VolumetricServer.SPOT_LIGHT, VolumetricServer.DIRECTIONAL_LIGHT]:
 			var shadow_texture : ViewportTexture = shadow_map.get_texture()
 			texture_rect.texture = shadow_texture
 		elif light.type == VolumetricServer.OMNI_LIGHT:
-			texture_rect.texture = AnimatedTexture.new() #placeholder
+			texture_rect.texture = AnimatedTexture.new() # Placeholder
 			texture_rect.material = ShaderMaterial.new()
 			texture_rect.material.shader = preload("cube_to_dualparabloid.shader")
 			texture_rect.material.set_shader_param("front", shadow_map.viewports[0].get_texture())
@@ -143,10 +129,50 @@ func get_shadow_data(key) -> Dictionary:
 
 func set_size(value : int) -> void:
 	size = value
-	
 	if not is_inside_tree():
 		yield(self, "ready")
 	$ShadowAtlas.size = Vector2(size, size)
+
+func set_atlas_subdivs(s1 : int, s2 : int, s3 : int, s4 : int) -> void:
+	if s1 == atlas_subdivs[0] and s2 == atlas_subdivs[1] and s3 == atlas_subdivs[2] and s4 == atlas_subdivs[3]:
+		return
+	
+	atlas_subdivs = [s1, s2, s3, s4]
+	
+	atlas_spaces = []
+	atlas_spaces.resize(atlas_subdivs[0] + atlas_subdivs[1] + atlas_subdivs[2] + atlas_subdivs[3])
+	for i in atlas_spaces.size():
+		var subdiv_root := 0
+		var quad_size := 0.0; var x := 0.0; var y := 0.0
+		
+		if get_quadrant(i) == 0:
+			subdiv_root = int(sqrt(atlas_subdivs[0]))
+			quad_size = 0.5 / subdiv_root
+			x = i % subdiv_root * quad_size
+			y = floor(float(i / subdiv_root)) * quad_size
+			
+		elif get_quadrant(i) == 1:
+			var j = i - atlas_subdivs[0]
+			subdiv_root = int(sqrt(atlas_subdivs[1]))
+			quad_size = 0.5 / subdiv_root
+			x = j % subdiv_root * quad_size + 0.5
+			y = floor(float(j / subdiv_root)) * quad_size
+			
+		elif get_quadrant(i) == 2:
+			var j = i - atlas_subdivs[0] - atlas_subdivs[1]
+			subdiv_root = int(sqrt(atlas_subdivs[2]))
+			quad_size = 0.5 / subdiv_root
+			x = j % subdiv_root * quad_size
+			y = floor(float(j / subdiv_root)) * quad_size + 0.5
+			
+		else:
+			var j = i - atlas_subdivs[0] - atlas_subdivs[1] - atlas_subdivs[2]
+			subdiv_root = int(sqrt(atlas_subdivs[3]))
+			quad_size = 0.5 / subdiv_root
+			x = j % subdiv_root * quad_size + 0.5
+			y = floor(float(j / subdiv_root)) * quad_size + 0.5
+		
+		atlas_spaces[i] = Rect2(x, y, quad_size, quad_size)
 
 func get_quadrant(index : int) -> int:
 	if index < atlas_subdivs[0]:
@@ -164,8 +190,8 @@ class ShadowSort:
 		var priority_diff := get_shadow_priority(s2) - get_shadow_priority(s1)
 		
 		if priority_diff == 0:
-	#		if s1 is DirectionalLight:
-	#			return (int)signum(s2.getEnergy() - s1.getEnergy())
+			if s1.type == VolumetricServer.DIRECTIONAL_LIGHT:
+				return s2.shadow.energy - s1.shadow.energy < 0
 			
 			var cam_distance1 : float = s1.camera.distance_squared_to(s1.shadow.position)
 			var cam_distance2 : float = s1.camera.distance_squared_to(s2.shadow.position)
@@ -176,7 +202,8 @@ class ShadowSort:
 	
 	static func get_shadow_priority(shadow) -> int:
 		match shadow.type:
-			0: return 1 # OmniLight
-			1: return 0 # SpotLight
+			VolumetricServer.DIRECTIONAL_LIGHT: return 2
+			VolumetricServer.OMNI_LIGHT: return 1
+			VolumetricServer.SPOT_LIGHT: return 0
 			_: return -1
 

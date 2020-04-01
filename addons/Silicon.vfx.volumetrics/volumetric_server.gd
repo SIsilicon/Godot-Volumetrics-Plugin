@@ -11,21 +11,32 @@ var default_material := preload("material/default_material.tres")
 
 var id_counter := 0
 
+var renderers := {}
 var volumes := {}
 var lights := {}
-var renderers := {}
+var geom_instances := {}
 
 var orphan_volumes := {}
+
+var can_function := true
 
 func _enter_tree() -> void:
 	process_priority = 512
 	get_tree().connect("node_added", self, "_on_node_added")
 	get_tree().connect("node_removed", self, "_on_node_removed")
+	
+	if OS.get_current_video_driver() == OS.VIDEO_DRIVER_GLES2:
+		can_function = false
+		printerr("Volumetrics Plugin: Sorry, but this rendering feature does not work in GLES2!")
 
 ### TODO : remove light metas
 func _exit_tree() -> void:
 	for renderer in renderers:
 		remove_renderer(renderer)
+	for light in lights:
+		unregister_node(light)
+	for geom_instance in geom_instances:
+		unregister_node(geom_instance)
 	volumes.clear()
 	orphan_volumes.clear()
 
@@ -74,8 +85,16 @@ func volume_set_param(id : int, param : String, value) -> void:
 		volume.renderer.set_volume_param(id, param, value)
 
 func add_renderer(viewport : Viewport) -> int:
+	if not can_function:
+		id_counter += 1
+		return id_counter - 1
+	
 	var renderer = preload("Renderer/volumetric_renderer.tscn").instance()
 	renderers[id_counter] = {node=renderer, viewport=viewport}
+	
+	
+	var r_id = id_counter
+	id_counter += 1
 	if viewport == get_parent():
 		add_child(renderer)
 	else:
@@ -102,23 +121,24 @@ func add_renderer(viewport : Viewport) -> int:
 				renderer.set_volume_param(id, param, volume.params[param])
 			volume.renderer = renderer
 	
-	var r_id = id_counter
-	id_counter += 1
-	
-	update_lights_in_viewport(viewport, viewport)
+	update_nodes_in_viewport(viewport, viewport)
 	
 	return r_id
 
 func remove_renderer(id : int) -> void:
 	if renderers.has(id):
+		var viewport = renderers[id].viewport
+		
 		var light_keys := lights.keys()
 		for idx in range(lights.size()-1, -1, -1):
 			if lights[light_keys[idx]] == renderers[id].node:
 				_on_node_removed(light_keys[idx])
 		
+#		for material in renderers[id].node.transparent_materials:
+#			orphan_transparent_materials[material] = viewport
+		
 		renderers[id].node.queue_free()
 		
-		var viewport = renderers[id].viewport
 		var ids = volumes.keys()
 		for vol_id in ids:
 			var volume = volumes[vol_id]
@@ -151,25 +171,28 @@ func renderer_set_temporal_blending(id : int, value : float) -> void:
 func renderer_set_volumetric_shadows(id : int, value : bool) -> void:
 	renderers[id].node.volumetric_shadows = value
 
+func renderer_set_shadow_atlas_size(id : int, value : int) -> void:
+	renderers[id].node.shadow_size = value
+
 func get_renderer_by_viewport(viewport : Viewport) -> int:
 	for id in renderers:
 		if renderers[id].viewport == viewport:
 			return id
 	return -1
 
-func add_light(light : Light) -> void:
-	pass
-
 func _process(_delta : float) -> void:
 	for light in lights:
 		update_light(light)
+	
+	for geom_inst in geom_instances:
+		update_geometry_instance(geom_inst)
 
-func update_lights_in_viewport(node : Node, viewport : Viewport) -> void:
-	if node is Light:
-		_on_node_added(node)
+func update_nodes_in_viewport(node : Node, viewport : Viewport) -> void:
+	if (node is Light or node is GeometryInstance) and node.is_inside_tree():
+		register_node(node)
 	if not node is Viewport or node == viewport:
 		for child in node.get_children():
-			update_lights_in_viewport(child, viewport)
+			update_nodes_in_viewport(child, viewport)
 
 func update_light(light : Light) -> void:
 	var renderer = lights[light]
@@ -191,8 +214,7 @@ func update_light(light : Light) -> void:
 	renderer.set_light_param(id, "color", light.light_color * (2.0 * float(not light.light_negative) - 1.0))
 	renderer.set_light_param(id, "energy", energy * float(light.is_visible_in_tree()))
 	
-	if light is SpotLight or light is OmniLight:
-		renderer.set_light_param(id, "shadows", light.shadow_enabled)
+	renderer.set_light_param(id, "shadows", light.shadow_enabled)
 	
 	var transform := light.global_transform if light.is_inside_tree() else light.transform
 	
@@ -211,14 +233,61 @@ func update_light(light : Light) -> void:
 			renderer.set_light_param(id, "spot_angle", light.spot_angle)
 			renderer.set_light_param(id, "spot_angle_attenuation", light.spot_angle_attenuation)
 
-func _on_node_added(node : Node) -> void:
-	if node is Light:
-		var viewport := node.get_viewport()
-		var r_id := get_renderer_by_viewport(viewport)
-		if r_id == -1:
-			return
+func update_geometry_instance(geom : GeometryInstance) -> void:
+	if not geom:
+		return
+	var geom_data : Dictionary = geom_instances[geom]
+	
+	var apply_volumetrics := geom.has_meta("apply_volumetrics")
+	if apply_volumetrics:
+		apply_volumetrics = geom.get_meta("apply_volumetrics")
+	
+	var materials_to_convert := []
+	if apply_volumetrics and geom_data.renderer:
+		if geom is MeshInstance:
+			for mat_idx in geom.get_surface_material_count():
+				var material : Material = geom.get_surface_material(mat_idx)
+				if material and is_transparent_material(material):
+					materials_to_convert.append("material/" + str(mat_idx))
+		elif geom is CSGPrimitive:
+			if geom.material and is_transparent_material(geom.material):
+				materials_to_convert.append("material")
+		if geom.material_override and is_transparent_material(geom.material_override):
+			materials_to_convert.append("material_override")
+	
+	geom_data.active_mats = {}
+	for material in materials_to_convert:
+		var geom_mat = geom.get(material)
+		geom_mat.resource_local_to_scene = true
 		
-		var renderer = renderers[r_id].node
+		if not geom_data.prev_mats.has(geom_mat):
+			var volume_overlay := preload("material/transparent_volume_overlayer.gd").new()
+			geom_mat.next_pass = volume_overlay
+			volume_overlay.set_parent_material_ref(geom, material)
+			
+			geom_data.active_mats[geom_mat] = volume_overlay
+			geom_data.renderer.transparent_materials.append(volume_overlay)
+		else:
+			geom_data.active_mats[geom_mat] = geom_data.prev_mats[geom_mat]
+	
+	for mat in geom_data.prev_mats:
+		if not mat in geom_data.active_mats.keys():
+			mat.next_pass = null
+			if geom_data.renderer:
+				geom_data.renderer.transparent_materials.erase(geom_data.prev_mats[mat])
+	
+	geom_data.prev_mats = geom_data.active_mats.duplicate()
+
+func register_node(node : Node) -> void:
+	assert(node.is_inside_tree())
+	
+	var viewport := node.get_viewport()
+	var r_id := get_renderer_by_viewport(viewport)
+	if r_id == -1:
+		return
+	var renderer = renderers[r_id].node
+	
+	if node is Light:
 		if not lights.has(node):
 			lights[node] = renderer
 		elif node.has_meta("_vol_id"):
@@ -232,15 +301,58 @@ func _on_node_added(node : Node) -> void:
 		
 		renderer.add_light(id_counter, type)
 		node.set_meta("_vol_id", id_counter)
+		id_counter += 1
 		
 		update_light(node)
+	
+	elif node is GeometryInstance:
+		if not geom_instances.has(node):
+			geom_instances[node] = {
+				renderer=renderer,
+				active_mats={},
+				prev_mats={}
+			}
+		elif node.has_meta("_vol_id"):
+			return
 		
+		node.set_meta("_vol_id", id_counter)
 		id_counter += 1
+		
+		update_geometry_instance(node)
 
-func _on_node_removed(node : Node) -> void:
-	if node is Light and lights.has(node):
+func unregister_node(node : Node) -> void:
+	if lights.has(node):
 		var renderer = lights[node]
 		lights.erase(node)
 		renderer.remove_light(node.get_meta("_vol_id"))
 		node.remove_meta("_vol_id")
+	elif geom_instances.has(node):
+		var renderer = geom_instances[node].renderer
+		if renderer:
+			for mat in geom_instances[node].active_mats:
+				renderer.transparent_materials.erase(geom_instances[node].prev_mats[mat])
+		geom_instances.erase(node)
+		node.remove_meta("_vol_id")
 
+func _on_node_added(node : Node) -> void:
+	if node is Light or node is GeometryInstance:
+		register_node(node)
+
+func _on_node_removed(node : Node) -> void:
+	if node is Light or node is GeometryInstance:
+		unregister_node(node)
+
+# Helper function
+static func is_transparent_material(material : Material) -> bool:
+	var shader = VisualServer.material_get_shader(material.get_rid())
+	var code = VisualServer.shader_get_code(shader)
+	
+	if code.find("blend_mul") != -1 or \
+		code.find("blend_add") != -1 or \
+		code.find("blend_sub") != -1 or \
+		code.find("ALPHA") != -1 or \
+		code.find("SCREEN_TEXTURE") != -1 or \
+		code.find("DEPTH_TEXTURE") != -1:
+			return true
+	
+	return false

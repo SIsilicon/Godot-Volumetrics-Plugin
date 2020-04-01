@@ -13,7 +13,7 @@ viewport_path = NodePath("ShadowAtlas")
 script = ExtResource( 2 )
 
 [node name="ShadowRenderer" type="MeshInstance" parent="."]
-layers = 0
+layers = 1048576
 material_override = ExtResource( 1 )
 cast_shadow = 0
 extra_cull_margin = 16384.0
@@ -21,7 +21,7 @@ mesh = SubResource( 1 )
 material/0 = null
 
 [node name="ShadowAtlas" type="Viewport" parent="."]
-size = Vector2( 1024, 1024 )
+size = Vector2( 2048, 2048 )
 own_world = true
 keep_3d_linear = true
 usage = 1
@@ -31,6 +31,7 @@ render_target_update_mode = 3
 [node name="TextureRect" type="TextureRect" parent="."]
 margin_right = 300.0
 margin_bottom = 300.0
+mouse_filter = 2
 texture = SubResource( 2 )
 expand = true
 stretch_mode = 1

@@ -1,7 +1,7 @@
 shader_type spatial;
 render_mode unshaded, blend_add;
 
-uniform bool global = false;
+uniform int bounds_mode = 0;
 
 uniform vec2 tile_factor;
 uniform vec3 sample_offset = vec3(0.0);
@@ -53,7 +53,11 @@ void fragment() {
 	vec3 WORLD = ndc.xyz;
 	vec3 UVW = (INV_WORLD_MATRIX * vec4(WORLD, 1.0)).xyz * 0.5 + 0.5;
 	
-	if(!global && clamp(UVW, 0.0, 1.0) != UVW) discard;
+	if(bounds_mode == 1) {
+		if(clamp(UVW, 0.0, 1.0) != UVW) discard;
+	} else if (bounds_mode == 2) {
+		if(distance(UVW, vec3(0.5)) > 0.5) discard;
+	}
 	
 	/**FRAGMENT CODE**/
 }

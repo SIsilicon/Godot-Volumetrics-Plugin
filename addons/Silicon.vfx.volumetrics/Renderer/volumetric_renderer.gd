@@ -30,15 +30,19 @@ var canvas := QuadMesh.new()
 var shadow_manager := preload("shadow_manager/shadow_manager.tscn").instance()
 onready var v_buffers := [$Scatter, $Extinction, $Emission, $Phase, $Motion]
 
+var shadow_size := 1024 setget set_shadow_size
+
 var volumes := {}
+var transparent_materials := []
 
 var lights := {}
 var light_texture := ImageTexture.new()
 var temp_light_img : Image = null
 
-var halton := Halton.genearate_sequence_3D(Vector3(2,5,3), 128)
+var halton : Array 
 
 func _enter_tree() -> void:
+	halton = Halton.genearate_sequence_3D(Vector3(2,5,3), 128)
 	halton.shuffle()
 	
 	var image := Image.new()
@@ -54,23 +58,18 @@ func _ready() -> void:
 	shadow_manager.connect("atlas_changed", self, "_on_shadow_atlas_changed")
 	
 	$LightScatter/ColorRect.material.set_shader_param("light_data", light_texture)
-	
-	$ShadowManager/TextureRect.visible = not Engine.editor_hint
-	
-	if Engine.editor_hint and get_tree().edited_scene_root == self:
-		set_enabled(false)
+	$ShadowManager/TextureRect.visible = false # not Engine.editor_hint
 	
 	resize(Vector2.ONE)
 	
 	yield(get_tree(), "idle_frame")
 	$LightScatter/ColorRect.material.set_shader_param("shadow_atlas", shadow_manager.get_shadow_atlas())
 
-func _process(_delta : float) -> void:
+func _process(delta) -> void:
 	set_enabled(not volumes.empty())
 	
+	# Get the camera, viewport and its size with tiling in account.
 	var size = tiling
-	prev_cam_transform = camera_transform
-	
 	var viewport : Viewport
 	if Engine.editor_hint:
 		if not has_node("/root/EditorNode/VolumetricsPlugin"):
@@ -89,15 +88,21 @@ func _process(_delta : float) -> void:
 		size *= get_viewport().size / tile_size
 		viewport = get_viewport()
 		camera = viewport.get_camera()
-	camera_transform = camera.global_transform
+		camera.force_update_transform()
+	camera_transform = camera.get_camera_transform()
+	
+	# For some VERY odd reason, the camera transform here seems to lag with the viewport's camera transform (editor AND runtime).
+	# This is a hack to compensate for the delay.
+	camera_transform = prev_cam_transform.interpolate_with(camera_transform, 2)
 	
 	resize(size)
 	shadow_manager.viewport_camera = camera
 	
 	for viewport in get_viewports():
 		var viewport_camera = viewport.get_child(0)
+		
 		if viewport_camera is Camera:
-			viewport_camera.transform = camera.global_transform
+			viewport_camera.global_transform = camera_transform
 			viewport_camera.keep_aspect = camera.keep_aspect
 			viewport_camera.fov = camera.fov
 			viewport_camera.near = start
@@ -115,7 +120,7 @@ func _process(_delta : float) -> void:
 	for viewport in [$LightScatter, $LightTransmit]:
 		viewport.get_child(0).material.set_shader_param("tile_factor", tiling)
 		viewport.get_child(0).material.set_shader_param("vol_depth_params", vol_depth_params)
-		viewport.get_child(0).material.set_shader_param("prev_inv_view_matrix", prev_cam_transform.inverse())
+		viewport.get_child(0).material.set_shader_param("prev_inv_view_matrix", camera.get_camera_transform().inverse())#prev_cam_transform.inverse())
 		viewport.get_child(0).material.set_shader_param("curr_view_matrix", camera_transform)
 		camera_projection.set_shader_param(viewport.get_child(0).material, "projection_matrix")
 	$LightScatter/ColorRect.material.set_shader_param("volumetric_shadows", volumetric_shadows)
@@ -123,6 +128,12 @@ func _process(_delta : float) -> void:
 	for resolver in [$ResolveScatter/Canvas, $ResolveTransmit/Canvas, $SolidTransmit, $SolidScatter]:
 		resolver.material_override.set_shader_param("vol_depth_params", vol_depth_params)
 		resolver.material_override.set_shader_param("tile_factor", tiling)
+	
+	for material in transparent_materials:
+		material.tile_factor = tiling
+		material.vol_depth_params = vol_depth_params
+		material.volume_transmittance = $SolidScatter.material_override.get_shader_param("volume_transmittance")
+		material.volume_scattering = $SolidScatter.material_override.get_shader_param("volume_scattering")
 	
 	var sample_offset : Vector3 = (halton[Engine.get_frames_drawn() % halton.size()]) / Vector3(size.x, size.y, samples) * float(blend != 0)
 	$LightScatter.get_child(0).material.set_shader_param("sample_offset", sample_offset)
@@ -163,11 +174,19 @@ func _process(_delta : float) -> void:
 		light_texture.create_from_image(temp_light_img, 0)
 		temp_light_img = null
 	
+	# Directional light shadow matrices need an update every frame.
+	for key in lights:
+		if lights[key].type == VolumetricServer.DIRECTIONAL_LIGHT and lights[key].shadows:
+			var shadow_matrix : Matrix4 = shadow_manager.get_shadow_data(key).shadow_matrix
+			pass_light_data(14, lights[key].index, shadow_matrix.get_data())
+	
 	frames_till_blending = max(frames_till_blending - 1, 0)
+	prev_cam_transform = camera.get_camera_transform()
 
 func set_samples(value : int) -> void:
 	samples = value
 	tiling = get_tile_dimension(samples)
+	reduce_sample_size()
 
 func get_tile_dimension(depth : int) -> Vector2:
 	var tile_dimension := Vector2(0, 0)
@@ -188,6 +207,15 @@ func get_tile_dimension(depth : int) -> Vector2:
 		return get_tile_dimension(depth+1)
 	else:
 		return tile_dimension
+
+func reduce_sample_size() -> void:
+	if not is_inside_tree():
+		return
+	
+	var size : Vector2 = $PrevScatter.size
+	while size.x * tiling.x > 16384 or size.y * tiling.y > 16384:
+		samples -= 1
+		tiling = get_tile_dimension(samples)
 
 func set_enabled(value : bool) -> void:
 	if enabled != value:
@@ -212,9 +240,15 @@ func get_viewports() -> Array:
 func resize(size : Vector2) -> void:
 	if size.floor() != $PrevScatter.size:
 		frames_till_blending = 3
+		reduce_sample_size()
 	
 	for viewport in get_viewports():
 		viewport.size = size
+
+func set_shadow_size(value : int) -> void:
+	shadow_size = value
+	if shadow_manager:
+		shadow_manager.size = shadow_size
 
 func add_volume(key) -> void:
 	var meshes := []
@@ -294,7 +328,7 @@ func add_light(key, type : int, data := {}) -> void:
 			pass_light_data(13, light_data.index, cos(deg2rad(light_data.spot_angle)))
 	
 	if light_data.shadows:
-		shadow_manager.add_shadow(light_data)
+		shadow_manager.add_shadow(key, light_data)
 		var shadow_coords : Rect2 = shadow_manager.get_shadow_data(key).coords
 		var shadow_matrix : Matrix4 = shadow_manager.get_shadow_data(key).shadow_matrix
 		pass_light_data(14, light_data.index, shadow_matrix.get_data())
@@ -386,6 +420,8 @@ func set_light_param(key, param : String, value) -> void:
 			light_data.shadows = value
 	
 	if shadow_data_update and light_data.shadows:
+		if light_data.type == VolumetricServer.DIRECTIONAL_LIGHT and param == "position":
+			param = "direction"
 		shadow_manager.set_shadow_param(key, param, value)
 		var shadow_matrix : Matrix4 = shadow_manager.get_shadow_data(key).shadow_matrix
 		pass_light_data(14, light_data.index, shadow_matrix.get_data())

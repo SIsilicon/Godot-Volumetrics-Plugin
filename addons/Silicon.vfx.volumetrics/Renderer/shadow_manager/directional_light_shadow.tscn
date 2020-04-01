@@ -3,16 +3,12 @@
 [ext_resource path="res://addons/silicon.vfx.volumetrics/renderer/shadow_manager/directional_light_shadow.gd" type="Script" id=1]
 [ext_resource path="res://addons/silicon.vfx.volumetrics/renderer/shadow_manager/shadow_map_env.tres" type="Environment" id=2]
 
-
-
-
-
-
 [node name="DirectionalLightShadow" type="Viewport"]
 keep_3d_linear = true
 debug_draw = 1
 script = ExtResource( 1 )
 __meta__ = {
+"_directional_light": true,
 "_spot_light": true
 }
 

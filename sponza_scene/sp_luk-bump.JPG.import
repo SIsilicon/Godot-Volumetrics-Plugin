@@ -2,8 +2,8 @@
 
 importer="texture"
 type="StreamTexture"
-path.s3tc="res://.import/sp_luk-bump.JPG-831b23fc2f701ceed3e27f264346ed6e.s3tc.stex"
-path.etc="res://.import/sp_luk-bump.JPG-831b23fc2f701ceed3e27f264346ed6e.etc.stex"
+path.s3tc="res://.import/sp_luk-bump.jpg-ff4acc59203380133c977348909da882.s3tc.stex"
+path.etc="res://.import/sp_luk-bump.jpg-ff4acc59203380133c977348909da882.etc.stex"
 metadata={
 "imported_formats": [ "s3tc", "etc" ],
 "vram_texture": true
@@ -11,8 +11,8 @@ metadata={
 
 [deps]
 
-source_file="res://sponza_scene/sp_luk-bump.JPG"
-dest_files=[ "res://.import/sp_luk-bump.JPG-831b23fc2f701ceed3e27f264346ed6e.s3tc.stex", "res://.import/sp_luk-bump.JPG-831b23fc2f701ceed3e27f264346ed6e.etc.stex" ]
+source_file="res://sponza_scene/sp_luk-bump.jpg"
+dest_files=[ "res://.import/sp_luk-bump.jpg-ff4acc59203380133c977348909da882.s3tc.stex", "res://.import/sp_luk-bump.jpg-ff4acc59203380133c977348909da882.etc.stex" ]
 
 [params]
 

@@ -2,8 +2,8 @@
 
 importer="texture"
 type="StreamTexture"
-path.s3tc="res://.import/KAMEN-stup.JPG-d2bfa96cc7d8782bbc41b27b9c53795e.s3tc.stex"
-path.etc="res://.import/KAMEN-stup.JPG-d2bfa96cc7d8782bbc41b27b9c53795e.etc.stex"
+path.s3tc="res://.import/KAMEN-stup.jpg-133ca8d6ad15ad9d5b9df8b1cd181274.s3tc.stex"
+path.etc="res://.import/KAMEN-stup.jpg-133ca8d6ad15ad9d5b9df8b1cd181274.etc.stex"
 metadata={
 "imported_formats": [ "s3tc", "etc" ],
 "vram_texture": true
@@ -11,8 +11,8 @@ metadata={
 
 [deps]
 
-source_file="res://sponza_scene/KAMEN-stup.JPG"
-dest_files=[ "res://.import/KAMEN-stup.JPG-d2bfa96cc7d8782bbc41b27b9c53795e.s3tc.stex", "res://.import/KAMEN-stup.JPG-d2bfa96cc7d8782bbc41b27b9c53795e.etc.stex" ]
+source_file="res://sponza_scene/KAMEN-stup.jpg"
+dest_files=[ "res://.import/KAMEN-stup.jpg-133ca8d6ad15ad9d5b9df8b1cd181274.s3tc.stex", "res://.import/KAMEN-stup.jpg-133ca8d6ad15ad9d5b9df8b1cd181274.etc.stex" ]
 
 [params]
 

@@ -12,6 +12,8 @@ var distribution := 0.8 setget set_distribution
 var temporal_blending := 0.95 setget set_temporal_blending
 var volumetric_shadows := false setget set_volumetric_shadows
 
+var shadow_atlas_size := 1024 setget set_shadow_atlas_size
+
 var ambient_light_color := Color.black setget set_ambient_light_color
 var ambient_light_energy := 1.0 setget set_ambient_light_energy
 
@@ -25,6 +27,7 @@ func _get_property_list() -> Array:
 		{name="distribution", type=TYPE_REAL, hint=PROPERTY_HINT_RANGE, hint_string="0,1,0.01"},
 		{name="temporal_blending", type=TYPE_REAL, hint=PROPERTY_HINT_RANGE, hint_string="0,0.95,0.01"},
 		{name="volumetric_shadows", type=TYPE_BOOL},
+		{name="shadow_atlas_size", type=TYPE_INT},
 		
 		{name="Ambient Light", type=TYPE_NIL, usage=PROPERTY_USAGE_GROUP, hint_string="ambient_light_"},
 		{name="ambient_light_color", type=TYPE_COLOR, hint=PROPERTY_HINT_COLOR_NO_ALPHA},
@@ -40,6 +43,7 @@ func _enter_tree() -> void:
 	VolumetricServer.renderer_set_distribution(renderer_id, distribution)
 	VolumetricServer.renderer_set_temporal_blending(renderer_id, temporal_blending)
 	VolumetricServer.renderer_set_volumetric_shadows(renderer_id, volumetric_shadows)
+	VolumetricServer.renderer_set_shadow_atlas_size(renderer_id, shadow_atlas_size)
 	VolumetricServer.renderer_set_ambient_light(renderer_id, Vector3(ambient_light_color.r, ambient_light_color.g, ambient_light_color.b) * ambient_light_energy)
 
 func _exit_tree() -> void:
@@ -87,6 +91,12 @@ func set_volumetric_shadows(value : bool) -> void:
 	if renderer_id == -1:
 		yield(self, "ready")
 	VolumetricServer.renderer_set_volumetric_shadows(renderer_id, volumetric_shadows)
+
+func set_shadow_atlas_size(value : int) -> void:
+	shadow_atlas_size = clamp(value, 256, 16384)
+	if renderer_id == -1:
+		yield(self, "ready")
+	VolumetricServer.renderer_set_shadow_atlas_size(renderer_id, shadow_atlas_size)
 
 func set_ambient_light_color(value : Color) -> void:
 	ambient_light_color = value

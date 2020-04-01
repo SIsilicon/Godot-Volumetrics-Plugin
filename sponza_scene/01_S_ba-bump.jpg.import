@@ -2,8 +2,8 @@
 
 importer="texture"
 type="StreamTexture"
-path.s3tc="res://.import/vrata_ko.JPG-d62d8b2062ba51e7c673f3448b3eb7d5.s3tc.stex"
-path.etc="res://.import/vrata_ko.JPG-d62d8b2062ba51e7c673f3448b3eb7d5.etc.stex"
+path.s3tc="res://.import/01_S_ba-bump.jpg-a78fa1199d5fd7acd51c3fa690fd33d5.s3tc.stex"
+path.etc="res://.import/01_S_ba-bump.jpg-a78fa1199d5fd7acd51c3fa690fd33d5.etc.stex"
 metadata={
 "imported_formats": [ "s3tc", "etc" ],
 "vram_texture": true
@@ -11,8 +11,8 @@ metadata={
 
 [deps]
 
-source_file="res://sponza_scene/vrata_ko.JPG"
-dest_files=[ "res://.import/vrata_ko.JPG-d62d8b2062ba51e7c673f3448b3eb7d5.s3tc.stex", "res://.import/vrata_ko.JPG-d62d8b2062ba51e7c673f3448b3eb7d5.etc.stex" ]
+source_file="res://sponza_scene/01_S_ba-bump.jpg"
+dest_files=[ "res://.import/01_S_ba-bump.jpg-a78fa1199d5fd7acd51c3fa690fd33d5.s3tc.stex", "res://.import/01_S_ba-bump.jpg-a78fa1199d5fd7acd51c3fa690fd33d5.etc.stex" ]
 
 [params]
 
@@ -20,7 +20,7 @@ compress/mode=2
 compress/lossy_quality=0.7
 compress/hdr_mode=0
 compress/bptc_ldr=0
-compress/normal_map=2
+compress/normal_map=1
 flags/repeat=true
 flags/filter=true
 flags/mipmaps=true

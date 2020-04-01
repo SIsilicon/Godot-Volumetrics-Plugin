@@ -1,18 +1,12 @@
 shader_type spatial;
 render_mode unshaded, blend_add;
 
+//VOL__UNIFORMS_AND_FUNCTIONS__VOL//
 uniform sampler2D volume_scattering;
 uniform sampler2D volume_transmittance;
-
-uniform vec2 volume_size;
-
 uniform vec2 tile_factor;
-
 uniform vec3 vol_depth_params;
-
-void vertex() {
-	POSITION = vec4(VERTEX.xy, -1.0, 1.0);
-}
+uniform bool is_transparent_pass = false;
 
 vec2 uvw_to_uv(vec3 uvw, vec2 tiling) {
 	vec2 uv = uvw.xy / tiling;
@@ -62,11 +56,10 @@ vec4 texture_bicubic(sampler2D sampler, vec2 tex_coords, vec4 rect) {
 }
 
 vec4 texture3D(sampler2D tex, vec3 uvw, vec2 tiling) {
-	float tile_count = tiling.x * tiling.y;
-	float zCoord = uvw.z * tile_count;
+	float zCoord = uvw.z * (tiling.x * tiling.y - 1.0);
 	float zOffset = fract(zCoord);
 	
-	vec2 margin = 0.5 / vec2(textureSize(tex, 0));
+	vec2 margin = 1.2 / vec2(textureSize(tex, 0));
 	
 	vec2 uv = uvw.xy / tiling;
 	float ratio = tiling.y / tiling.x;
@@ -90,15 +83,30 @@ vec3 ndc_to_volume(vec3 coords, mat4 projection_matrix) {
 	z = vol_depth_params.z * log2(z * vol_depth_params.y + vol_depth_params.x);
 	return vec3(coords.xy, z);
 }
+//VOL__UNIFORMS_AND_FUNCTIONS__VOL//
+
+void vertex() {
+	if(is_transparent_pass) {
+		POSITION = PROJECTION_MATRIX * MODELVIEW_MATRIX * vec4(VERTEX, 1.0);
+	} else {
+		POSITION = vec4(VERTEX.xy, -1.0, 1.0);
+	}
+}
 
 void fragment() {
-	vec3 tile_margin = 1.0 / vec3(volume_size, tile_factor.x * tile_factor.y);
+	//VOL__FRAGMENT_CODE__VOL//
+	vec3 vol_ndc;
+	if(is_transparent_pass) {
+		vol_ndc = vec3(SCREEN_UV, FRAGCOORD.z);
+	} else {
+		vol_ndc = vec3(SCREEN_UV, texture(DEPTH_TEXTURE, SCREEN_UV).r);
+	}
+	vol_ndc = ndc_to_volume(vol_ndc, PROJECTION_MATRIX);
+	vol_ndc.z = clamp(vol_ndc.z, 0.0, 1.0);
 	
-	vec3 ndc = vec3(SCREEN_UV, texture(DEPTH_TEXTURE, SCREEN_UV).r);
-	ndc = ndc_to_volume(ndc, PROJECTION_MATRIX);
-	ndc = clamp(ndc, tile_margin * vec3(1,1,0), 1.0 - tile_margin);
-	vec3 transmittance = texture3D(volume_transmittance, ndc, tile_factor).rgb;
-	ALPHA = 1.0 - dot(transmittance, vec3(1.0 / 3.0));
+	vec3 transmittance = texture3D(volume_transmittance, vol_ndc, tile_factor).rgb;
 	
-	ALBEDO = texture3D(volume_scattering, ndc, tile_factor).rgb;
+	ALPHA = ALPHA * ALPHA * (1.0 - dot(transmittance, vec3(1.0 / 3.0)));
+	ALBEDO = texture3D(volume_scattering, vol_ndc, tile_factor).rgb;
+	//VOL__FRAGMENT_CODE__VOL//
 }

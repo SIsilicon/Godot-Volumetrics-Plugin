@@ -28,7 +28,7 @@ func set_position(value : Vector3) -> void:
 func set_size(value : Vector2) -> void:
 	size = value
 	for viewport in viewports:
-		viewport.size = size / 2.0
+		viewport.size = size / 3.0
 
 func get_shadow_matrix() -> Matrix4:
 	return Matrix4.new(Transform().translated(-position))

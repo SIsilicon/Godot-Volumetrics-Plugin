@@ -1,20 +1,24 @@
 tool
 extends Node
+class_name SceneBounds
 
 var root : Viewport
 
 var geometry_instances := []
 
-func _get(property : String):
-	if property == "aabb":
-		var aabb := AABB(Vector3.ONE * -16384, Vector3.ONE * 32768)
-		for instance in geometry_instances:
-			aabb.merge(instance.get_transformed_aabb())
+func get_aabb() -> AABB:
+	var aabb := AABB(Vector3.ONE * 16384, Vector3.ONE * -32768)
+	for instance in geometry_instances:
+		aabb = aabb.merge(instance.get_transformed_aabb())
+	return aabb
 
 func _init(root : Viewport) -> void:
 	self.root = root
 
 func _enter_tree() -> void:
+	get_tree().connect("node_added", self, "_on_node_added")
+	get_tree().connect("node_removed", self, "_on_node_removed")
+	
 	update_geometry_in_scene(root)
 
 func update_geometry_in_scene(node : Node) -> void:

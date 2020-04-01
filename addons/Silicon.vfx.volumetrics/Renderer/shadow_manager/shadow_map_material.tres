@@ -19,10 +19,14 @@ void fragment() {
 	ALPHA = 1.0;
 	
 	vec4 ndc = vec4(SCREEN_UV, texture(DEPTH_TEXTURE, SCREEN_UV).r, 1.0);
-	ndc = ndc * 2.0 - 1.0;
-	ndc = INV_PROJECTION_MATRIX * ndc;
-	ndc /= ndc.w;
-	ALBEDO.r = length(ndc.xyz) / get_camera_range(PROJECTION_MATRIX);
+	if(PROJECTION_MATRIX[3][3] == 0.0) { // Is projection matrix?
+		ndc = ndc * 2.0 - 1.0;
+		ndc = INV_PROJECTION_MATRIX * ndc;
+		ndc /= ndc.w;
+		ALBEDO.r = length(ndc.xyz) / get_camera_range(PROJECTION_MATRIX);
+	} else {
+		ALBEDO.r = ndc.z
+	}
 }
 "
 

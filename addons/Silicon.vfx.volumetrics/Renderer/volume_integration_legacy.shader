@@ -19,20 +19,20 @@ void vertex() {
 }
 
 vec4 texture3D(sampler2D tex, vec3 uvw, vec2 tiling, float lod) {
-	float zCoord = uvw.z * tiling.x * tiling.y;
+	float zCoord = uvw.z * (tiling.x * tiling.y - 1.0);
 	float zOffset = fract(zCoord);
 	
 	vec2 uv = uvw.xy / tiling;
 	float ratio = tiling.y / tiling.x;
 	vec2 slice0Offset = vec2(float(int(zCoord) % int(tiling.x)), floor(ratio * zCoord / tiling.y));
-	zCoord++;
-	vec2 slice1Offset = vec2(float(int(zCoord) % int(tiling.x)), floor(ratio * zCoord / tiling.y));
+//	zCoord++;
+//	vec2 slice1Offset = vec2(float(int(zCoord) % int(tiling.x)), floor(ratio * zCoord / tiling.y));
 	
 	vec4 slice0colour = textureLod(tex, slice0Offset/tiling + uv, lod);
-	vec4 slice1colour = textureLod(tex, slice1Offset/tiling + uv, lod);
+//	vec4 slice1colour = textureLod(tex, slice1Offset/tiling + uv, lod);
 	
-	//return slice0colour; //no filtering.
-	return mix(slice0colour, slice1colour, zOffset);
+	return slice0colour; //no filtering.
+//	return mix(slice0colour, slice1colour, zOffset);
 }
 
 vec3 volume_to_ndc(vec3 coords, mat4 projection_matrix) {

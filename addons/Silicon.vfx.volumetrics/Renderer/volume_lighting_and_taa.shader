@@ -37,10 +37,10 @@ const float M_PI = 3.141592653;
 
 vec4 texture3D(sampler2D tex, vec3 uvw, vec2 tiling) {
 	float tile_count = tiling.x * tiling.y;
-	float zCoord = uvw.z * tile_count;
+	float zCoord = uvw.z * (tile_count - 1.0);
 	float zOffset = fract(zCoord);
 	
-	vec2 margin = 0.5 / vec2(textureSize(tex, 0));
+	vec2 margin = 1.0 / vec2(textureSize(tex, 0));
 	
 	vec2 uv = uvw.xy / tiling;
 	float ratio = tiling.y / tiling.x;
@@ -201,20 +201,23 @@ void calculate_light(int light_index, vec3 wpos, vec3 wdir, float anisotropy, ma
 			shadow_coords = shadow_matrix * vec4(wpos, 1.0);
 			shadow_coords /= shadow_coords.w;
 			shadow_coords = shadow_coords * 0.5 + 0.5;
+		} else if(type == 2) {
+			shadow_coords = shadow_matrix * vec4(wpos, 1.0);
+			shadow_coords = shadow_coords * 0.5 + 0.5;
 		} else if(type == 0) {
 			shadow_coords = shadow_matrix * vec4(wpos, 1.0);
 			shadow_coords.xy = cube_to_paraboloid(shadow_coords.xyz);
 		}
 		shadow_coords.xy = shadow_coords.xy * shadow_rect.zw + shadow_rect.xy;
 		
-//		attenuation *= shadow_coords.xy;
-		
-		if(texture(shadow_atlas, shadow_coords.xy).r < light_dir.w / range) {
+		if(type == 2 && texture(shadow_atlas, shadow_coords.xy).r < shadow_coords.z) {
+			return;
+		} else if(type != 2 && texture(shadow_atlas, shadow_coords.xy).r < light_dir.w / range) {
 			return;
 		}
 	}
 	
-//	if(all(lessThanEqual(attenuation, vec3(0.0)))) return;
+	if(all(lessThanEqual(attenuation, vec3(0.0)))) return;
 	
 	if(volumetric_shadows) {
 		attenuation *= light_volume_shadow(wpos, light_dir, view_projection_matrix, projection_matrix);
@@ -247,7 +250,7 @@ void fragment() {
 	} else {
 		float anisotropy = texture(phase_volume, SCREEN_UV).r / max(1.0, texture(phase_volume, SCREEN_UV).g);
 		
-		COLOR.rgb = volume_sample * ambient_light;
+		COLOR.rgb = volume_sample * ambient_light / (4.0 * M_PI);
 		COLOR.rgb += texture(emission_volume, SCREEN_UV).rgb;
 		
 		if(use_light_data) {

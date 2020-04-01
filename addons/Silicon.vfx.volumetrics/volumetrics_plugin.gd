@@ -32,7 +32,7 @@ func _ready() -> void:
 	inspector_plugin = preload("editor/inspector_plugin.gd").new()
 	add_inspector_plugin(inspector_plugin)
 	
-	print("volumetrics plugin enter tree")
+	print("Volumetrics plugin enter tree")
 
 func _exit_tree() -> void:
 	remove_custom_type("LocalVolume")
@@ -40,7 +40,7 @@ func _exit_tree() -> void:
 	remove_autoload_singleton("VolumetricServer")
 	remove_inspector_plugin(inspector_plugin)
 	
-	print("volumetrics plugin exit tree")
+	print("Volumetrics plugin exit tree")
 
 func forward_spatial_gui_input(p_camera : Camera, p_event : InputEvent) -> bool:
 	if not editor_camera:
@@ -49,3 +49,4 @@ func forward_spatial_gui_input(p_camera : Camera, p_event : InputEvent) -> bool:
 
 func handles(object) -> bool:
 	return true
+
