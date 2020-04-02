@@ -172,7 +172,7 @@ func update_shaders() -> void:
 			("uniform sampler3D emission_texture;" if has_emission_tex else "")) if emission_enabled else "",
 		fragment_code =\
 			("ALBEDO = textureLod(emission_texture, UVW, 0.0) * emission;"
-			if emission_texture else "ALBEDO = emission") if emission_enabled else "discard;"
+			if emission_texture else "ALBEDO = emission;") if emission_enabled else "discard;"
 	},{
 		# Phase shader
 		globals = """

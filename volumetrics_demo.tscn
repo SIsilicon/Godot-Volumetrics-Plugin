@@ -9,19 +9,19 @@
 [ext_resource path="res://sponza_scene/KAMEN-stup.JPG" type="Texture" id=7]
 [ext_resource path="res://addons/silicon.vfx.volumetrics/material/transparent_volume_overlayer.gd" type="Script" id=8]
 
-[sub_resource type="SpatialMaterial" id=1]
+[sub_resource type="SpatialMaterial" id=8]
 resource_name = "sp_00_svod"
 albedo_color = Color( 0.941177, 0.866667, 0.737255, 1 )
 albedo_texture = ExtResource( 7 )
 metallic = 0.034039
 
-[sub_resource type="Environment" id=2]
+[sub_resource type="Environment" id=9]
 background_mode = 1
 background_color = Color( 0.105882, 0.105882, 0.105882, 1 )
 ambient_light_color = Color( 0.2, 0.2, 0.2, 1 )
 dof_blur_far_amount = 0.13
 
-[sub_resource type="Resource" id=3]
+[sub_resource type="Resource" id=10]
 script = ExtResource( 2 )
 scatter_color = Color( 0.75, 0.75, 0.75, 1 )
 density = 0.025
@@ -29,7 +29,7 @@ absorption_color = Color( 0, 0, 0, 1 )
 anisotropy = 0.556
 emission_enabled = false
 
-[sub_resource type="Resource" id=4]
+[sub_resource type="Resource" id=11]
 script = ExtResource( 2 )
 scatter_color = Color( 0.545098, 0.545098, 0.545098, 1 )
 density = 3.0
@@ -39,7 +39,7 @@ emission_enabled = true
 emission_color = Color( 1, 1, 1, 1 )
 emission_strength = 0.0
 
-[sub_resource type="Resource" id=5]
+[sub_resource type="Resource" id=12]
 script = ExtResource( 2 )
 scatter_color = Color( 0.356863, 0.313726, 0.529412, 1 )
 density = 1.0
@@ -49,7 +49,7 @@ emission_enabled = true
 emission_color = Color( 1, 1, 1, 1 )
 emission_strength = 0.0
 
-[sub_resource type="Animation" id=6]
+[sub_resource type="Animation" id=13]
 resource_name = "omni lights"
 length = 6.0
 loop = true
@@ -81,7 +81,7 @@ tracks/1/keys = {
 [sub_resource type="PlaneMesh" id=7]
 size = Vector2( 4.279, 5.028 )
 
-[sub_resource type="Shader" id=8]
+[sub_resource type="Shader" id=14]
 code = "shader_type spatial;
 //VOL__UNIFORMS_AND_FUNCTIONS__VOL//
 uniform sampler2D volume_scattering;
@@ -206,27 +206,27 @@ void fragment() {
 	
 	vec3 transmittance = texture3D(volume_transmittance, vol_ndc, tile_factor).rgb;
 	
-	ALPHA = ALPHA * ALPHA * (1.0 - dot(transmittance, vec3(1.0 / 3.0)));
+	ALPHA = ALPHA * (1.0 - dot(transmittance, vec3(1.0 / 3.0)));
 	ALBEDO = texture3D(volume_scattering, vol_ndc, tile_factor).rgb;
 	}
 render_mode unshaded;render_mode blend_add;"
 
-[sub_resource type="ViewportTexture" id=9]
+[sub_resource type="ViewportTexture" id=15]
 flags = 4
 viewport_path = NodePath("ResolveScatter")
 
-[sub_resource type="ViewportTexture" id=10]
+[sub_resource type="ViewportTexture" id=16]
 flags = 4
 viewport_path = NodePath("ResolveTransmit")
 
-[sub_resource type="ShaderMaterial" id=11]
+[sub_resource type="ShaderMaterial" id=17]
 resource_local_to_scene = true
 render_priority = 2
-shader = SubResource( 8 )
+shader = SubResource( 14 )
 shader_param/tile_factor = Vector2( 8, 8 )
 shader_param/vol_depth_params = Vector3( 0.98649, -0.135104, 0.314 )
 shader_param/is_transparent_pass = true
-shader_param/albedo = Color( 1, 1, 1, 0.403922 )
+shader_param/albedo = Color( 1, 1, 1, 0.572549 )
 shader_param/specular = 0.5
 shader_param/metallic = 0.0
 shader_param/roughness = 0.14
@@ -235,10 +235,10 @@ shader_param/uv1_scale = Vector3( 1, 1, 1 )
 shader_param/uv1_offset = Vector3( 0, 0, 0 )
 shader_param/uv2_scale = Vector3( 1, 1, 1 )
 shader_param/uv2_offset = Vector3( 0, 0, 0 )
-shader_param/volume_scattering = SubResource( 9 )
-shader_param/volume_transmittance = SubResource( 10 )
+shader_param/volume_scattering = SubResource( 15 )
+shader_param/volume_transmittance = SubResource( 16 )
 
-[sub_resource type="Shader" id=12]
+[sub_resource type="Shader" id=18]
 code = "shader_type spatial;
 //VOL__UNIFORMS_AND_FUNCTIONS__VOL//
 uniform sampler2D volume_transmittance;
@@ -354,20 +354,20 @@ void fragment() {
 	vol_ndc.z = clamp(vol_ndc.z, 0.0, 1.0);
 	
 	vec3 transmittance = texture3D(volume_transmittance, vol_ndc, tile_factor).rgb;
-	ALBEDO = mix(transmittance, vec3(1.0), 1.0 - (ALPHA * ALPHA));
+	ALBEDO = mix(transmittance, vec3(1.0), 1.0 - ALPHA);
 	ALPHA = dot(transmittance, vec3(1.0 / 3.0));
 	}
 render_mode unshaded;render_mode blend_mul;"
 
-[sub_resource type="ShaderMaterial" id=13]
+[sub_resource type="ShaderMaterial" id=19]
 resource_local_to_scene = true
 render_priority = 1
-next_pass = SubResource( 11 )
-shader = SubResource( 12 )
+next_pass = SubResource( 17 )
+shader = SubResource( 18 )
 shader_param/tile_factor = Vector2( 8, 8 )
 shader_param/vol_depth_params = Vector3( 0.98649, -0.135104, 0.314 )
 shader_param/is_transparent_pass = true
-shader_param/albedo = Color( 1, 1, 1, 0.403922 )
+shader_param/albedo = Color( 1, 1, 1, 0.572549 )
 shader_param/specular = 0.5
 shader_param/metallic = 0.0
 shader_param/roughness = 0.14
@@ -376,7 +376,7 @@ shader_param/uv1_scale = Vector3( 1, 1, 1 )
 shader_param/uv1_offset = Vector3( 0, 0, 0 )
 shader_param/uv2_scale = Vector3( 1, 1, 1 )
 shader_param/uv2_offset = Vector3( 0, 0, 0 )
-shader_param/volume_transmittance = SubResource( 10 )
+shader_param/volume_transmittance = SubResource( 16 )
 script = ExtResource( 8 )
 __meta__ = {
 "anisotropy_enabled": false,
@@ -433,16 +433,16 @@ __meta__ = {
 "vertex_color_use_as_albedo": false
 }
 parent_material_ref = [ Object(MeshInstance,"_import_path":NodePath(""),"pause_mode":0,"process_priority":0,"transform":Transform( 1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, -0.108683, 2.16899, 2.74094 ),"visible":true,"layers":1,"material_override":null,"cast_shadow":1,"extra_cull_margin":0.0,"use_in_baked_light":false,"lod_min_distance":0.0,"lod_min_hysteresis":0.0,"lod_max_distance":0.0,"lod_max_hysteresis":0.0,"mesh":SubResource( 7 ),"skin":null,"skeleton":NodePath(".."),"material/0":null,"script":null,"__meta__":{
-"_vol_id": 10,
+"_vol_id": 21,
 "apply_volumetrics": true
 })
 , "material/0" ]
 
-[sub_resource type="SpatialMaterial" id=14]
+[sub_resource type="SpatialMaterial" id=20]
 resource_local_to_scene = true
-next_pass = SubResource( 13 )
+next_pass = SubResource( 19 )
 flags_transparent = true
-albedo_color = Color( 1, 1, 1, 0.403922 )
+albedo_color = Color( 1, 1, 1, 0.572549 )
 roughness = 0.14
 
 [node name="Spatial" type="Spatial"]
@@ -473,7 +473,7 @@ material/19 = null
 material/20 = null
 material/21 = null
 material/22 = null
-material/23 = SubResource( 1 )
+material/23 = SubResource( 8 )
 material/24 = null
 material/25 = null
 material/26 = null
@@ -489,7 +489,7 @@ material/35 = null
 material/36 = null
 material/37 = null
 __meta__ = {
-"_vol_id": 4,
+"_vol_id": 15,
 "apply_volumetrics": false
 }
 
@@ -500,11 +500,14 @@ script = ExtResource( 4 )
 max_speed = Vector3( 2, 2, 5 )
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
-environment = SubResource( 2 )
+environment = SubResource( 9 )
 
 [node name="VolumetricFog" type="Node" parent="WorldEnvironment"]
 process_priority = 512
 script = ExtResource( 5 )
+__meta__ = {
+"_editor_description_": ""
+}
 start = 0.1
 end = 60.0
 tile_size = 3
@@ -519,19 +522,19 @@ ambient_light_energy = 1.0
 [node name="VolumeProxy" type="Spatial" parent="."]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.692142, 0 )
 script = ExtResource( 1 )
-material = SubResource( 3 )
+material = SubResource( 10 )
 bounds_mode = 0
 
 [node name="VolumeProxy2" type="Spatial" parent="."]
 transform = Transform( 2, 0, 0, 0, 2, 0, 0, 0, 2, 0, 1.70014, 0.0950187 )
 script = ExtResource( 1 )
-material = SubResource( 4 )
+material = SubResource( 11 )
 bounds_mode = 2
 
 [node name="VolumeProxy3" type="Spatial" parent="."]
 transform = Transform( 15.1479, 0, 0, 0, 1, 0, 0, 0, 7.22351, 0, 0.130421, 0.0950187 )
 script = ExtResource( 1 )
-material = SubResource( 5 )
+material = SubResource( 12 )
 bounds_mode = 1
 
 [node name="OmniLight" type="OmniLight" parent="."]
@@ -541,7 +544,7 @@ shadow_enabled = true
 omni_range = 18.0
 omni_attenuation = 2.73208
 __meta__ = {
-"_vol_id": 8,
+"_vol_id": 19,
 "volumetric": 4.07
 }
 
@@ -552,20 +555,20 @@ shadow_enabled = true
 omni_range = 18.0
 omni_attenuation = 2.73208
 __meta__ = {
-"_vol_id": 9,
+"_vol_id": 20,
 "volumetric": 4.07
 }
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
 autoplay = "omni lights"
 playback_speed = 0.5
-"anims/omni lights" = SubResource( 6 )
+"anims/omni lights" = SubResource( 13 )
 
 [node name="MeshInstance" type="MeshInstance" parent="."]
 transform = Transform( 1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, -0.108683, 2.16899, 2.74094 )
 mesh = SubResource( 7 )
-material/0 = SubResource( 14 )
+material/0 = SubResource( 20 )
 __meta__ = {
-"_vol_id": 10,
+"_vol_id": 21,
 "apply_volumetrics": true
 }

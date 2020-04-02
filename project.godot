@@ -113,5 +113,5 @@ ui_down={
 
 vram_compression/import_etc=true
 vram_compression/import_etc2=false
-quality/filters/msaa=2
+quality/shadow_atlas/size=2048
 environment/default_environment="res://default_env.tres"

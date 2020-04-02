@@ -97,7 +97,7 @@ void fragment() {
 	vol_ndc.z = clamp(vol_ndc.z, 0.0, 1.0);
 	
 	vec3 transmittance = texture3D(volume_transmittance, vol_ndc, tile_factor).rgb;
-	ALBEDO = mix(transmittance, vec3(1.0), 1.0 - (ALPHA * ALPHA));
+	ALBEDO = mix(transmittance, vec3(1.0), 1.0 - ALPHA);
 	ALPHA = dot(transmittance, vec3(1.0 / 3.0));
 	//VOL__FRAGMENT_CODE__VOL//
 }

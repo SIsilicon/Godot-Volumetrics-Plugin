@@ -106,7 +106,7 @@ void fragment() {
 	
 	vec3 transmittance = texture3D(volume_transmittance, vol_ndc, tile_factor).rgb;
 	
-	ALPHA = ALPHA * ALPHA * (1.0 - dot(transmittance, vec3(1.0 / 3.0)));
+	ALPHA = ALPHA * (1.0 - dot(transmittance, vec3(1.0 / 3.0)));
 	ALBEDO = texture3D(volume_scattering, vol_ndc, tile_factor).rgb;
 	//VOL__FRAGMENT_CODE__VOL//
 }
