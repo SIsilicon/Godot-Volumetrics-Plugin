@@ -33,6 +33,10 @@ var emission_color := Color.white setget set_emission_color
 var emission_strength := 0.0 setget set_emission_strength
 var emission_texture : Texture3D setget set_emission_texture
 
+var uvw_border_blend := Vector3.ZERO setget set_uvw_border_blend
+var uvw_scale := Vector3.ONE setget set_uvw_scale
+var uvw_offset := Vector3.ZERO setget set_uvw_offset
+
 func _get_property_list() -> Array:
 	var properties := [
 		{name="VolumetricMaterial", type=TYPE_NIL, usage=PROPERTY_USAGE_CATEGORY},
@@ -54,6 +58,13 @@ func _get_property_list() -> Array:
 			{name="emission_texture", type=TYPE_OBJECT, hint=PROPERTY_HINT_RESOURCE_TYPE, hint_string="Texture3D"},
 		]
 	
+	properties += [
+		{name="UVW", type=TYPE_NIL, usage=PROPERTY_USAGE_GROUP, hint_string="uvw_"},
+		{name="uvw_scale", type=TYPE_VECTOR3},
+		{name="uvw_offset", type=TYPE_VECTOR3},
+		{name="uvw_border_blend", type=TYPE_VECTOR3},
+	]
+	
 	return properties
 
 func _init() -> void:
@@ -68,6 +79,9 @@ func set_all_params() -> void:
 	set_emission_color(emission_color)
 	set_emission_strength(emission_strength)
 	set_emission_texture(emission_texture)
+	set_uvw_border_blend(uvw_border_blend)
+	set_uvw_scale(uvw_scale)
+	set_uvw_offset(uvw_offset)
 
 func set_scatter_color(value : Color) -> void:
 	scatter_color = value
@@ -131,6 +145,24 @@ func set_anisotropy(value : float) -> void:
 	for volume in volumes:
 		VolumetricServer.volume_set_param(volume, "anisotropy", anisotropy * 0.99)
 
+func set_uvw_border_blend(value : Vector3) -> void:
+	uvw_border_blend = value
+	uvw_border_blend.x = clamp(uvw_border_blend.x, 0.0, 1.0)
+	uvw_border_blend.y = clamp(uvw_border_blend.y, 0.0, 1.0)
+	uvw_border_blend.z = clamp(uvw_border_blend.z, 0.0, 1.0)
+	for volume in volumes:
+		VolumetricServer.volume_set_param(volume, "blend_amount", uvw_border_blend)
+
+func set_uvw_scale(value : Vector3) -> void:
+	uvw_scale = value
+	for volume in volumes:
+		VolumetricServer.volume_set_param(volume, "uvw_scale", uvw_scale)
+
+func set_uvw_offset(value : Vector3) -> void:
+	uvw_offset = value
+	for volume in volumes:
+		VolumetricServer.volume_set_param(volume, "uvw_offset", uvw_offset)
+
 func set_material_flags(value : int) -> void:
 	if material_flags != value or material_flags & MAX_FLAG:
 		material_flags = value & ~MAX_FLAG
@@ -147,32 +179,41 @@ func update_shaders() -> void:
 		# Scattering shader
 		globals = """
 			uniform vec3 scatter = vec3(1.0);
-			uniform float density = 1.0;""" +\
+			uniform float density = 1.0;
+			uniform vec3 uvw_scale = vec3(1.0);
+			uniform vec3 uvw_offset = vec3(0.0);""" +\
 			("uniform sampler3D scatter_texture;" if has_scatter_tex else ""),
 		fragment_code = """
-			ALBEDO = scatter * density;""" +\
+			UVW = UVW / uvw_scale - uvw_offset;
+			ALBEDO = scatter * density * FADE;""" +\
 			("ALBEDO *= textureLod(scatter_texture, UVW, 0.0).rgb;" if has_scatter_tex else "")
 	},{
 		# Extinction shader
 		globals = """
 			uniform vec3 scatter = vec3(1.0);
 			uniform vec3 absorption = vec3(0.0);
-			uniform float density = 1.0;""" +\
+			uniform float density = 1.0;
+			uniform vec3 uvw_scale = vec3(1.0);
+			uniform vec3 uvw_offset = vec3(0.0);""" +\
 			("uniform sampler3D scatter_texture;" if has_scatter_tex else ""),
 		fragment_code =\
+			"UVW = UVW / uvw_scale - uvw_offset;" +\
 			"vec3 dens = " + ("textureLod(scatter_texture, UVW, 0.0).rgb * density;" if has_scatter_tex else "vec3(density);") + """
 			vec3 scatter_color = scatter;
 			vec3 absorption_color = sqrt(absorption);
 			absorption_color = max(1.0 - scatter_color, 0.0) * max(1.0 - absorption_color, 0.0);
-			ALBEDO = (scatter_color + absorption_color) * dens;"""
+			ALBEDO = (scatter_color + absorption_color) * dens * FADE;"""
 	},{
 		# Emission shader
-		globals =\
+		globals = """
+			uniform vec3 uvw_scale = vec3(1.0);
+			uniform vec3 uvw_offset = vec3(0.0);""" +\
 			("uniform vec3 emission = vec3(0.0);" +\
 			("uniform sampler3D emission_texture;" if has_emission_tex else "")) if emission_enabled else "",
 		fragment_code =\
+			"UVW = UVW / uvw_scale - uvw_offset;" +\
 			("ALBEDO = textureLod(emission_texture, UVW, 0.0) * emission;"
-			if emission_texture else "ALBEDO = emission;") if emission_enabled else "discard;"
+			if emission_texture else "ALBEDO = emission * FADE;") if emission_enabled else "discard;"
 	},{
 		# Phase shader
 		globals = """

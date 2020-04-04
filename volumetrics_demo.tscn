@@ -1,4 +1,4 @@
-[gd_scene load_steps=23 format=2]
+[gd_scene load_steps=14 format=2]
 
 [ext_resource path="res://addons/silicon.vfx.volumetrics/volume_proxy.gd" type="Script" id=1]
 [ext_resource path="res://addons/silicon.vfx.volumetrics/material/volumetric_material.gd" type="Script" id=2]
@@ -7,49 +7,53 @@
 [ext_resource path="res://addons/silicon.vfx.volumetrics/volumetric_fog.gd" type="Script" id=5]
 [ext_resource path="res://sponza_scene/sponza.obj" type="ArrayMesh" id=6]
 [ext_resource path="res://sponza_scene/KAMEN-stup.JPG" type="Texture" id=7]
-[ext_resource path="res://addons/silicon.vfx.volumetrics/material/transparent_volume_overlayer.gd" type="Script" id=8]
 
-[sub_resource type="SpatialMaterial" id=8]
+[sub_resource type="SpatialMaterial" id=1]
 resource_name = "sp_00_svod"
 albedo_color = Color( 0.941177, 0.866667, 0.737255, 1 )
 albedo_texture = ExtResource( 7 )
 metallic = 0.034039
 
-[sub_resource type="Environment" id=9]
+[sub_resource type="Environment" id=2]
 background_mode = 1
 background_color = Color( 0.105882, 0.105882, 0.105882, 1 )
 ambient_light_color = Color( 0.2, 0.2, 0.2, 1 )
 dof_blur_far_amount = 0.13
 
-[sub_resource type="Resource" id=10]
+[sub_resource type="Resource" id=3]
 script = ExtResource( 2 )
 scatter_color = Color( 0.75, 0.75, 0.75, 1 )
-density = 0.025
+density = 0.038
 absorption_color = Color( 0, 0, 0, 1 )
 anisotropy = 0.556
 emission_enabled = false
+uvw_scale = Vector3( 1, 1, 1 )
+uvw_offset = Vector3( 0, 0, 0 )
+uvw_border_blend = Vector3( 0, 0, 0 )
 
-[sub_resource type="Resource" id=11]
+[sub_resource type="Resource" id=4]
 script = ExtResource( 2 )
 scatter_color = Color( 0.545098, 0.545098, 0.545098, 1 )
 density = 3.0
 absorption_color = Color( 0.392157, 0.0235294, 0.0235294, 1 )
 anisotropy = 0.0
-emission_enabled = true
-emission_color = Color( 1, 1, 1, 1 )
-emission_strength = 0.0
+emission_enabled = false
+uvw_scale = Vector3( 1, 1, 1 )
+uvw_offset = Vector3( 0, 0, 0 )
+uvw_border_blend = Vector3( 0, 0, 0 )
 
-[sub_resource type="Resource" id=12]
+[sub_resource type="Resource" id=5]
 script = ExtResource( 2 )
 scatter_color = Color( 0.356863, 0.313726, 0.529412, 1 )
-density = 1.0
+density = 0.506
 absorption_color = Color( 0.309804, 0.290196, 0.333333, 1 )
 anisotropy = 0.0
-emission_enabled = true
-emission_color = Color( 1, 1, 1, 1 )
-emission_strength = 0.0
+emission_enabled = false
+uvw_scale = Vector3( 1, 1, 1 )
+uvw_offset = Vector3( 0, 0, 0 )
+uvw_border_blend = Vector3( 0, 0, 0 )
 
-[sub_resource type="Animation" id=13]
+[sub_resource type="Animation" id=6]
 resource_name = "omni lights"
 length = 6.0
 loop = true
@@ -77,373 +81,6 @@ tracks/1/keys = {
 "update": 0,
 "values": [ Vector3( -13, 2.2, 4 ), Vector3( 13, 2.2, 4 ), Vector3( -13, 2.2, 4 ) ]
 }
-
-[sub_resource type="PlaneMesh" id=7]
-size = Vector2( 4.279, 5.028 )
-
-[sub_resource type="Shader" id=14]
-code = "shader_type spatial;
-//VOL__UNIFORMS_AND_FUNCTIONS__VOL//
-uniform sampler2D volume_scattering;
-uniform sampler2D volume_transmittance;
-uniform vec2 tile_factor;
-uniform vec3 vol_depth_params;
-uniform bool is_transparent_pass = false;
-
-vec2 uvw_to_uv(vec3 uvw, vec2 tiling) {
-	vec2 uv = uvw.xy / tiling;
-	uv.x += mod(uvw.z * tiling.y, 1.0);
-	uv.y += floor(uvw.z * tiling.y) / tiling.y;
-	return uv.xy;
-}
-
-vec4 cubic(float v) {
-	vec4 n = vec4(1.0, 2.0, 3.0, 4.0) - v;
-	vec4 s = n * n * n;
-	float x = s.x;
-	float y = s.y - 4.0 * s.x;
-	float z = s.z - 4.0 * s.y + 6.0 * s.x;
-	float w = 6.0 - x - y - z;
-	return vec4(x, y, z, w) * (1.0/6.0);
-}
-
-vec4 texture_bicubic(sampler2D sampler, vec2 tex_coords, vec4 rect) {
-	vec2 tex_size = vec2(textureSize(sampler, 0));
-	vec2 inv_tex_size = 1.0 / tex_size;
-	
-	tex_coords = tex_coords * tex_size - 0.5;
-	
-	vec2 fxy = fract(tex_coords);
-	tex_coords -= fxy;
-	
-	vec4 xcubic = cubic(fxy.x);
-	vec4 ycubic = cubic(fxy.y);
-	
-	vec4 c = tex_coords.xxyy + vec2 (-0.5, +1.5).xyxy;
-	
-	vec4 s = vec4(xcubic.xz + xcubic.yw, ycubic.xz + ycubic.yw);
-	vec4 offset = c + vec4 (xcubic.yw, ycubic.yw) / s;
-	
-	offset *= inv_tex_size.xxyy;
-	
-	vec4 sample0 = textureLod(sampler, clamp(offset.xz, rect.xy, rect.zw), 0.0);
-	vec4 sample1 = textureLod(sampler, clamp(offset.yz, rect.xy, rect.zw), 0.0);
-	vec4 sample2 = textureLod(sampler, clamp(offset.xw, rect.xy, rect.zw), 0.0);
-	vec4 sample3 = textureLod(sampler, clamp(offset.yw, rect.xy, rect.zw), 0.0);
-	
-	float sx = s.x / (s.x + s.y);
-	float sy = s.z / (s.z + s.w);
-	
-	return mix(mix(sample3, sample2, sx), mix(sample1, sample0, sx), sy);
-}
-
-vec4 texture3D(sampler2D tex, vec3 uvw, vec2 tiling) {
-	float zCoord = uvw.z * (tiling.x * tiling.y - 1.0);
-	float zOffset = fract(zCoord);
-	
-	vec2 margin = 1.2 / vec2(textureSize(tex, 0));
-	
-	vec2 uv = uvw.xy / tiling;
-	float ratio = tiling.y / tiling.x;
-	vec2 slice0Offset = vec2(float(int(zCoord) % int(tiling.x)), floor(ratio * zCoord / tiling.y));
-	zCoord++;
-	vec2 slice1Offset = vec2(float(int(zCoord) % int(tiling.x)), floor(ratio * zCoord / tiling.y));
-	
-	vec4 rect0 = vec4(slice0Offset/tiling + margin, slice0Offset/tiling + 1.0 / tiling - margin);
-	vec4 rect1 = vec4(slice1Offset/tiling + margin, slice1Offset/tiling + 1.0 / tiling - margin);
-	
-	vec4 slice0colour = texture_bicubic(tex, slice0Offset/tiling + uv, rect0);
-	vec4 slice1colour = texture_bicubic(tex, slice1Offset/tiling + uv, rect1);
-	
-//	return slice0colour; //no filtering.
-	return mix(slice0colour, slice1colour, zOffset);
-}
-
-vec3 ndc_to_volume(vec3 coords, mat4 projection_matrix) {
-	float z = 2.0 * coords.z - 1.0;
-	z = -projection_matrix[3][2] / (z + projection_matrix[2][2]);
-	z = vol_depth_params.z * log2(z * vol_depth_params.y + vol_depth_params.x);
-	return vec3(coords.xy, z);
-}
-
-render_mode blend_mix,depth_draw_opaque,cull_back,diffuse_burley,specular_schlick_ggx;
-uniform vec4 albedo : hint_color;
-uniform sampler2D texture_albedo : hint_albedo;
-uniform float specular;
-uniform float metallic;
-uniform float roughness : hint_range(0,1);
-uniform float point_size : hint_range(0,128);
-uniform vec3 uv1_scale;
-uniform vec3 uv1_offset;
-uniform vec3 uv2_scale;
-uniform vec3 uv2_offset;
-
-
-void vertex() {
-	UV=UV*uv1_scale.xy+uv1_offset.xy;
-}
-
-
-
-
-void fragment() {
-	vec2 base_uv = UV;
-	vec4 albedo_tex = texture(texture_albedo,base_uv);
-	ALBEDO = albedo.rgb * albedo_tex.rgb;
-	METALLIC = metallic;
-	ROUGHNESS = roughness;
-	SPECULAR = specular;
-	ALPHA = albedo.a * albedo_tex.a;
-//VOL__FRAGMENT_CODE__VOL//
-	vec3 vol_ndc;
-	if(is_transparent_pass) {
-		vol_ndc = vec3(SCREEN_UV, FRAGCOORD.z);
-	} else {
-		vol_ndc = vec3(SCREEN_UV, texture(DEPTH_TEXTURE, SCREEN_UV).r);
-	}
-	vol_ndc = ndc_to_volume(vol_ndc, PROJECTION_MATRIX);
-	vol_ndc.z = clamp(vol_ndc.z, 0.0, 1.0);
-	
-	vec3 transmittance = texture3D(volume_transmittance, vol_ndc, tile_factor).rgb;
-	
-	ALPHA = ALPHA * (1.0 - dot(transmittance, vec3(1.0 / 3.0)));
-	ALBEDO = texture3D(volume_scattering, vol_ndc, tile_factor).rgb;
-	}
-render_mode unshaded;render_mode blend_add;"
-
-[sub_resource type="ViewportTexture" id=15]
-flags = 4
-viewport_path = NodePath("ResolveScatter")
-
-[sub_resource type="ViewportTexture" id=16]
-flags = 4
-viewport_path = NodePath("ResolveTransmit")
-
-[sub_resource type="ShaderMaterial" id=17]
-resource_local_to_scene = true
-render_priority = 2
-shader = SubResource( 14 )
-shader_param/tile_factor = Vector2( 8, 8 )
-shader_param/vol_depth_params = Vector3( 0.98649, -0.135104, 0.314 )
-shader_param/is_transparent_pass = true
-shader_param/albedo = Color( 1, 1, 1, 0.572549 )
-shader_param/specular = 0.5
-shader_param/metallic = 0.0
-shader_param/roughness = 0.14
-shader_param/point_size = null
-shader_param/uv1_scale = Vector3( 1, 1, 1 )
-shader_param/uv1_offset = Vector3( 0, 0, 0 )
-shader_param/uv2_scale = Vector3( 1, 1, 1 )
-shader_param/uv2_offset = Vector3( 0, 0, 0 )
-shader_param/volume_scattering = SubResource( 15 )
-shader_param/volume_transmittance = SubResource( 16 )
-
-[sub_resource type="Shader" id=18]
-code = "shader_type spatial;
-//VOL__UNIFORMS_AND_FUNCTIONS__VOL//
-uniform sampler2D volume_transmittance;
-uniform vec2 tile_factor;
-uniform vec3 vol_depth_params;
-uniform bool is_transparent_pass = false;
-
-vec4 cubic(float v) {
-	vec4 n = vec4(1.0, 2.0, 3.0, 4.0) - v;
-	vec4 s = n * n * n;
-	float x = s.x;
-	float y = s.y - 4.0 * s.x;
-	float z = s.z - 4.0 * s.y + 6.0 * s.x;
-	float w = 6.0 - x - y - z;
-	return vec4(x, y, z, w) * (1.0/6.0);
-}
-
-vec4 texture_bicubic(sampler2D sampler, vec2 tex_coords, vec4 rect) {
-	vec2 tex_size = vec2(textureSize(sampler, 0));
-	vec2 inv_tex_size = 1.0 / tex_size;
-	
-	tex_coords = tex_coords * tex_size - 0.5;
-	
-	vec2 fxy = fract(tex_coords);
-	tex_coords -= fxy;
-	
-	vec4 xcubic = cubic(fxy.x);
-	vec4 ycubic = cubic(fxy.y);
-	
-	vec4 c = tex_coords.xxyy + vec2 (-0.5, +1.5).xyxy;
-	
-	vec4 s = vec4(xcubic.xz + xcubic.yw, ycubic.xz + ycubic.yw);
-	vec4 offset = c + vec4 (xcubic.yw, ycubic.yw) / s;
-	
-	offset *= inv_tex_size.xxyy;
-	
-	vec4 sample0 = textureLod(sampler, clamp(offset.xz, rect.xy, rect.zw), 0.0);
-	vec4 sample1 = textureLod(sampler, clamp(offset.yz, rect.xy, rect.zw), 0.0);
-	vec4 sample2 = textureLod(sampler, clamp(offset.xw, rect.xy, rect.zw), 0.0);
-	vec4 sample3 = textureLod(sampler, clamp(offset.yw, rect.xy, rect.zw), 0.0);
-	
-	float sx = s.x / (s.x + s.y);
-	float sy = s.z / (s.z + s.w);
-	
-	return mix(mix(sample3, sample2, sx), mix(sample1, sample0, sx), sy);
-}
-
-vec4 texture3D(sampler2D tex, vec3 uvw, vec2 tiling) {
-	float zCoord = uvw.z * (tiling.x * tiling.y - 1.0);
-	float zOffset = fract(zCoord);
-	
-	vec2 margin = 1.2 / vec2(textureSize(tex, 0));
-	
-	vec2 uv = uvw.xy / tiling;
-	float ratio = tiling.y / tiling.x;
-	vec2 slice0Offset = vec2(float(int(zCoord) % int(tiling.x)), floor(ratio * zCoord / tiling.y));
-	zCoord++;
-	vec2 slice1Offset = vec2(float(int(zCoord) % int(tiling.x)), floor(ratio * zCoord / tiling.y));
-	
-	vec4 rect0 = vec4(slice0Offset/tiling + margin, slice0Offset/tiling + 1.0 / tiling - margin);
-	vec4 rect1 = vec4(slice1Offset/tiling + margin, slice1Offset/tiling + 1.0 / tiling - margin);
-	
-	vec4 slice0colour = texture_bicubic(tex, slice0Offset/tiling + uv, rect0);
-	vec4 slice1colour = texture_bicubic(tex, slice1Offset/tiling + uv, rect1);
-	
-//	return slice0colour; //no filtering.
-	return mix(slice0colour, slice1colour, zOffset);
-}
-
-vec3 ndc_to_volume(vec3 coords, mat4 projection_matrix) {
-	float z = 2.0 * coords.z - 1.0;
-	z = -projection_matrix[3][2] / (z + projection_matrix[2][2]);
-	z = vol_depth_params.z * log2(z * vol_depth_params.y + vol_depth_params.x);
-	return vec3(coords.xy, z);
-}
-
-render_mode blend_mix,depth_draw_opaque,cull_back,diffuse_burley,specular_schlick_ggx;
-uniform vec4 albedo : hint_color;
-uniform sampler2D texture_albedo : hint_albedo;
-uniform float specular;
-uniform float metallic;
-uniform float roughness : hint_range(0,1);
-uniform float point_size : hint_range(0,128);
-uniform vec3 uv1_scale;
-uniform vec3 uv1_offset;
-uniform vec3 uv2_scale;
-uniform vec3 uv2_offset;
-
-
-void vertex() {
-	UV=UV*uv1_scale.xy+uv1_offset.xy;
-}
-
-
-
-
-void fragment() {
-	vec2 base_uv = UV;
-	vec4 albedo_tex = texture(texture_albedo,base_uv);
-	ALBEDO = albedo.rgb * albedo_tex.rgb;
-	METALLIC = metallic;
-	ROUGHNESS = roughness;
-	SPECULAR = specular;
-	ALPHA = albedo.a * albedo_tex.a;
-//VOL__FRAGMENT_CODE__VOL//
-	vec3 vol_ndc;
-	if(is_transparent_pass) {
-		vol_ndc = vec3(SCREEN_UV, FRAGCOORD.z);
-	} else {
-		vol_ndc = vec3(SCREEN_UV, texture(DEPTH_TEXTURE, SCREEN_UV).r);
-	}
-	vol_ndc = ndc_to_volume(vol_ndc, PROJECTION_MATRIX);
-	vol_ndc.z = clamp(vol_ndc.z, 0.0, 1.0);
-	
-	vec3 transmittance = texture3D(volume_transmittance, vol_ndc, tile_factor).rgb;
-	ALBEDO = mix(transmittance, vec3(1.0), 1.0 - ALPHA);
-	ALPHA = dot(transmittance, vec3(1.0 / 3.0));
-	}
-render_mode unshaded;render_mode blend_mul;"
-
-[sub_resource type="ShaderMaterial" id=19]
-resource_local_to_scene = true
-render_priority = 1
-next_pass = SubResource( 17 )
-shader = SubResource( 18 )
-shader_param/tile_factor = Vector2( 8, 8 )
-shader_param/vol_depth_params = Vector3( 0.98649, -0.135104, 0.314 )
-shader_param/is_transparent_pass = true
-shader_param/albedo = Color( 1, 1, 1, 0.572549 )
-shader_param/specular = 0.5
-shader_param/metallic = 0.0
-shader_param/roughness = 0.14
-shader_param/point_size = null
-shader_param/uv1_scale = Vector3( 1, 1, 1 )
-shader_param/uv1_offset = Vector3( 0, 0, 0 )
-shader_param/uv2_scale = Vector3( 1, 1, 1 )
-shader_param/uv2_offset = Vector3( 0, 0, 0 )
-shader_param/volume_transmittance = SubResource( 16 )
-script = ExtResource( 8 )
-__meta__ = {
-"anisotropy_enabled": false,
-"ao_enabled": false,
-"ao_on_uv2": false,
-"clearcoat_enabled": false,
-"depth_deep_parallax": false,
-"depth_enabled": false,
-"depth_flip_binormal": false,
-"depth_flip_tangent": false,
-"depth_max_layers": 32,
-"depth_min_layers": 8,
-"detail_blend_mode": 0,
-"detail_enabled": false,
-"detail_uv_layer": 0,
-"distance_fade_mode": 0,
-"emission_enabled": false,
-"emission_on_uv2": false,
-"emission_operator": 0,
-"flags_albedo_tex_force_srgb": false,
-"flags_disable_ambient_light": false,
-"flags_do_not_receive_shadows": false,
-"flags_ensure_correct_normals": false,
-"flags_fixed_size": false,
-"flags_no_depth_test": false,
-"flags_transparent": true,
-"flags_unshaded": false,
-"flags_use_point_size": false,
-"flags_use_shadow_to_opacity": false,
-"flags_vertex_lighting": false,
-"flags_world_triplanar": false,
-"normal_enabled": false,
-"params_billboard_keep_scale": false,
-"params_billboard_mode": 0,
-"params_blend_mode": 0,
-"params_cull_mode": 0,
-"params_depth_draw_mode": 0,
-"params_diffuse_mode": 0,
-"params_grow": false,
-"params_specular_mode": 0,
-"params_use_alpha_scissor": false,
-"particles_anim_h_frames": 1,
-"particles_anim_loop": false,
-"particles_anim_v_frames": 1,
-"proximity_fade_enable": false,
-"refraction_enabled": false,
-"render_priority": 0,
-"rim_enabled": false,
-"subsurf_scatter_enabled": false,
-"transmission_enabled": false,
-"uv1_triplanar": false,
-"uv2_triplanar": false,
-"vertex_color_is_srgb": false,
-"vertex_color_use_as_albedo": false
-}
-parent_material_ref = [ Object(MeshInstance,"_import_path":NodePath(""),"pause_mode":0,"process_priority":0,"transform":Transform( 1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, -0.108683, 2.16899, 2.74094 ),"visible":true,"layers":1,"material_override":null,"cast_shadow":1,"extra_cull_margin":0.0,"use_in_baked_light":false,"lod_min_distance":0.0,"lod_min_hysteresis":0.0,"lod_max_distance":0.0,"lod_max_hysteresis":0.0,"mesh":SubResource( 7 ),"skin":null,"skeleton":NodePath(".."),"material/0":null,"script":null,"__meta__":{
-"_vol_id": 21,
-"apply_volumetrics": true
-})
-, "material/0" ]
-
-[sub_resource type="SpatialMaterial" id=20]
-resource_local_to_scene = true
-next_pass = SubResource( 19 )
-flags_transparent = true
-albedo_color = Color( 1, 1, 1, 0.572549 )
-roughness = 0.14
 
 [node name="Spatial" type="Spatial"]
 script = ExtResource( 3 )
@@ -473,7 +110,7 @@ material/19 = null
 material/20 = null
 material/21 = null
 material/22 = null
-material/23 = SubResource( 8 )
+material/23 = SubResource( 1 )
 material/24 = null
 material/25 = null
 material/26 = null
@@ -489,7 +126,7 @@ material/35 = null
 material/36 = null
 material/37 = null
 __meta__ = {
-"_vol_id": 15,
+"_vol_id": 24,
 "apply_volumetrics": false
 }
 
@@ -500,7 +137,7 @@ script = ExtResource( 4 )
 max_speed = Vector3( 2, 2, 5 )
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
-environment = SubResource( 9 )
+environment = SubResource( 2 )
 
 [node name="VolumetricFog" type="Node" parent="WorldEnvironment"]
 process_priority = 512
@@ -512,8 +149,8 @@ start = 0.1
 end = 60.0
 tile_size = 3
 samples = 1
-distribution = 0.97
-temporal_blending = 0.91
+distribution = 1.0
+temporal_blending = 0.76
 volumetric_shadows = true
 shadow_atlas_size = 512
 ambient_light_color = Color( 0.0823529, 0.0823529, 0.0823529, 1 )
@@ -522,19 +159,19 @@ ambient_light_energy = 1.0
 [node name="VolumeProxy" type="Spatial" parent="."]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.692142, 0 )
 script = ExtResource( 1 )
-material = SubResource( 10 )
+material = SubResource( 3 )
 bounds_mode = 0
 
 [node name="VolumeProxy2" type="Spatial" parent="."]
 transform = Transform( 2, 0, 0, 0, 2, 0, 0, 0, 2, 0, 1.70014, 0.0950187 )
 script = ExtResource( 1 )
-material = SubResource( 11 )
+material = SubResource( 4 )
 bounds_mode = 2
 
 [node name="VolumeProxy3" type="Spatial" parent="."]
-transform = Transform( 15.1479, 0, 0, 0, 1, 0, 0, 0, 7.22351, 0, 0.130421, 0.0950187 )
+transform = Transform( 15.148, 0, 0, 0, 2.131, 0, 0, 0, 7.224, 0, -0.186334, 0.0950187 )
 script = ExtResource( 1 )
-material = SubResource( 12 )
+material = SubResource( 5 )
 bounds_mode = 1
 
 [node name="OmniLight" type="OmniLight" parent="."]
@@ -544,7 +181,7 @@ shadow_enabled = true
 omni_range = 18.0
 omni_attenuation = 2.73208
 __meta__ = {
-"_vol_id": 19,
+"_vol_id": 28,
 "volumetric": 4.07
 }
 
@@ -555,20 +192,11 @@ shadow_enabled = true
 omni_range = 18.0
 omni_attenuation = 2.73208
 __meta__ = {
-"_vol_id": 20,
+"_vol_id": 29,
 "volumetric": 4.07
 }
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
 autoplay = "omni lights"
 playback_speed = 0.5
-"anims/omni lights" = SubResource( 13 )
-
-[node name="MeshInstance" type="MeshInstance" parent="."]
-transform = Transform( 1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, -0.108683, 2.16899, 2.74094 )
-mesh = SubResource( 7 )
-material/0 = SubResource( 20 )
-__meta__ = {
-"_vol_id": 21,
-"apply_volumetrics": true
-}
+"anims/omni lights" = SubResource( 6 )

@@ -108,7 +108,7 @@ func _process(delta) -> void:
 			viewport_camera.near = start
 			viewport_camera.far = end
 	
-	var sample_distribution = 4.0 * (max(1.0 - distribution * 0.95, 1e-2))
+	var sample_distribution = 4.0 * (max(1.0 - sqrt(distribution) * 0.95, 1e-2))
 	var near = min(-start, -camera.near - 1e-4)
 	var far = min(-end, near - 1e-4)
 	var vol_depth_params := Vector3()

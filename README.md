@@ -34,7 +34,7 @@ To start adding volumetric fog to your scene, you need to first add a `Volumetri
 * `Temporal Blending` :- How much the effect blends with the previous frame. A higher value can smooth the effect more, but is more susceptible to ghosting artifacts. Setting it to zero disables blending altogether.
 * `Volumetric Shadows` :- Enabling this allows volumes in view to cast shadows on themselves (Not on geometry though).
 * `Shadow Atlas Size` :- How much resolution is used to render the shadows of lights. **Does not affect `Volumetric Shadows`**.
-* `Ambient Light Color`:- The color of the ambient light applied to volumes.
+* `Ambient Light Color` :- The color of the ambient light applied to volumes.
 * `Ambient Light Energy` :- How much the ambient light is applied to volumes.
 
 ### Volume Proxy
@@ -52,7 +52,7 @@ After you've added the node mentioned above, the `VolumeProxy` node should now w
 `VolumeProxys` use a `VolumetricMaterial` to change the way they appear. They are pretty basic right now, but should do for most practical situations. They have the following properties.
 
 * `Scatter Color` :- The color of the volume.
-* `Density ` :- How thick the volume is.
+* `Density` :- How thick the volume is.
 * `Scatter Texture` :- A texture applied to the volume's color.
 * `Absorption Color` :- The color appears as light get's absorbed by the volume. Visible when used in conjunction with `Volumetric Shadows`.
 * `Anisotropy` :- How light is scattered through the volume. Positive values tend to scatter light towards the viewer, while negative scatters light _away_ from the viewer.
@@ -60,6 +60,9 @@ After you've added the node mentioned above, the `VolumeProxy` node should now w
 * `Emission Color` :- The color of the emission in the volume.
 * `Emission Strength` :- How strong the emission is.
 * `Emission Texture` :- A texture applied to the volume's emission.
+* `Uvw Scale` :- The scale factor of the uvw texture coordinates.
+* `Uvw Offset` :- The offset of the uvw texture coordinates.
+* `Uvw Border Blend` :- How softened the borders of the volume proxy is (if it has one). If it is a `Local Sphere`, then the maximum value of the border blend is used.
 
 ### Other stuff
 

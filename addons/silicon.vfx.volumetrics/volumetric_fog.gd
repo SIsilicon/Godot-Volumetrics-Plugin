@@ -8,7 +8,7 @@ var end := 100.0 setget set_end
 
 var tile_size := 2 setget set_tile_size
 var samples := 1 setget set_samples
-var distribution := 0.8 setget set_distribution
+var distribution := 0.9 setget set_distribution
 var temporal_blending := 0.95 setget set_temporal_blending
 var volumetric_shadows := false setget set_volumetric_shadows
 
