@@ -3,6 +3,8 @@ extends Node
 
 const LIGHT_DATA_SIZE = 34
 
+var default_material = preload("../material/default_material.tres")
+
 var plugin
 
 export var start := 0.1
@@ -284,7 +286,10 @@ func set_volume_param(key, param : String, value) -> void:
 		for idx in volumes[key].size():
 			var mesh : MeshInstance = volumes[key][idx]
 			var material := mesh.material_override
-			material.shader = value[idx]
+			if value and not value.empty():
+				material.shader = value[idx]
+			else:
+				material.shader = default_material.shaders[idx]
 	else:
 		for mesh in volumes[key]:
 			mesh.material_override.set_shader_param(param, value)

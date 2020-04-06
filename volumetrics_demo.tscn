@@ -20,41 +20,7 @@ background_color = Color( 0.105882, 0.105882, 0.105882, 1 )
 ambient_light_color = Color( 0.2, 0.2, 0.2, 1 )
 dof_blur_far_amount = 0.13
 
-[sub_resource type="Resource" id=3]
-script = ExtResource( 2 )
-scatter_color = Color( 0.75, 0.75, 0.75, 1 )
-density = 0.038
-absorption_color = Color( 0, 0, 0, 1 )
-anisotropy = 0.556
-emission_enabled = false
-uvw_scale = Vector3( 1, 1, 1 )
-uvw_offset = Vector3( 0, 0, 0 )
-uvw_border_blend = Vector3( 0, 0, 0 )
-
-[sub_resource type="Resource" id=4]
-script = ExtResource( 2 )
-scatter_color = Color( 0.545098, 0.545098, 0.545098, 1 )
-density = 3.0
-absorption_color = Color( 0.392157, 0.0235294, 0.0235294, 1 )
-anisotropy = 0.0
-emission_enabled = false
-uvw_scale = Vector3( 1, 1, 1 )
-uvw_offset = Vector3( 0, 0, 0 )
-uvw_border_blend = Vector3( 0, 0, 0 )
-
-[sub_resource type="Resource" id=5]
-script = ExtResource( 2 )
-scatter_color = Color( 0.356863, 0.313726, 0.529412, 1 )
-density = 0.506
-absorption_color = Color( 0.309804, 0.290196, 0.333333, 1 )
-anisotropy = 0.0
-emission_enabled = false
-uvw_scale = Vector3( 1, 1, 1 )
-uvw_offset = Vector3( 0, 0, 0 )
-uvw_border_blend = Vector3( 0, 0, 0 )
-
-[sub_resource type="Animation" id=6]
-resource_name = "omni lights"
+[sub_resource type="Animation" id=3]
 length = 6.0
 loop = true
 tracks/0/type = "value"
@@ -81,6 +47,38 @@ tracks/1/keys = {
 "update": 0,
 "values": [ Vector3( -13, 2.2, 4 ), Vector3( 13, 2.2, 4 ), Vector3( -13, 2.2, 4 ) ]
 }
+
+[sub_resource type="Resource" id=4]
+script = ExtResource( 2 )
+scatter_color = Color( 0.75, 0.75, 0.75, 1 )
+density = 0.048
+absorption_color = Color( 0.854902, 0.72549, 0.72549, 1 )
+anisotropy = 0.424
+emission_enabled = false
+uvw_scale = Vector3( 1, 1, 1 )
+uvw_offset = Vector3( 0, 0, 0 )
+
+[sub_resource type="Resource" id=5]
+script = ExtResource( 2 )
+scatter_color = Color( 0.568627, 0.501961, 0.894118, 1 )
+density = 0.746
+absorption_color = Color( 0.921569, 0.921569, 0.921569, 1 )
+anisotropy = 0.0
+emission_enabled = false
+uvw_scale = Vector3( 1, 1, 1 )
+uvw_offset = Vector3( 0, 0, 0 )
+
+[sub_resource type="Resource" id=6]
+script = ExtResource( 2 )
+scatter_color = Color( 0.75, 0.75, 0.75, 1 )
+density = 1.0
+absorption_color = Color( 0, 0, 0, 1 )
+anisotropy = 0.0
+emission_enabled = true
+emission_color = Color( 0.145098, 0.2, 1, 1 )
+emission_strength = 0.6
+uvw_scale = Vector3( 1, 1, 1 )
+uvw_offset = Vector3( 0, 0, 0 )
 
 [node name="Spatial" type="Spatial"]
 script = ExtResource( 3 )
@@ -126,7 +124,6 @@ material/35 = null
 material/36 = null
 material/37 = null
 __meta__ = {
-"_vol_id": 24,
 "apply_volumetrics": false
 }
 
@@ -149,54 +146,56 @@ start = 0.1
 end = 60.0
 tile_size = 3
 samples = 1
-distribution = 1.0
-temporal_blending = 0.76
+distribution = 0.93
+temporal_blending = 0.79
 volumetric_shadows = true
 shadow_atlas_size = 512
 ambient_light_color = Color( 0.0823529, 0.0823529, 0.0823529, 1 )
 ambient_light_energy = 1.0
 
-[node name="VolumeProxy" type="Spatial" parent="."]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.692142, 0 )
-script = ExtResource( 1 )
-material = SubResource( 3 )
-bounds_mode = 0
-
-[node name="VolumeProxy2" type="Spatial" parent="."]
-transform = Transform( 2, 0, 0, 0, 2, 0, 0, 0, 2, 0, 1.70014, 0.0950187 )
-script = ExtResource( 1 )
-material = SubResource( 4 )
-bounds_mode = 2
-
-[node name="VolumeProxy3" type="Spatial" parent="."]
-transform = Transform( 15.148, 0, 0, 0, 2.131, 0, 0, 0, 7.224, 0, -0.186334, 0.0950187 )
-script = ExtResource( 1 )
-material = SubResource( 5 )
-bounds_mode = 1
-
 [node name="OmniLight" type="OmniLight" parent="."]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -6.18367, 2.2, -4 )
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 7.631, 2.2, -4 )
 light_color = Color( 0.52549, 0.847059, 0.423529, 1 )
 shadow_enabled = true
 omni_range = 18.0
 omni_attenuation = 2.73208
 __meta__ = {
-"_vol_id": 28,
 "volumetric": 4.07
 }
 
 [node name="OmniLight2" type="OmniLight" parent="."]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 6.18367, 2.2, 4 )
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -7.631, 2.2, 4 )
 light_color = Color( 0.847059, 0.423529, 0.423529, 1 )
 shadow_enabled = true
 omni_range = 18.0
 omni_attenuation = 2.73208
 __meta__ = {
-"_vol_id": 29,
 "volumetric": 4.07
 }
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
 autoplay = "omni lights"
 playback_speed = 0.5
-"anims/omni lights" = SubResource( 6 )
+"anims/omni lights" = SubResource( 3 )
+
+[node name="VolumeProxy" type="Spatial" parent="."]
+visible = false
+script = ExtResource( 1 )
+material = SubResource( 4 )
+bounds_mode = 0
+
+[node name="VolumeProxy2" type="Spatial" parent="."]
+script = ExtResource( 1 )
+material = SubResource( 5 )
+bounds_mode = 1
+extents = Vector3( 16.605, 1.63871, 7.77037 )
+bounds_fade = Vector3( 0, 0.846, 0 )
+
+[node name="VolumeProxy3" type="Spatial" parent="."]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.33799, 0 )
+visible = false
+script = ExtResource( 1 )
+material = SubResource( 6 )
+bounds_mode = 2
+extents = Vector3( 1.591, 1.396, 1.53293 )
+bounds_fade = Vector3( 0, 0.787, 0 )

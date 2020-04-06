@@ -1,0 +1,180 @@
+[gd_scene load_steps=2 format=2]
+
+[ext_resource path="res://addons/editor_icon_previewer/editor_icon_window.gd" type="Script" id=1]
+
+[node name="window" type="AcceptDialog"]
+margin_right = 300.0
+margin_bottom = 240.0
+rect_min_size = Vector2( 600, 480 )
+focus_mode = 2
+window_title = "Editor Icons"
+resizable = true
+script = ExtResource( 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="body" type="VBoxContainer" parent="."]
+margin_left = 8.0
+margin_top = 8.0
+margin_right = 592.0
+margin_bottom = 464.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+custom_constants/separation = 16
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="search" type="HBoxContainer" parent="body"]
+margin_right = 584.0
+margin_bottom = 24.0
+
+[node name="box" type="LineEdit" parent="body/search"]
+margin_right = 484.0
+margin_bottom = 24.0
+size_flags_horizontal = 3
+placeholder_text = "Search icons..."
+caret_blink = true
+caret_blink_speed = 0.5
+
+[node name="found" type="LineEdit" parent="body/search"]
+margin_left = 488.0
+margin_right = 584.0
+margin_bottom = 24.0
+rect_min_size = Vector2( 96, 0 )
+focus_mode = 0
+text = "Found: 0"
+editable = false
+
+[node name="icons" type="HSplitContainer" parent="body"]
+margin_top = 40.0
+margin_right = 584.0
+margin_bottom = 456.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+dragger_visibility = 1
+
+[node name="previews" type="ScrollContainer" parent="body/icons"]
+margin_right = 396.0
+margin_bottom = 416.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="container" type="GridContainer" parent="body/icons/previews"]
+margin_right = 396.0
+margin_bottom = 416.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+columns = 18
+
+[node name="info" type="PanelContainer" parent="body/icons"]
+self_modulate = Color( 0.615686, 0.615686, 0.615686, 1 )
+margin_left = 408.0
+margin_right = 584.0
+margin_bottom = 416.0
+rect_min_size = Vector2( 176, 0 )
+size_flags_vertical = 3
+
+[node name="icon" type="VBoxContainer" parent="body/icons/info"]
+margin_left = 7.0
+margin_top = 7.0
+margin_right = 169.0
+margin_bottom = 409.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+size_flags_stretch_ratio = 0.25
+
+[node name="label" type="Label" parent="body/icons/info/icon"]
+margin_right = 162.0
+margin_bottom = 14.0
+text = "Select any icon."
+autowrap = true
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="preview" type="TextureRect" parent="body/icons/info/icon"]
+margin_top = 18.0
+margin_right = 128.0
+margin_bottom = 146.0
+rect_min_size = Vector2( 128, 128 )
+size_flags_horizontal = 0
+size_flags_vertical = 0
+size_flags_stretch_ratio = 0.25
+expand = true
+stretch_mode = 5
+
+[node name="size" type="Label" parent="body/icons/info/icon"]
+margin_top = 150.0
+margin_right = 162.0
+margin_bottom = 164.0
+autowrap = true
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="copied" type="Label" parent="body/icons/info/icon"]
+visible = false
+margin_top = 3.0
+margin_right = 223.0
+margin_bottom = 28.0
+text = "Copied to clipboard!"
+autowrap = true
+
+[node name="space" type="Control" parent="body/icons/info/icon"]
+margin_top = 168.0
+margin_right = 162.0
+margin_bottom = 364.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="params" type="VBoxContainer" parent="body/icons/info/icon"]
+margin_top = 368.0
+margin_right = 162.0
+margin_bottom = 402.0
+
+[node name="icon" type="Label" parent="body/icons/info/icon/params"]
+margin_right = 162.0
+margin_bottom = 14.0
+text = "Icons preview size"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="size" type="HBoxContainer" parent="body/icons/info/icon/params"]
+margin_top = 18.0
+margin_right = 162.0
+margin_bottom = 34.0
+
+[node name="range" type="HSlider" parent="body/icons/info/icon/params/size"]
+margin_right = 123.0
+margin_bottom = 16.0
+focus_mode = 0
+size_flags_horizontal = 3
+min_value = 16.0
+max_value = 128.0
+value = 16.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="pixels" type="Label" parent="body/icons/info/icon/params/size"]
+margin_left = 127.0
+margin_top = 1.0
+margin_right = 162.0
+margin_bottom = 15.0
+text = "16 px"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+[connection signal="about_to_show" from="." to="." method="_on_window_about_to_show"]
+[connection signal="popup_hide" from="." to="." method="_on_window_popup_hide"]
+[connection signal="resized" from="." to="." method="_on_window_resized"]
+[connection signal="visibility_changed" from="." to="." method="_on_window_visibility_changed"]
+[connection signal="text_changed" from="body/search/box" to="." method="_on_search_text_changed"]
+[connection signal="mouse_exited" from="body/icons/previews/container" to="." method="_on_container_mouse_exited"]
+[connection signal="value_changed" from="body/icons/info/icon/params/size/range" to="." method="_on_size_changed"]

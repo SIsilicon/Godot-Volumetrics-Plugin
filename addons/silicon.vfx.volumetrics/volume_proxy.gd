@@ -9,6 +9,8 @@ enum {
 
 var material : VolumetricMaterial setget set_material
 var bounds_mode := LOCAL_BOX setget set_bounds_mode
+var extents := Vector3.ONE setget set_extents
+var bounds_fade := Vector3.ZERO setget set_bounds_fade
 
 var vol_id := -1
 var vis_notifier := VisibilityNotifier.new()
@@ -17,8 +19,14 @@ func _get_property_list() -> Array:
 	var properties := [
 		{name="VolumeSprite", type=TYPE_NIL, usage=PROPERTY_USAGE_CATEGORY},
 		{name="material", type=TYPE_OBJECT, hint=PROPERTY_HINT_RESOURCE_TYPE, hint_string="VolumetricMaterial"},
-		{name="bounds_mode", type=TYPE_INT, hint=PROPERTY_HINT_ENUM, hint_string="Global,Local Box,Local Sphere"}
+		{name="bounds_mode", type=TYPE_INT, hint=PROPERTY_HINT_ENUM, hint_string="Global,Local Box,Local Sphere"},
 	]
+	
+	if bounds_mode != GLOBAL:
+		properties += [
+			{name="extents", type=TYPE_VECTOR3},
+			{name="bounds_fade", type=TYPE_VECTOR3},
+		]
 	
 	return properties
 
@@ -29,12 +37,15 @@ func _enter_tree() -> void:
 	vol_id = VolumetricServer.add_volume(get_viewport())
 	set_material(material)
 	set_bounds_mode(bounds_mode)
+	set_extents(extents)
+	set_bounds_fade(bounds_fade)
 
 func _process(delta : float) -> void:
+	scale = Vector3.ONE
 	var vol_visible := is_visible_in_tree()
 	if bounds_mode != GLOBAL:
 		vol_visible = vol_visible and vis_notifier.is_on_screen()
-	VolumetricServer.volume_set_param(vol_id, "transform", global_transform)
+	VolumetricServer.volume_set_param(vol_id, "transform", global_transform.orthonormalized())
 	VolumetricServer.volume_set_param(vol_id, "visible", vol_visible)
 
 func _exit_tree() -> void:
@@ -62,12 +73,22 @@ func set_material(value : VolumetricMaterial) -> void:
 			yield(material, "shader_changed")
 		VolumetricServer.volume_set_param(vol_id, "shader", material.shaders)
 
+func set_extents(value : Vector3) -> void:
+	extents.x = max(value.x, 0.01)
+	extents.y = max(value.y, 0.01)
+	extents.z = max(value.z, 0.01)
+	VolumetricServer.volume_set_param(vol_id, "bounds_extents", extents)
+	update_gizmo()
+	
+	vis_notifier.aabb = AABB(-extents, extents*2.0)
+
 func set_bounds_mode(value : int) -> void:
 	if not is_inside_tree():
 		bounds_mode = value
 		return
 	
 	bounds_mode = value
+	set_extents(extents)
 	
 	if value == GLOBAL:
 		for volume in get_tree().get_nodes_in_group("_global_volume"):
@@ -79,3 +100,10 @@ func set_bounds_mode(value : int) -> void:
 	
 	if vol_id != -1:
 		VolumetricServer.volume_set_param(vol_id, "bounds_mode", bounds_mode)
+	property_list_changed_notify()
+
+func set_bounds_fade(value : Vector3) -> void:
+	bounds_fade.x = clamp(value.x, 0.0, 1.0)
+	bounds_fade.y = clamp(value.y, 0.0, 1.0)
+	bounds_fade.z = clamp(value.z, 0.0, 1.0)
+	VolumetricServer.volume_set_param(vol_id, "bounds_fade", bounds_fade)

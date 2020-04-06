@@ -63,7 +63,7 @@ window/size/height=720
 
 [editor_plugins]
 
-enabled=PoolStringArray( "silicon.vfx.volumetrics", "zylann.editor_debugger" )
+enabled=PoolStringArray( "editor_icon_previewer", "silicon.vfx.volumetrics", "zylann.editor_debugger" )
 
 [importer_defaults]
 

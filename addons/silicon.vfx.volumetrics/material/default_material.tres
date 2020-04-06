@@ -11,4 +11,3 @@ anisotropy = 0.0
 emission_enabled = false
 uvw_scale = Vector3( 1, 1, 1 )
 uvw_offset = Vector3( 0, 0, 0 )
-uvw_border_blend = Vector3( 0, 0, 0 )

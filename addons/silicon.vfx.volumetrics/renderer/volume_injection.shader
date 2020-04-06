@@ -2,7 +2,8 @@ shader_type spatial;
 render_mode unshaded, blend_add;
 
 uniform int bounds_mode = 0;
-uniform vec3 blend_amount = vec3(0.0);
+uniform vec3 bounds_extents = vec3(1.0);
+uniform vec3 bounds_fade = vec3(0.0);
 
 uniform vec2 tile_factor;
 uniform vec3 sample_offset = vec3(0.0);
@@ -52,7 +53,7 @@ void fragment() {
 	ndc = CAMERA_MATRIX * ndc;
 	
 	vec3 WORLD = ndc.xyz;
-	vec3 UVW = (INV_WORLD_MATRIX * vec4(WORLD, 1.0)).xyz * 0.5 + 0.5;
+	vec3 UVW = (INV_WORLD_MATRIX * vec4(WORLD, 1.0)).xyz / bounds_extents * 0.5 + 0.5;
 	
 	if(bounds_mode == 1) {
 		if(clamp(UVW, 0.0, 1.0) != UVW) discard;
@@ -62,12 +63,12 @@ void fragment() {
 	
 	float FADE = 1.0;
 	if(bounds_mode == 1) {
-		vec3 b = max(blend_amount, 1e-5);
+		vec3 b = max(bounds_fade, 1e-5);
 		vec3 blend = 1.0 - max(2.0 * abs((UVW - 0.5) / b) - 1.0/b + 1.0, 0.0);
 		blend = smoothstep(vec3(0.0), vec3(1.0), blend);
 		FADE *= min(min(blend.x, blend.y), blend.z);
 	} else if(bounds_mode == 2) {
-		float b = max(max(blend_amount.x, max(blend_amount.y, blend_amount.z)), 1e-5);
+		float b = max(max(bounds_fade.x, max(bounds_fade.y, bounds_fade.z)), 1e-5);
 		float d = distance(UVW, vec3(0.5));
 		float blend = 1.0 - max(2.0 * abs(d / b) - 1.0/b + 1.0, 0.0);
 		blend = smoothstep(0.0, 1.0, blend);

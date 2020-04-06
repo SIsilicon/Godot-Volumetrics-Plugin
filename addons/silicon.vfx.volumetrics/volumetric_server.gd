@@ -113,7 +113,7 @@ func add_renderer(viewport : Viewport) -> int:
 			if volume.params.has("shader"):
 				renderer.set_volume_param(id, "shader", volume.params.shader)
 			else:
-				renderer.set_volume_param(id, "shader", default_material)
+				renderer.set_volume_param(id, "shader", default_material.shaders)
 			
 			for param in volume.params:
 				if param == "shader":

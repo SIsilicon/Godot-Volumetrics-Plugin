@@ -46,6 +46,8 @@ After you've added the node mentioned above, the `VolumeProxy` node should now w
   * `Global` :- No borders at all. Only _one_ `VolumeProxy` can be global at a time.
   * `Local Box` :- The border's shaped like a cuboid.
   * `Local Sphere` :- The border's shaped like an ellipsoid.
+* `Extents` :- The region in which the volume is rendered (with a local bounds mode).
+* `Bounds Fade` :- How faded the bounds of the volume is.
 
 ### Volumetric Material
 
@@ -62,7 +64,6 @@ After you've added the node mentioned above, the `VolumeProxy` node should now w
 * `Emission Texture` :- A texture applied to the volume's emission.
 * `Uvw Scale` :- The scale factor of the uvw texture coordinates.
 * `Uvw Offset` :- The offset of the uvw texture coordinates.
-* `Uvw Border Blend` :- How softened the borders of the volume proxy is (if it has one). If it is a `Local Sphere`, then the maximum value of the border blend is used.
 
 ### Other stuff
 

@@ -40,7 +40,7 @@ viewport_path = NodePath("Emission")
 [sub_resource type="ViewportTexture" id=9]
 viewport_path = NodePath("Extinction")
 
-[sub_resource type="Image" id=39]
+[sub_resource type="Image" id=33]
 data = {
 "data": PoolByteArray( 0, 0, 0, 0 ),
 "format": "RFloat",
@@ -52,7 +52,7 @@ data = {
 [sub_resource type="ImageTexture" id=11]
 flags = 0
 flags = 0
-image = SubResource( 39 )
+image = SubResource( 33 )
 size = Vector2( 1, 1 )
 
 [sub_resource type="ViewportTexture" id=12]
@@ -74,14 +74,14 @@ resource_local_to_scene = true
 shader = ExtResource( 3 )
 shader_param/is_transmission = false
 shader_param/blend = 0.0
-shader_param/tile_factor = Vector2( 8, 8 )
-shader_param/vol_depth_params = Vector3( 0.99238, -0.076201, 0.4964 )
+shader_param/tile_factor = Vector2( 8, 16 )
+shader_param/vol_depth_params = Vector3( 0.98447, -0.155303, 0.351208 )
 shader_param/sample_offset = Vector3( 0, 0, 0 )
-shader_param/projection_matrix0 = Plane( 0.514133, 0, 0, 0 )
+shader_param/projection_matrix0 = Plane( 0.998973, 0, 0, 0 )
 shader_param/projection_matrix1 = Plane( 0, 1.42815, 0, 0 )
 shader_param/projection_matrix2 = Plane( 0, 0, -1.0002, -1 )
 shader_param/projection_matrix3 = Plane( 0, 0, -0.10001, 0 )
-shader_param/curr_view_matrix = Transform( -0.592732, -0.558867, -0.579945, -0.799155, 0.318611, 0.509744, -0.100102, 0.765607, -0.635472, 3.8905, 5.21081, 0.244516 )
+shader_param/curr_view_matrix = Transform( 0.0627257, -0.799155, 0.597843, -8.9407e-08, 0.599023, 0.800732, -0.998031, -0.0502264, 0.0375741, 1.94525, 2.60541, 0.122258 )
 shader_param/prev_inv_view_matrix = Transform( 0.0627258, 0, -0.998031, -0.799155, 0.599023, -0.0502265, 0.597843, 0.800732, 0.0375742, 0, -2.24914e-07, -3.25378 )
 shader_param/use_light_data = false
 shader_param/volumetric_shadows = false
@@ -110,14 +110,14 @@ resource_local_to_scene = true
 shader = ExtResource( 3 )
 shader_param/is_transmission = true
 shader_param/blend = 0.0
-shader_param/tile_factor = Vector2( 8, 8 )
-shader_param/vol_depth_params = Vector3( 0.99238, -0.076201, 0.4964 )
+shader_param/tile_factor = Vector2( 8, 16 )
+shader_param/vol_depth_params = Vector3( 0.98447, -0.155303, 0.351208 )
 shader_param/sample_offset = null
-shader_param/projection_matrix0 = Plane( 0.514133, 0, 0, 0 )
+shader_param/projection_matrix0 = Plane( 0.998973, 0, 0, 0 )
 shader_param/projection_matrix1 = Plane( 0, 1.42815, 0, 0 )
 shader_param/projection_matrix2 = Plane( 0, 0, -1.0002, -1 )
 shader_param/projection_matrix3 = Plane( 0, 0, -0.10001, 0 )
-shader_param/curr_view_matrix = Transform( -0.592732, -0.558867, -0.579945, -0.799155, 0.318611, 0.509744, -0.100102, 0.765607, -0.635472, 3.8905, 5.21081, 0.244516 )
+shader_param/curr_view_matrix = Transform( 0.0627257, -0.799155, 0.597843, -8.9407e-08, 0.599023, 0.800732, -0.998031, -0.0502264, 0.0375741, 1.94525, 2.60541, 0.122258 )
 shader_param/prev_inv_view_matrix = Transform( 0.0627258, 0, -0.998031, -0.799155, 0.599023, -0.0502265, 0.597843, 0.800732, 0.0375742, 0, -2.24914e-07, -3.25378 )
 shader_param/use_light_data = false
 shader_param/volumetric_shadows = true
@@ -134,8 +134,8 @@ resource_local_to_scene = true
 shader = ExtResource( 2 )
 shader_param/is_transmittance = false
 shader_param/shader_pass = null
-shader_param/tile_factor = Vector2( 8, 8 )
-shader_param/vol_depth_params = Vector3( 0.99238, -0.076201, 0.4964 )
+shader_param/tile_factor = Vector2( 8, 16 )
+shader_param/vol_depth_params = Vector3( 0.98447, -0.155303, 0.351208 )
 shader_param/volume_scattering = SubResource( 1 )
 shader_param/volume_transmittance = SubResource( 21 )
 
@@ -155,33 +155,33 @@ resource_local_to_scene = true
 shader = ExtResource( 2 )
 shader_param/is_transmittance = true
 shader_param/shader_pass = null
-shader_param/tile_factor = Vector2( 8, 8 )
-shader_param/vol_depth_params = Vector3( 0.99238, -0.076201, 0.4964 )
+shader_param/tile_factor = Vector2( 8, 16 )
+shader_param/vol_depth_params = Vector3( 0.98447, -0.155303, 0.351208 )
 shader_param/volume_scattering = SubResource( 1 )
 shader_param/volume_transmittance = SubResource( 21 )
 
-[sub_resource type="ViewportTexture" id=33]
+[sub_resource type="ViewportTexture" id=27]
 flags = 4
 viewport_path = NodePath("ResolveScatter")
 
-[sub_resource type="ViewportTexture" id=34]
+[sub_resource type="ViewportTexture" id=28]
 flags = 4
 viewport_path = NodePath("ResolveTransmit")
 
-[sub_resource type="ShaderMaterial" id=35]
+[sub_resource type="ShaderMaterial" id=29]
 resource_local_to_scene = true
 render_priority = -16
 shader = ExtResource( 4 )
-shader_param/tile_factor = Vector2( 8, 8 )
-shader_param/vol_depth_params = Vector3( 0.99238, -0.076201, 0.4964 )
+shader_param/tile_factor = Vector2( 8, 16 )
+shader_param/vol_depth_params = Vector3( 0.98447, -0.155303, 0.351208 )
 shader_param/is_transparent_pass = false
-shader_param/volume_scattering = SubResource( 33 )
-shader_param/volume_transmittance = SubResource( 34 )
+shader_param/volume_scattering = SubResource( 27 )
+shader_param/volume_transmittance = SubResource( 28 )
 
-[sub_resource type="QuadMesh" id=36]
+[sub_resource type="QuadMesh" id=30]
 size = Vector2( 2, 2 )
 
-[sub_resource type="Shader" id=37]
+[sub_resource type="Shader" id=31]
 code = "shader_type spatial;
 render_mode unshaded, blend_mul;
 
@@ -274,16 +274,16 @@ void fragment() {
 }
 "
 
-[sub_resource type="ShaderMaterial" id=38]
+[sub_resource type="ShaderMaterial" id=32]
 resource_local_to_scene = true
 render_priority = -17
-shader = SubResource( 37 )
+shader = SubResource( 31 )
 shader_param/volume_size = Vector2( 101, 68 )
-shader_param/tile_factor = Vector2( 8, 8 )
-shader_param/vol_depth_params = Vector3( 0.99238, -0.076201, 0.4964 )
-shader_param/volume_transmittance = SubResource( 34 )
+shader_param/tile_factor = Vector2( 8, 16 )
+shader_param/vol_depth_params = Vector3( 0.98447, -0.155303, 0.351208 )
+shader_param/volume_transmittance = SubResource( 28 )
 
-[node name="VolumetricRenderer2" type="Node"]
+[node name="VolumetricRenderer" type="Node"]
 pause_mode = 2
 process_priority = 16384
 script = ExtResource( 5 )
@@ -293,7 +293,7 @@ distribution = 0.922
 enabled = false
 
 [node name="PrevScatter" type="Viewport" parent="."]
-size = Vector2( 337, 121 )
+size = Vector2( 391, 547 )
 own_world = true
 transparent_bg = true
 keep_3d_linear = true
@@ -309,7 +309,7 @@ __meta__ = {
 }
 
 [node name="PrevTransmit" type="Viewport" parent="."]
-size = Vector2( 337, 121 )
+size = Vector2( 391, 547 )
 own_world = true
 transparent_bg = true
 keep_3d_linear = true
@@ -325,7 +325,7 @@ __meta__ = {
 }
 
 [node name="Scatter" type="Viewport" parent="."]
-size = Vector2( 337, 121 )
+size = Vector2( 391, 547 )
 own_world = true
 world = SubResource( 6 )
 keep_3d_linear = true
@@ -334,13 +334,13 @@ render_target_update_mode = 0
 
 [node name="Camera" type="Camera" parent="Scatter"]
 process_priority = 16384
-transform = Transform( -0.592732, -0.558867, -0.579945, -0.799155, 0.318611, 0.509744, -0.100102, 0.765607, -0.635472, 3.8905, 5.21081, 0.244516 )
+transform = Transform( 0.0627257, -0.799155, 0.597843, -8.9407e-08, 0.599023, 0.800732, -0.998031, -0.0502264, 0.0375741, 1.94525, 2.60541, 0.122258 )
 current = true
 near = 0.1
 far = 40.0
 
 [node name="Extinction" type="Viewport" parent="."]
-size = Vector2( 337, 121 )
+size = Vector2( 391, 547 )
 own_world = true
 world = SubResource( 6 )
 keep_3d_linear = true
@@ -349,13 +349,13 @@ render_target_update_mode = 0
 
 [node name="Camera" type="Camera" parent="Extinction"]
 process_priority = 16384
-transform = Transform( -0.592732, -0.558867, -0.579945, -0.799155, 0.318611, 0.509744, -0.100102, 0.765607, -0.635472, 3.8905, 5.21081, 0.244516 )
+transform = Transform( 0.0627257, -0.799155, 0.597843, -8.9407e-08, 0.599023, 0.800732, -0.998031, -0.0502264, 0.0375741, 1.94525, 2.60541, 0.122258 )
 current = true
 near = 0.1
 far = 40.0
 
 [node name="Emission" type="Viewport" parent="."]
-size = Vector2( 337, 121 )
+size = Vector2( 391, 547 )
 own_world = true
 world = SubResource( 6 )
 keep_3d_linear = true
@@ -364,13 +364,13 @@ render_target_update_mode = 0
 
 [node name="Camera" type="Camera" parent="Emission"]
 process_priority = 16384
-transform = Transform( -0.592732, -0.558867, -0.579945, -0.799155, 0.318611, 0.509744, -0.100102, 0.765607, -0.635472, 3.8905, 5.21081, 0.244516 )
+transform = Transform( 0.0627257, -0.799155, 0.597843, -8.9407e-08, 0.599023, 0.800732, -0.998031, -0.0502264, 0.0375741, 1.94525, 2.60541, 0.122258 )
 current = true
 near = 0.1
 far = 40.0
 
 [node name="Phase" type="Viewport" parent="."]
-size = Vector2( 337, 121 )
+size = Vector2( 391, 547 )
 own_world = true
 world = SubResource( 6 )
 keep_3d_linear = true
@@ -379,13 +379,13 @@ render_target_update_mode = 0
 
 [node name="Camera" type="Camera" parent="Phase"]
 process_priority = 16384
-transform = Transform( -0.592732, -0.558867, -0.579945, -0.799155, 0.318611, 0.509744, -0.100102, 0.765607, -0.635472, 3.8905, 5.21081, 0.244516 )
+transform = Transform( 0.0627257, -0.799155, 0.597843, -8.9407e-08, 0.599023, 0.800732, -0.998031, -0.0502264, 0.0375741, 1.94525, 2.60541, 0.122258 )
 current = true
 near = 0.1
 far = 40.0
 
 [node name="Motion" type="Viewport" parent="."]
-size = Vector2( 337, 121 )
+size = Vector2( 391, 547 )
 own_world = true
 world = SubResource( 6 )
 keep_3d_linear = true
@@ -394,13 +394,13 @@ render_target_update_mode = 0
 
 [node name="Camera" type="Camera" parent="Motion"]
 process_priority = 16384
-transform = Transform( -0.592732, -0.558867, -0.579945, -0.799155, 0.318611, 0.509744, -0.100102, 0.765607, -0.635472, 3.8905, 5.21081, 0.244516 )
+transform = Transform( 0.0627257, -0.799155, 0.597843, -8.9407e-08, 0.599023, 0.800732, -0.998031, -0.0502264, 0.0375741, 1.94525, 2.60541, 0.122258 )
 current = true
 near = 0.1
 far = 40.0
 
 [node name="LightScatter" type="Viewport" parent="."]
-size = Vector2( 337, 121 )
+size = Vector2( 391, 547 )
 own_world = true
 transparent_bg = true
 keep_3d_linear = true
@@ -416,7 +416,7 @@ __meta__ = {
 }
 
 [node name="LightTransmit" type="Viewport" parent="."]
-size = Vector2( 337, 121 )
+size = Vector2( 391, 547 )
 own_world = true
 transparent_bg = true
 keep_3d_linear = true
@@ -432,7 +432,7 @@ __meta__ = {
 }
 
 [node name="ResolveScatter" type="Viewport" parent="."]
-size = Vector2( 337, 121 )
+size = Vector2( 391, 547 )
 own_world = true
 world = SubResource( 6 )
 keep_3d_linear = true
@@ -441,7 +441,7 @@ render_target_update_mode = 0
 
 [node name="Camera" type="Camera" parent="ResolveScatter"]
 process_priority = 16384
-transform = Transform( -0.592732, -0.558867, -0.579945, -0.799155, 0.318611, 0.509744, -0.100102, 0.765607, -0.635472, 3.8905, 5.21081, 0.244516 )
+transform = Transform( 0.0627257, -0.799155, 0.597843, -8.9407e-08, 0.599023, 0.800732, -0.998031, -0.0502264, 0.0375741, 1.94525, 2.60541, 0.122258 )
 current = true
 near = 0.1
 far = 40.0
@@ -456,7 +456,7 @@ __meta__ = {
 }
 
 [node name="ResolveTransmit" type="Viewport" parent="."]
-size = Vector2( 337, 121 )
+size = Vector2( 391, 547 )
 own_world = true
 world = SubResource( 25 )
 keep_3d_linear = true
@@ -465,7 +465,7 @@ render_target_update_mode = 0
 
 [node name="Camera" type="Camera" parent="ResolveTransmit"]
 process_priority = 16384
-transform = Transform( -0.592732, -0.558867, -0.579945, -0.799155, 0.318611, 0.509744, -0.100102, 0.765607, -0.635472, 3.8905, 5.21081, 0.244516 )
+transform = Transform( 0.0627257, -0.799155, 0.597843, -8.9407e-08, 0.599023, 0.800732, -0.998031, -0.0502264, 0.0375741, 1.94525, 2.60541, 0.122258 )
 current = true
 near = 0.1
 far = 40.0
@@ -482,9 +482,9 @@ __meta__ = {
 [node name="SolidScatter" type="MeshInstance" parent="."]
 visible = false
 layers = 524288
-material_override = SubResource( 35 )
+material_override = SubResource( 29 )
 extra_cull_margin = 16384.0
-mesh = SubResource( 36 )
+mesh = SubResource( 30 )
 material/0 = null
 __meta__ = {
 "apply_volumetrics": false
@@ -493,9 +493,9 @@ __meta__ = {
 [node name="SolidTransmit" type="MeshInstance" parent="."]
 visible = false
 layers = 524288
-material_override = SubResource( 38 )
+material_override = SubResource( 32 )
 extra_cull_margin = 16384.0
-mesh = SubResource( 36 )
+mesh = SubResource( 30 )
 material/0 = null
 __meta__ = {
 "apply_volumetrics": false

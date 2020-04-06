@@ -1,0 +1,466 @@
+[gd_scene load_steps=8 format=2]
+
+[ext_resource path="res://addons/silicon.vfx.volumetrics/editor/texture_3d_creator/texture_3d_creator.gd" type="Script" id=1]
+
+[sub_resource type="ViewportTexture" id=1]
+flags = 4
+viewport_path = NodePath("Preview")
+
+[sub_resource type="StyleBoxFlat" id=2]
+bg_color = Color( 0, 0, 0, 0.321569 )
+expand_margin_top = 1.0
+expand_margin_bottom = 1.0
+
+[sub_resource type="Image" id=7]
+data = {
+"data": PoolByteArray( 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ),
+"format": "LumAlpha8",
+"height": 16,
+"mipmaps": false,
+"width": 16
+}
+
+[sub_resource type="ImageTexture" id=4]
+flags = 4
+flags = 4
+image = SubResource( 7 )
+size = Vector2( 16, 16 )
+
+[sub_resource type="Shader" id=5]
+code = "shader_type canvas_item;
+
+uniform vec2 tile_factor = vec2(1.0);
+
+uniform int seed = 0;
+uniform int size = 5;
+uniform int octaves = 1;
+uniform float persistence = 0.5;
+uniform float lacunarity = 2.0;
+
+uniform float contrast = 1.0;
+uniform float brightness = 0.0;
+
+vec3 uv_to_uvw(vec2 uv, vec2 tiling) {
+	vec3 uvw = vec3(mod(uv * tiling, vec2(1.0)), 0.0);
+	uvw.z = floor(uv.x * tiling.x) + floor(uv.y * tiling.y) * tiling.x;
+	uvw.z /= tiling.x * tiling.y;
+	return uvw;
+}
+
+float random(vec2 st) {return fract(sin(dot(st.xy, vec2(12.9898, 78.233))) * 43758.5453123);}
+float roundD(float num, float dec) {return num - mod(num, dec);}
+
+//
+// GLSL textureless classic 3D noise \"cnoise\",
+// with an RSL-style periodic variant \"pnoise\".
+// Author:  Stefan Gustavson (stefan.gustavson@liu.se)
+// Version: 2011-10-11
+//
+// Many thanks to Ian McEwan of Ashima Arts for the
+// ideas for permutation and gradient selection.
+//
+// Copyright (c) 2011 Stefan Gustavson. All rights reserved.
+// Distributed under the MIT license. See LICENSE file.
+// https://github.com/ashima/webgl-noise
+//
+
+vec3 mod289(vec3 x) {return x - floor(x * (1.0 / 289.0)) * 289.0;}
+vec4 mod289_4(vec4 x) {return x - floor(x * (1.0 / 289.0)) * 289.0;}
+vec4 permute(vec4 x) {return mod289_4(((x*34.0)+1.0)*x);}
+vec4 taylorInvSqrt(vec4 r) {return 1.79284291400159 - 0.85373472095314 * r;}
+vec3 fade(vec3 t) {return t*t*t*(t*(t*6.0-15.0)+10.0);}
+
+// Classic Perlin noise, periodic variant
+float pnoise(vec3 P, float rep) {
+	vec3 Pi0 = mod(floor(P), rep); // Integer part, modulo period
+	vec3 Pi1 = mod(Pi0 + vec3(1.0), rep); // Integer part + 1, mod period
+	Pi0 = mod289(Pi0);
+	Pi1 = mod289(Pi1);
+	vec3 Pf0 = fract(P); // Fractional part for interpolation
+	vec3 Pf1 = Pf0 - vec3(1.0); // Fractional part - 1.0
+	vec4 ix = vec4(Pi0.x, Pi1.x, Pi0.x, Pi1.x);
+	vec4 iy = vec4(Pi0.yy, Pi1.yy);
+	vec4 iz0 = Pi0.zzzz;
+	vec4 iz1 = Pi1.zzzz;
+	
+	vec4 ixy = permute(permute(ix) + iy);
+	vec4 ixy0 = permute(ixy + iz0);
+	vec4 ixy1 = permute(ixy + iz1);
+	
+	vec4 gx0 = ixy0 * (1.0 / 7.0);
+	vec4 gy0 = fract(floor(gx0) * (1.0 / 7.0)) - 0.5;
+	gx0 = fract(gx0);
+	vec4 gz0 = vec4(0.5) - abs(gx0) - abs(gy0);
+	vec4 sz0 = step(gz0, vec4(0.0));
+	gx0 -= sz0 * (step(0.0, gx0) - 0.5);
+	gy0 -= sz0 * (step(0.0, gy0) - 0.5);
+	
+	vec4 gx1 = ixy1 * (1.0 / 7.0);
+	vec4 gy1 = fract(floor(gx1) * (1.0 / 7.0)) - 0.5;
+	gx1 = fract(gx1);
+	vec4 gz1 = vec4(0.5) - abs(gx1) - abs(gy1);
+	vec4 sz1 = step(gz1, vec4(0.0));
+	gx1 -= sz1 * (step(0.0, gx1) - 0.5);
+	gy1 -= sz1 * (step(0.0, gy1) - 0.5);
+	
+	vec3 g000 = vec3(gx0.x,gy0.x,gz0.x);
+	vec3 g100 = vec3(gx0.y,gy0.y,gz0.y);
+	vec3 g010 = vec3(gx0.z,gy0.z,gz0.z);
+	vec3 g110 = vec3(gx0.w,gy0.w,gz0.w);
+	vec3 g001 = vec3(gx1.x,gy1.x,gz1.x);
+	vec3 g101 = vec3(gx1.y,gy1.y,gz1.y);
+	vec3 g011 = vec3(gx1.z,gy1.z,gz1.z);
+	vec3 g111 = vec3(gx1.w,gy1.w,gz1.w);
+	
+	vec4 norm0 = taylorInvSqrt(vec4(dot(g000, g000), dot(g010, g010), dot(g100, g100), dot(g110, g110)));
+	g000 *= norm0.x;
+	g010 *= norm0.y;
+	g100 *= norm0.z;
+	g110 *= norm0.w;
+	vec4 norm1 = taylorInvSqrt(vec4(dot(g001, g001), dot(g011, g011), dot(g101, g101), dot(g111, g111)));
+	g001 *= norm1.x;
+	g011 *= norm1.y;
+	g101 *= norm1.z;
+	g111 *= norm1.w;
+	float n000 = dot(g000, Pf0);
+	float n100 = dot(g100, vec3(Pf1.x, Pf0.yz));
+	float n010 = dot(g010, vec3(Pf0.x, Pf1.y, Pf0.z));
+	float n110 = dot(g110, vec3(Pf1.xy, Pf0.z));
+	float n001 = dot(g001, vec3(Pf0.xy, Pf1.z));
+	float n101 = dot(g101, vec3(Pf1.x, Pf0.y, Pf1.z));
+	float n011 = dot(g011, vec3(Pf0.x, Pf1.yz));
+	float n111 = dot(g111, Pf1);
+	vec3 fade_xyz = fade(Pf0);
+	
+	vec4 n_z = mix(vec4(n000, n100, n010, n110), vec4(n001, n101, n011, n111), fade_xyz.z);
+	vec2 n_yz = mix(n_z.xy, n_z.zw, fade_xyz.y);
+	float n_xyz = mix(n_yz.x, n_yz.y, fade_xyz.x);
+	return 2.2 * n_xyz;
+}
+
+float fbm(vec3 x) {
+	float v = 0.0;
+	float a = 1.0;
+	float s = 1.0;
+	float max_a = 0.0;
+	for(int i = 0; i < octaves; ++i) {
+		vec3 rand_offset = vec3(
+				random(vec2(ivec2(seed, octaves))),
+				random(vec2(ivec2(-octaves, seed))),
+				random(vec2(ivec2(octaves * 2, seed)))
+		);
+		x += rand_offset;
+//		x.xy = rotate(x.xy, random(vec2(ivec2(octaves * -2, -seed))) * 3.14159);
+		
+		float repeat = float(size) * s;
+		v += a * pnoise(repeat * x + rand_offset, repeat);
+		max_a += a;
+		s /= lacunarity;
+		a *= persistence;
+	}
+	return (v / max_a) * 0.5 + 0.5;
+}
+
+void fragment() {
+	vec3 uvw = uv_to_uvw(SCREEN_UV, tile_factor);
+	COLOR.rgb = vec3(fbm(uvw));
+	COLOR.rgb = (COLOR.rgb - 0.5) * contrast + 0.5 + brightness;
+}
+"
+
+[sub_resource type="ShaderMaterial" id=6]
+shader = SubResource( 5 )
+shader_param/tile_factor = Vector2( 1, 1 )
+shader_param/seed = 0
+shader_param/size = 4.0
+shader_param/octaves = 2
+shader_param/persistence = 0.46
+shader_param/lacunarity = 0.5
+shader_param/contrast = 3.0
+shader_param/brightness = -0.2
+
+[node name="Texture3DCreator" type="WindowDialog"]
+visible = true
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = 486.716
+margin_top = 118.136
+margin_right = -438.284
+margin_bottom = -139.864
+window_title = "Create 3D Texture"
+resizable = true
+script = ExtResource( 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = 18.0
+margin_top = 12.0
+margin_right = -18.0
+margin_bottom = -11.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="TextureRect" type="TextureRect" parent="VBoxContainer"]
+margin_right = 319.0
+margin_bottom = 143.0
+size_flags_vertical = 3
+texture = SubResource( 1 )
+expand = true
+stretch_mode = 6
+
+[node name="Settings" type="Label" parent="VBoxContainer"]
+margin_top = 147.0
+margin_right = 319.0
+margin_bottom = 161.0
+size_flags_vertical = 1
+size_flags_stretch_ratio = 0.75
+custom_styles/normal = SubResource( 2 )
+text = "Settings"
+align = 1
+valign = 1
+
+[node name="Resolution" type="HBoxContainer" parent="VBoxContainer"]
+margin_top = 165.0
+margin_right = 319.0
+margin_bottom = 189.0
+
+[node name="Label" type="Label" parent="VBoxContainer/Resolution"]
+margin_top = 5.0
+margin_right = 84.0
+margin_bottom = 19.0
+text = "Resolution:   "
+
+[node name="SpinBox" type="SpinBox" parent="VBoxContainer/Resolution"]
+margin_left = 88.0
+margin_right = 319.0
+margin_bottom = 24.0
+size_flags_horizontal = 3
+min_value = 32.0
+max_value = 512.0
+value = 64.0
+align = 3
+
+[node name="Seed" type="HBoxContainer" parent="VBoxContainer"]
+margin_top = 193.0
+margin_right = 319.0
+margin_bottom = 217.0
+
+[node name="Label" type="Label" parent="VBoxContainer/Seed"]
+margin_top = 5.0
+margin_right = 83.0
+margin_bottom = 19.0
+text = "Seed:            "
+
+[node name="SpinBox" type="SpinBox" parent="VBoxContainer/Seed"]
+margin_left = 87.0
+margin_right = 319.0
+margin_bottom = 24.0
+size_flags_horizontal = 3
+min_value = -100.0
+allow_greater = true
+allow_lesser = true
+align = 3
+
+[node name="Control" type="Control" parent="VBoxContainer"]
+margin_top = 221.0
+margin_right = 319.0
+margin_bottom = 229.0
+size_flags_vertical = 3
+size_flags_stretch_ratio = 0.06
+
+[node name="Period" type="HBoxContainer" parent="VBoxContainer"]
+margin_top = 233.0
+margin_right = 319.0
+margin_bottom = 257.0
+
+[node name="Label" type="Label" parent="VBoxContainer/Period"]
+margin_top = 5.0
+margin_right = 85.0
+margin_bottom = 19.0
+text = "Period:          "
+
+[node name="SpinBox" type="SpinBox" parent="VBoxContainer/Period"]
+margin_left = 89.0
+margin_right = 319.0
+margin_bottom = 24.0
+size_flags_horizontal = 3
+min_value = 1.0
+max_value = 20.0
+value = 2.0
+align = 3
+
+[node name="Octaves" type="HBoxContainer" parent="VBoxContainer"]
+margin_top = 261.0
+margin_right = 319.0
+margin_bottom = 285.0
+
+[node name="Label" type="Label" parent="VBoxContainer/Octaves"]
+margin_top = 5.0
+margin_right = 84.0
+margin_bottom = 19.0
+text = "Octaves:       "
+
+[node name="SpinBox" type="SpinBox" parent="VBoxContainer/Octaves"]
+margin_left = 88.0
+margin_right = 319.0
+margin_bottom = 24.0
+size_flags_horizontal = 3
+min_value = 1.0
+max_value = 10.0
+value = 3.0
+align = 3
+
+[node name="Persistence" type="HBoxContainer" parent="VBoxContainer"]
+margin_top = 289.0
+margin_right = 319.0
+margin_bottom = 313.0
+
+[node name="Label" type="Label" parent="VBoxContainer/Persistence"]
+margin_top = 5.0
+margin_right = 83.0
+margin_bottom = 19.0
+text = "Persistence: "
+
+[node name="SpinBox" type="SpinBox" parent="VBoxContainer/Persistence"]
+margin_left = 87.0
+margin_right = 319.0
+margin_bottom = 24.0
+size_flags_horizontal = 3
+max_value = 1.0
+step = 0.01
+value = 0.5
+align = 3
+
+[node name="Control2" type="Control" parent="VBoxContainer"]
+margin_top = 317.0
+margin_right = 319.0
+margin_bottom = 324.0
+size_flags_vertical = 3
+size_flags_stretch_ratio = 0.05
+
+[node name="Brightness" type="HBoxContainer" parent="VBoxContainer"]
+margin_top = 328.0
+margin_right = 319.0
+margin_bottom = 352.0
+
+[node name="Label" type="Label" parent="VBoxContainer/Brightness"]
+margin_top = 5.0
+margin_right = 84.0
+margin_bottom = 19.0
+text = "Brightness:   "
+
+[node name="SpinBox" type="SpinBox" parent="VBoxContainer/Brightness"]
+margin_left = 88.0
+margin_right = 319.0
+margin_bottom = 24.0
+size_flags_horizontal = 3
+min_value = -1.0
+max_value = 1.0
+step = 0.01
+align = 3
+
+[node name="Contrast" type="HBoxContainer" parent="VBoxContainer"]
+margin_top = 356.0
+margin_right = 319.0
+margin_bottom = 380.0
+
+[node name="Label" type="Label" parent="VBoxContainer/Contrast"]
+margin_top = 5.0
+margin_right = 81.0
+margin_bottom = 19.0
+text = "Contrast:      "
+
+[node name="SpinBox" type="SpinBox" parent="VBoxContainer/Contrast"]
+margin_left = 85.0
+margin_right = 319.0
+margin_bottom = 24.0
+size_flags_horizontal = 3
+max_value = 3.0
+step = 0.01
+value = 1.0
+align = 3
+
+[node name="Control3" type="Control" parent="VBoxContainer"]
+margin_top = 384.0
+margin_right = 319.0
+margin_bottom = 392.0
+size_flags_vertical = 3
+size_flags_stretch_ratio = 0.06
+
+[node name="Create" type="Button" parent="VBoxContainer"]
+margin_top = 396.0
+margin_right = 319.0
+margin_bottom = 418.0
+text = "Create Texture"
+icon = SubResource( 4 )
+
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer"]
+margin_top = 422.0
+margin_right = 319.0
+margin_bottom = 436.0
+
+[node name="Horizontal" type="Label" parent="VBoxContainer/HBoxContainer"]
+margin_right = 157.0
+margin_bottom = 14.0
+size_flags_horizontal = 3
+text = "Horizontal Slices: "
+
+[node name="Vertical" type="Label" parent="VBoxContainer/HBoxContainer"]
+margin_left = 161.0
+margin_right = 319.0
+margin_bottom = 14.0
+size_flags_horizontal = 3
+text = "Vertical Slices: "
+align = 2
+
+[node name="FileDialog" type="FileDialog" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = 27.7012
+margin_top = 100.701
+margin_right = -20.2988
+margin_bottom = -67.2987
+rect_min_size = Vector2( 50, 50 )
+resizable = true
+dialog_hide_on_ok = true
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Preview" type="Viewport" parent="."]
+size = Vector2( 128, 128 )
+own_world = true
+handle_input_locally = false
+hdr = false
+render_target_update_mode = 3
+
+[node name="ColorRect" type="ColorRect" parent="Preview"]
+material = SubResource( 6 )
+anchor_right = 1.0
+anchor_bottom = 1.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Render" type="Viewport" parent="."]
+own_world = true
+hdr = false
+render_target_update_mode = 0
+
+[node name="ColorRect" type="ColorRect" parent="Render"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+[connection signal="value_changed" from="VBoxContainer/Resolution/SpinBox" to="." method="_on_value_changed" binds= [ "resolution" ]]
+[connection signal="value_changed" from="VBoxContainer/Seed/SpinBox" to="." method="_on_value_changed" binds= [ "seed" ]]
+[connection signal="value_changed" from="VBoxContainer/Period/SpinBox" to="." method="_on_value_changed" binds= [ "period" ]]
+[connection signal="value_changed" from="VBoxContainer/Octaves/SpinBox" to="." method="_on_value_changed" binds= [ "octaves" ]]
+[connection signal="value_changed" from="VBoxContainer/Persistence/SpinBox" to="." method="_on_value_changed" binds= [ "persistence" ]]
+[connection signal="value_changed" from="VBoxContainer/Brightness/SpinBox" to="." method="_on_value_changed" binds= [ "brightness" ]]
+[connection signal="value_changed" from="VBoxContainer/Contrast/SpinBox" to="." method="_on_value_changed" binds= [ "contrast" ]]
+[connection signal="pressed" from="VBoxContainer/Create" to="." method="_on_Create_pressed"]
+[connection signal="file_selected" from="FileDialog" to="." method="_on_file_selected"]
