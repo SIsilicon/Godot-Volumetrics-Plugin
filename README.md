@@ -1,6 +1,6 @@
 # Godot Volumetrics Plugin
 
-![Volumetrics Plugin](doc_images/Volumetrics Plugin.png)
+![volumetrics plugin](doc_images/volumetrics plugin.png)
 
 Hello fellow Godot user. This plugin will enable to create well lit volumetric fog in the game engine. **GLES 3 only**.
 
@@ -69,17 +69,17 @@ After you've added the node mentioned above, the `VolumeProxy` node should now w
 
 ## 3D Texture Creator
 
-![3D texture creator](doc_images/3D texture creator.png)
+![3d texture creator](doc_images/3d texture creator.png)
 
 The plugin comes with a 3D Texture Creator so that you can easily give a little life to your fog volumes. More specifically, you can generate 3D noise textures. You can find this tool under `Project -> Tools -> Create 3D Texture...`. 
 
-![3D texture location](doc_images/3D texture location.png)
+![3d texture location](doc_images/3d texture location.png)
 
 After setting up the texture (Each label has a tooltip for you), press the `Create Texture` button to save the texture to a location. If you're not overriding an existing texture, then you'll have to close and open the engine window to refresh the file manager. Then select the texture and setup the slices (you get the numbers from the texture creator). If the texture is being created for the first time, then it would be imported as a regular texture. You would need to manually reimport it as a `Texture3D` and restart the editor. And just like that, you should now have a 3D texture to use in your fog. :)
 
 ## Demo
 
-![Volumetrics demo](doc_images/Volumetrics demo.png)
+![volumetrics demo](doc_images/volumetrics demo.png)
 
 The project comes with a demo to see what can be done with the plugin. You look around with the mouse and move with the arrow keys. To see your mouse again, press the `Esc` key. Each setting on the top right has a tooltip to tell you about what they do.
 
