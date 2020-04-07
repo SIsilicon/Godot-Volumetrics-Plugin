@@ -10,6 +10,10 @@ func _ready() -> void:
 	if get_tree().edited_scene_root != self:
 		$VBoxContainer/Create.icon = get_icon("Texture3D", "EditorIcons")
 		$Preview/ColorRect.material = $Preview/ColorRect.material.duplicate()
+	
+	for child in $VBoxContainer.get_children():
+		if child is HBoxContainer and child.get_child(1) is SpinBox:
+			_on_value_changed(child.get_child(1).value, child.name.to_lower())
 
 func _on_Create_pressed() -> void:
 	$FileDialog.popup_centered()

@@ -100,15 +100,18 @@ func set_handle(gizmo : EditorSpatialGizmo, index : int, camera : Camera, point 
 		1: extents.y = max(closest_point.y, 0.01)
 		2: extents.z = max(closest_point.z, 0.01)
 	volume.extents = extents
-	property_list_changed_notify()
+	volume.property_list_changed_notify()
 
 func commit_handle(gizmo : EditorSpatialGizmo, index : int, restore, cancel := false) -> void:
 	var volume := gizmo.get_spatial_node()
 	
 	if cancel:
 		volume.extents = restore
+		volume.property_list_changed_notify()
+		return
 	
 	undo_redo.create_action("Change Volume Extents")
 	undo_redo.add_do_method(volume, "set_extents", volume.extents)
 	undo_redo.add_undo_method(volume, "set_extents", restore)
 	undo_redo.commit_action()
+	volume.property_list_changed_notify()

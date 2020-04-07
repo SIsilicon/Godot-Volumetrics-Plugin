@@ -1,10 +1,12 @@
 # Godot Volumetrics Plugin
 
+![Volumetrics Plugin](doc_images/Volumetrics Plugin.png)
+
 Hello fellow Godot user. This plugin will enable to create well lit volumetric fog in the game engine. **GLES 3 only**.
 
 ## What is it exactly?
 
-Well as you may know, there are different ways of achieving volumetric effects; each one have their one advantages and disadvantages.
+Well as you may know, there are different ways of achieving volumetric effects; each one has their one advantages and disadvantages.
 
 * **Analytic fog** :- An oldy but a goody, this blends a solid colour onto the scene based on depth, and sometimes height. It's easy to calculate, but usually doesn't interact with lights in the scene.
 
@@ -28,7 +30,7 @@ To start adding volumetric fog to your scene, you need to first add a `Volumetri
 
 * `Start`:- The closest point to where volumes appear.
 * `End` :- The _farthest_ point to where volumes appear.
-* `Tile Size` :- The size of each tile in the 3D textures used to render the effect. A smaller number allows finer detail, but can reduce performance.
+* `Tile Size` :- The size of each tile in the 3D textures used to render the effect. A smaller number allows finer detail, but can **severely** reduce performance.
 * `Samples` :- The number of layers used to render the volumes. A larger number allows more detail along the _depth_ of the scene, but can reduce performance.
 * `Distribution` :- How much the volume layers get packed close to the `Start` distance. A value of zero means equal distribution, while a value of one distributes the layers closer to the viewer, giving more detail close up than farther away.
 * `Temporal Blending` :- How much the effect blends with the previous frame. A higher value can smooth the effect more, but is more susceptible to ghosting artifacts. Setting it to zero disables blending altogether.
@@ -65,9 +67,25 @@ After you've added the node mentioned above, the `VolumeProxy` node should now w
 * `Uvw Scale` :- The scale factor of the uvw texture coordinates.
 * `Uvw Offset` :- The offset of the uvw texture coordinates.
 
-### Other stuff
+## 3D Texture Creator
 
-By default, all lights add to the scene affect volumes at the same strength, but you can adjust this strength for each individual light. Each one should now have a `Volumetric Energy` parameter. This can be used to strengthen or weaken the volumetric effect the light has, without changing the energy the light contributes to real geometry. If you want to do it by script then you must set it as a meta value.
+![3D texture creator](doc_images/3D texture creator.png)
+
+The plugin comes with a 3D Texture Creator so that you can easily give a little life to your fog volumes. More specifically, you can generate 3D noise textures. You can find this tool under `Project -> Tools -> Create 3D Texture...`. 
+
+![3D texture location](doc_images/3D texture location.png)
+
+After setting up the texture (Each label has a tooltip for you), press the `Create Texture` button to save the texture to a location. If you're not overriding an existing texture, then you'll have to close and open the engine window to refresh the file manager. Then select the texture and setup the slices (you get the numbers from the texture creator). If the texture is being created for the first time, then it would be imported as a regular texture. You would need to manually reimport it as a `Texture3D` and restart the editor. And just like that, you should now have a 3D texture to use in your fog. :)
+
+## Demo
+
+![Volumetrics demo](doc_images/Volumetrics demo.png)
+
+The project comes with a demo to see what can be done with the plugin. You look around with the mouse and move with the arrow keys. To see your mouse again, press the `Esc` key. Each setting on the top right has a tooltip to tell you about what they do.
+
+## Other stuff
+
+By default, all lights added to the scene affect volumes at the same strength, but you can adjust this strength for each individual light. Each one should now have a `Volumetric Energy` parameter. This can be used to strengthen or weaken the volumetric effect the light has, without changing the energy the light contributes to real geometry. If you want to do it by script then you must set it as a meta value.
 
 ```GDScript
 set_meta("volumetric", energy_you_wanna_set_as)

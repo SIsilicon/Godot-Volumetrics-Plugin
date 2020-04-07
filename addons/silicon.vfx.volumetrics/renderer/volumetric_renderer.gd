@@ -279,9 +279,9 @@ func set_volume_param(key, param : String, value) -> void:
 	if param == "transform":
 		for mesh in volumes[key]:
 			mesh.transform = value
-	elif param == "visible":
-		for mesh in volumes[key]:
-			mesh.visible = value
+#	elif param == "visible":
+#		for mesh in volumes[key]:
+#			mesh.visible = value
 	elif param == "shader":
 		for idx in volumes[key].size():
 			var mesh : MeshInstance = volumes[key][idx]

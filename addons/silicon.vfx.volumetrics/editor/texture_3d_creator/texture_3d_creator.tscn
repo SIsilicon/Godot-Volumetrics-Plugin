@@ -180,13 +180,12 @@ shader_param/contrast = 3.0
 shader_param/brightness = -0.2
 
 [node name="Texture3DCreator" type="WindowDialog"]
-visible = true
 anchor_right = 1.0
 anchor_bottom = 1.0
-margin_left = 486.716
-margin_top = 118.136
-margin_right = -438.284
-margin_bottom = -139.864
+margin_left = 375.5
+margin_top = 129.0
+margin_right = -375.5
+margin_bottom = -129.0
 window_title = "Create 3D Texture"
 resizable = true
 script = ExtResource( 1 )
@@ -206,17 +205,17 @@ __meta__ = {
 }
 
 [node name="TextureRect" type="TextureRect" parent="VBoxContainer"]
-margin_right = 319.0
-margin_bottom = 143.0
+margin_right = 237.0
+margin_bottom = 41.0
 size_flags_vertical = 3
 texture = SubResource( 1 )
 expand = true
 stretch_mode = 6
 
 [node name="Settings" type="Label" parent="VBoxContainer"]
-margin_top = 147.0
-margin_right = 319.0
-margin_bottom = 161.0
+margin_top = 45.0
+margin_right = 237.0
+margin_bottom = 59.0
 size_flags_vertical = 1
 size_flags_stretch_ratio = 0.75
 custom_styles/normal = SubResource( 2 )
@@ -225,19 +224,23 @@ align = 1
 valign = 1
 
 [node name="Resolution" type="HBoxContainer" parent="VBoxContainer"]
-margin_top = 165.0
-margin_right = 319.0
-margin_bottom = 189.0
+margin_top = 63.0
+margin_right = 237.0
+margin_bottom = 87.0
 
 [node name="Label" type="Label" parent="VBoxContainer/Resolution"]
 margin_top = 5.0
-margin_right = 84.0
+margin_right = 80.0
 margin_bottom = 19.0
-text = "Resolution:   "
+rect_min_size = Vector2( 80, 0 )
+hint_tooltip = "The resolution of the noise texture.
+The slice settings for importing will appear at the bottom."
+mouse_filter = 0
+text = "Resolution"
 
 [node name="SpinBox" type="SpinBox" parent="VBoxContainer/Resolution"]
-margin_left = 88.0
-margin_right = 319.0
+margin_left = 84.0
+margin_right = 237.0
 margin_bottom = 24.0
 size_flags_horizontal = 3
 min_value = 32.0
@@ -246,19 +249,22 @@ value = 64.0
 align = 3
 
 [node name="Seed" type="HBoxContainer" parent="VBoxContainer"]
-margin_top = 193.0
-margin_right = 319.0
-margin_bottom = 217.0
+margin_top = 91.0
+margin_right = 237.0
+margin_bottom = 115.0
 
 [node name="Label" type="Label" parent="VBoxContainer/Seed"]
 margin_top = 5.0
-margin_right = 83.0
+margin_right = 80.0
 margin_bottom = 19.0
-text = "Seed:            "
+rect_min_size = Vector2( 80, 0 )
+hint_tooltip = "A different seed gives a different set of noise."
+mouse_filter = 0
+text = "Seed"
 
 [node name="SpinBox" type="SpinBox" parent="VBoxContainer/Seed"]
-margin_left = 87.0
-margin_right = 319.0
+margin_left = 84.0
+margin_right = 237.0
 margin_bottom = 24.0
 size_flags_horizontal = 3
 min_value = -100.0
@@ -267,26 +273,30 @@ allow_lesser = true
 align = 3
 
 [node name="Control" type="Control" parent="VBoxContainer"]
-margin_top = 221.0
-margin_right = 319.0
-margin_bottom = 229.0
+margin_top = 119.0
+margin_right = 237.0
+margin_bottom = 121.0
 size_flags_vertical = 3
 size_flags_stretch_ratio = 0.06
 
 [node name="Period" type="HBoxContainer" parent="VBoxContainer"]
-margin_top = 233.0
-margin_right = 319.0
-margin_bottom = 257.0
+margin_top = 125.0
+margin_right = 237.0
+margin_bottom = 149.0
 
 [node name="Label" type="Label" parent="VBoxContainer/Period"]
 margin_top = 5.0
-margin_right = 85.0
+margin_right = 80.0
 margin_bottom = 19.0
-text = "Period:          "
+rect_min_size = Vector2( 80, 0 )
+hint_tooltip = "How much of the noise is rendered into the texture.
+Larger period gives finer noise."
+mouse_filter = 0
+text = "Period"
 
 [node name="SpinBox" type="SpinBox" parent="VBoxContainer/Period"]
-margin_left = 89.0
-margin_right = 319.0
+margin_left = 84.0
+margin_right = 237.0
 margin_bottom = 24.0
 size_flags_horizontal = 3
 min_value = 1.0
@@ -295,19 +305,22 @@ value = 2.0
 align = 3
 
 [node name="Octaves" type="HBoxContainer" parent="VBoxContainer"]
-margin_top = 261.0
-margin_right = 319.0
-margin_bottom = 285.0
+margin_top = 153.0
+margin_right = 237.0
+margin_bottom = 177.0
 
 [node name="Label" type="Label" parent="VBoxContainer/Octaves"]
 margin_top = 5.0
-margin_right = 84.0
+margin_right = 80.0
 margin_bottom = 19.0
-text = "Octaves:       "
+rect_min_size = Vector2( 80, 0 )
+hint_tooltip = "How many iterations of noise are added together."
+mouse_filter = 0
+text = "Octaves"
 
 [node name="SpinBox" type="SpinBox" parent="VBoxContainer/Octaves"]
-margin_left = 88.0
-margin_right = 319.0
+margin_left = 84.0
+margin_right = 237.0
 margin_bottom = 24.0
 size_flags_horizontal = 3
 min_value = 1.0
@@ -316,19 +329,22 @@ value = 3.0
 align = 3
 
 [node name="Persistence" type="HBoxContainer" parent="VBoxContainer"]
-margin_top = 289.0
-margin_right = 319.0
-margin_bottom = 313.0
+margin_top = 181.0
+margin_right = 237.0
+margin_bottom = 205.0
 
 [node name="Label" type="Label" parent="VBoxContainer/Persistence"]
 margin_top = 5.0
-margin_right = 83.0
+margin_right = 80.0
 margin_bottom = 19.0
-text = "Persistence: "
+rect_min_size = Vector2( 80, 0 )
+hint_tooltip = "How much each octave affects the base noise."
+mouse_filter = 0
+text = "Persistence"
 
 [node name="SpinBox" type="SpinBox" parent="VBoxContainer/Persistence"]
-margin_left = 87.0
-margin_right = 319.0
+margin_left = 84.0
+margin_right = 237.0
 margin_bottom = 24.0
 size_flags_horizontal = 3
 max_value = 1.0
@@ -337,26 +353,29 @@ value = 0.5
 align = 3
 
 [node name="Control2" type="Control" parent="VBoxContainer"]
-margin_top = 317.0
-margin_right = 319.0
-margin_bottom = 324.0
+margin_top = 209.0
+margin_right = 237.0
+margin_bottom = 211.0
 size_flags_vertical = 3
 size_flags_stretch_ratio = 0.05
 
 [node name="Brightness" type="HBoxContainer" parent="VBoxContainer"]
-margin_top = 328.0
-margin_right = 319.0
-margin_bottom = 352.0
+margin_top = 215.0
+margin_right = 237.0
+margin_bottom = 239.0
 
 [node name="Label" type="Label" parent="VBoxContainer/Brightness"]
 margin_top = 5.0
-margin_right = 84.0
+margin_right = 80.0
 margin_bottom = 19.0
-text = "Brightness:   "
+rect_min_size = Vector2( 80, 0 )
+hint_tooltip = "How bright the noise is."
+mouse_filter = 0
+text = "Brightness"
 
 [node name="SpinBox" type="SpinBox" parent="VBoxContainer/Brightness"]
-margin_left = 88.0
-margin_right = 319.0
+margin_left = 84.0
+margin_right = 237.0
 margin_bottom = 24.0
 size_flags_horizontal = 3
 min_value = -1.0
@@ -365,19 +384,22 @@ step = 0.01
 align = 3
 
 [node name="Contrast" type="HBoxContainer" parent="VBoxContainer"]
-margin_top = 356.0
-margin_right = 319.0
-margin_bottom = 380.0
+margin_top = 243.0
+margin_right = 237.0
+margin_bottom = 267.0
 
 [node name="Label" type="Label" parent="VBoxContainer/Contrast"]
 margin_top = 5.0
-margin_right = 81.0
+margin_right = 80.0
 margin_bottom = 19.0
-text = "Contrast:      "
+rect_min_size = Vector2( 80, 0 )
+hint_tooltip = "How sharp the noise is."
+mouse_filter = 0
+text = "Contrast"
 
 [node name="SpinBox" type="SpinBox" parent="VBoxContainer/Contrast"]
-margin_left = 85.0
-margin_right = 319.0
+margin_left = 84.0
+margin_right = 237.0
 margin_bottom = 24.0
 size_flags_horizontal = 3
 max_value = 3.0
@@ -386,33 +408,33 @@ value = 1.0
 align = 3
 
 [node name="Control3" type="Control" parent="VBoxContainer"]
-margin_top = 384.0
-margin_right = 319.0
-margin_bottom = 392.0
+margin_top = 271.0
+margin_right = 237.0
+margin_bottom = 273.0
 size_flags_vertical = 3
 size_flags_stretch_ratio = 0.06
 
 [node name="Create" type="Button" parent="VBoxContainer"]
-margin_top = 396.0
-margin_right = 319.0
-margin_bottom = 418.0
+margin_top = 277.0
+margin_right = 237.0
+margin_bottom = 299.0
 text = "Create Texture"
 icon = SubResource( 4 )
 
 [node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer"]
-margin_top = 422.0
-margin_right = 319.0
-margin_bottom = 436.0
+margin_top = 303.0
+margin_right = 237.0
+margin_bottom = 317.0
 
 [node name="Horizontal" type="Label" parent="VBoxContainer/HBoxContainer"]
-margin_right = 157.0
+margin_right = 116.0
 margin_bottom = 14.0
 size_flags_horizontal = 3
 text = "Horizontal Slices: "
 
 [node name="Vertical" type="Label" parent="VBoxContainer/HBoxContainer"]
-margin_left = 161.0
-margin_right = 319.0
+margin_left = 120.0
+margin_right = 237.0
 margin_bottom = 14.0
 size_flags_horizontal = 3
 text = "Vertical Slices: "

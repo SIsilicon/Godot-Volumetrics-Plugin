@@ -1,4 +1,4 @@
-[gd_scene load_steps=14 format=2]
+[gd_scene load_steps=19 format=2]
 
 [ext_resource path="res://addons/silicon.vfx.volumetrics/volume_proxy.gd" type="Script" id=1]
 [ext_resource path="res://addons/silicon.vfx.volumetrics/material/volumetric_material.gd" type="Script" id=2]
@@ -7,6 +7,10 @@
 [ext_resource path="res://addons/silicon.vfx.volumetrics/volumetric_fog.gd" type="Script" id=5]
 [ext_resource path="res://sponza_scene/sponza.obj" type="ArrayMesh" id=6]
 [ext_resource path="res://sponza_scene/KAMEN-stup.JPG" type="Texture" id=7]
+[ext_resource path="res://GUI.gd" type="Script" id=8]
+[ext_resource path="res://omni_light.svg" type="Texture" id=9]
+[ext_resource path="res://directional_light.svg" type="Texture" id=10]
+[ext_resource path="res://test_volume.png" type="Texture3D" id=11]
 
 [sub_resource type="SpatialMaterial" id=1]
 resource_name = "sp_00_svod"
@@ -30,10 +34,10 @@ tracks/0/loop_wrap = true
 tracks/0/imported = false
 tracks/0/enabled = true
 tracks/0/keys = {
-"times": PoolRealArray( 0, 3, 6 ),
-"transitions": PoolRealArray( 1, 1, 1 ),
+"times": PoolRealArray( 0, 3 ),
+"transitions": PoolRealArray( 1, 1 ),
 "update": 0,
-"values": [ Vector3( 13, 2.2, -4 ), Vector3( -13, 2.2, -4 ), Vector3( 13, 2.2, -4 ) ]
+"values": [ Vector3( 13, 2.2, -4 ), Vector3( -13, 2.2, -4 ) ]
 }
 tracks/1/type = "value"
 tracks/1/path = NodePath("OmniLight2:translation")
@@ -42,43 +46,65 @@ tracks/1/loop_wrap = true
 tracks/1/imported = false
 tracks/1/enabled = true
 tracks/1/keys = {
-"times": PoolRealArray( 0, 3, 6 ),
-"transitions": PoolRealArray( 1, 1, 1 ),
+"times": PoolRealArray( 0, 3 ),
+"transitions": PoolRealArray( 1, 1 ),
 "update": 0,
-"values": [ Vector3( -13, 2.2, 4 ), Vector3( 13, 2.2, 4 ), Vector3( -13, 2.2, 4 ) ]
+"values": [ Vector3( -13, 2.2, 4 ), Vector3( 13, 2.2, 4 ) ]
+}
+tracks/2/type = "value"
+tracks/2/path = NodePath("DirectionalLight:rotation_degrees")
+tracks/2/interp = 2
+tracks/2/loop_wrap = true
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/keys = {
+"times": PoolRealArray( 0, 3 ),
+"transitions": PoolRealArray( 1, 1 ),
+"update": 0,
+"values": [ Vector3( -120, 0, 0 ), Vector3( -60, 0, 0 ) ]
 }
 
 [sub_resource type="Resource" id=4]
 script = ExtResource( 2 )
 scatter_color = Color( 0.75, 0.75, 0.75, 1 )
-density = 0.048
-absorption_color = Color( 0.854902, 0.72549, 0.72549, 1 )
-anisotropy = 0.424
+density = 0.15
+scatter_texture = ExtResource( 11 )
+absorption_color = Color( 0.670588, 0.670588, 0.670588, 1 )
+anisotropy = 0.616
 emission_enabled = false
-uvw_scale = Vector3( 1, 1, 1 )
+uvw_scale = Vector3( 0.177, 0.174, 0.155 )
 uvw_offset = Vector3( 0, 0, 0 )
 
 [sub_resource type="Resource" id=5]
 script = ExtResource( 2 )
 scatter_color = Color( 0.568627, 0.501961, 0.894118, 1 )
-density = 0.746
+density = 0.379
 absorption_color = Color( 0.921569, 0.921569, 0.921569, 1 )
-anisotropy = 0.0
+anisotropy = -0.585
 emission_enabled = false
 uvw_scale = Vector3( 1, 1, 1 )
 uvw_offset = Vector3( 0, 0, 0 )
 
 [sub_resource type="Resource" id=6]
 script = ExtResource( 2 )
-scatter_color = Color( 0.75, 0.75, 0.75, 1 )
-density = 1.0
-absorption_color = Color( 0, 0, 0, 1 )
+scatter_color = Color( 0.572549, 0.572549, 0.572549, 1 )
+density = 4.0
+absorption_color = Color( 0.498039, 0.12549, 0.12549, 1 )
 anisotropy = 0.0
 emission_enabled = true
-emission_color = Color( 0.145098, 0.2, 1, 1 )
-emission_strength = 0.6
+emission_color = Color( 0.427451, 0.568627, 0.905882, 1 )
+emission_strength = 0.0
 uvw_scale = Vector3( 1, 1, 1 )
 uvw_offset = Vector3( 0, 0, 0 )
+
+[sub_resource type="StyleBoxFlat" id=7]
+bg_color = Color( 0.141388, 0.135132, 0.160156, 1 )
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color( 0.0666667, 0.0666667, 0.0666667, 1 )
+corner_radius_bottom_right = 8
+expand_margin_left = 5.0
+expand_margin_top = 5.0
 
 [node name="Spatial" type="Spatial"]
 script = ExtResource( 3 )
@@ -107,8 +133,8 @@ material/18 = null
 material/19 = null
 material/20 = null
 material/21 = null
-material/22 = null
-material/23 = SubResource( 1 )
+material/22 = SubResource( 1 )
+material/23 = null
 material/24 = null
 material/25 = null
 material/26 = null
@@ -131,6 +157,7 @@ __meta__ = {
 process_priority = 1
 transform = Transform( -4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, -10.1269, 2.20875, -4.42659e-07 )
 script = ExtResource( 4 )
+pitch_limit = 175
 max_speed = Vector3( 2, 2, 5 )
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
@@ -146,15 +173,15 @@ start = 0.1
 end = 60.0
 tile_size = 3
 samples = 1
-distribution = 0.93
-temporal_blending = 0.79
+distribution = 0.82
+temporal_blending = 0.83
 volumetric_shadows = true
 shadow_atlas_size = 512
 ambient_light_color = Color( 0.0823529, 0.0823529, 0.0823529, 1 )
 ambient_light_energy = 1.0
 
 [node name="OmniLight" type="OmniLight" parent="."]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 7.631, 2.2, -4 )
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 4.2717, 2.2, -4 )
 light_color = Color( 0.52549, 0.847059, 0.423529, 1 )
 shadow_enabled = true
 omni_range = 18.0
@@ -164,7 +191,7 @@ __meta__ = {
 }
 
 [node name="OmniLight2" type="OmniLight" parent="."]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -7.631, 2.2, 4 )
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -4.2717, 2.2, 4 )
 light_color = Color( 0.847059, 0.423529, 0.423529, 1 )
 shadow_enabled = true
 omni_range = 18.0
@@ -173,13 +200,20 @@ __meta__ = {
 "volumetric": 4.07
 }
 
+[node name="DirectionalLight" type="DirectionalLight" parent="."]
+transform = Transform( 1, 0, 0, 0, -0.171203, 0.985236, 0, -0.985236, -0.171203, 0, 2.54653, 0 )
+visible = false
+shadow_enabled = true
+__meta__ = {
+"volumetric": 2.0
+}
+
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
 autoplay = "omni lights"
-playback_speed = 0.5
+playback_speed = 0.0
 "anims/omni lights" = SubResource( 3 )
 
 [node name="VolumeProxy" type="Spatial" parent="."]
-visible = false
 script = ExtResource( 1 )
 material = SubResource( 4 )
 bounds_mode = 0
@@ -189,13 +223,279 @@ script = ExtResource( 1 )
 material = SubResource( 5 )
 bounds_mode = 1
 extents = Vector3( 16.605, 1.63871, 7.77037 )
-bounds_fade = Vector3( 0, 0.846, 0 )
+bounds_fade = Vector3( 0, 0.584, 0 )
 
 [node name="VolumeProxy3" type="Spatial" parent="."]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.33799, 0 )
-visible = false
 script = ExtResource( 1 )
 material = SubResource( 6 )
 bounds_mode = 2
-extents = Vector3( 1.591, 1.396, 1.53293 )
-bounds_fade = Vector3( 0, 0.787, 0 )
+extents = Vector3( 1.5, 1.5, 1.5 )
+bounds_fade = Vector3( 0, 0.5, 0 )
+
+[node name="GUI" type="Control" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+script = ExtResource( 8 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="FPS" type="Label" parent="GUI"]
+anchor_left = 1.0
+anchor_right = 1.0
+margin_left = -66.5039
+margin_top = 10.2384
+margin_right = -20.5039
+margin_bottom = 24.2384
+custom_colors/font_color_shadow = Color( 0, 0, 0, 1 )
+text = "FPS: 30"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Panel" type="Panel" parent="GUI"]
+margin_right = 358.0
+margin_bottom = 276.0
+custom_styles/panel = SubResource( 7 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="VBox" type="VBoxContainer" parent="GUI/Panel"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = 11.0
+margin_top = 8.0
+margin_right = -11.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="AnimatedLights" type="HBoxContainer" parent="GUI/Panel/VBox"]
+margin_right = 336.0
+margin_bottom = 24.0
+
+[node name="Label" type="Label" parent="GUI/Panel/VBox/AnimatedLights"]
+margin_top = 5.0
+margin_right = 135.0
+margin_bottom = 19.0
+rect_min_size = Vector2( 135, 0 )
+hint_tooltip = "Whether to move the lights about."
+mouse_filter = 0
+text = "Animated Lights"
+
+[node name="CheckBox" type="CheckBox" parent="GUI/Panel/VBox/AnimatedLights"]
+margin_left = 139.0
+margin_right = 336.0
+margin_bottom = 24.0
+size_flags_horizontal = 3
+text = "On"
+
+[node name="LightType" type="HBoxContainer" parent="GUI/Panel/VBox"]
+margin_top = 28.0
+margin_right = 336.0
+margin_bottom = 50.0
+
+[node name="Label" type="Label" parent="GUI/Panel/VBox/LightType"]
+margin_top = 4.0
+margin_right = 135.0
+margin_bottom = 18.0
+rect_min_size = Vector2( 135, 0 )
+hint_tooltip = "The type of light illuminating the scene."
+mouse_filter = 0
+text = "Light Type"
+
+[node name="OptionButton" type="OptionButton" parent="GUI/Panel/VBox/LightType"]
+margin_left = 139.0
+margin_right = 336.0
+margin_bottom = 22.0
+size_flags_horizontal = 3
+text = "Omni Lights"
+icon = ExtResource( 9 )
+items = [ "Omni Lights", ExtResource( 9 ), false, 0, null, "Directional Light", ExtResource( 10 ), false, 1, null ]
+selected = 0
+
+[node name="HSeparator" type="HSeparator" parent="GUI/Panel/VBox"]
+margin_top = 54.0
+margin_right = 336.0
+margin_bottom = 59.0
+custom_constants/separation = 5
+
+[node name="TemporalBlending" type="HBoxContainer" parent="GUI/Panel/VBox"]
+margin_top = 63.0
+margin_right = 336.0
+margin_bottom = 87.0
+
+[node name="Label" type="Label" parent="GUI/Panel/VBox/TemporalBlending"]
+margin_top = 5.0
+margin_right = 135.0
+margin_bottom = 19.0
+rect_min_size = Vector2( 135, 0 )
+hint_tooltip = "How much the volumetrics blends with the previous frame.
+A higher value can smooth the effect more, but is more susceptible to ghosting artifacts."
+mouse_filter = 0
+text = "Temporal Blending"
+
+[node name="SpinBox" type="SpinBox" parent="GUI/Panel/VBox/TemporalBlending"]
+margin_left = 139.0
+margin_right = 336.0
+margin_bottom = 24.0
+size_flags_horizontal = 3
+max_value = 0.95
+step = 0.01
+
+[node name="TileSize" type="HBoxContainer" parent="GUI/Panel/VBox"]
+margin_top = 91.0
+margin_right = 336.0
+margin_bottom = 111.0
+
+[node name="Label" type="Label" parent="GUI/Panel/VBox/TileSize"]
+margin_top = 3.0
+margin_right = 135.0
+margin_bottom = 17.0
+rect_min_size = Vector2( 135, 0 )
+hint_tooltip = "The size of each tile in the 3D textures used to render the effect.
+A smaller number allows finer detail, but can severely reduce performance."
+mouse_filter = 0
+text = "Tile Size"
+
+[node name="OptionButton" type="OptionButton" parent="GUI/Panel/VBox/TileSize"]
+margin_left = 139.0
+margin_right = 336.0
+margin_bottom = 20.0
+size_flags_horizontal = 3
+text = "16x"
+items = [ "2x", null, false, 0, null, "4x", null, false, 1, null, "8x", null, false, 2, null, "16x", null, false, 3, null ]
+selected = 3
+
+[node name="Samples" type="HBoxContainer" parent="GUI/Panel/VBox"]
+margin_top = 115.0
+margin_right = 336.0
+margin_bottom = 135.0
+
+[node name="Label" type="Label" parent="GUI/Panel/VBox/Samples"]
+margin_top = 3.0
+margin_right = 135.0
+margin_bottom = 17.0
+rect_min_size = Vector2( 135, 0 )
+hint_tooltip = "The number of layers used to render the volumes.
+A larger number allows more detail along the depth of the scene, but can reduce performance."
+mouse_filter = 0
+text = "Samples"
+
+[node name="OptionButton" type="OptionButton" parent="GUI/Panel/VBox/Samples"]
+margin_left = 139.0
+margin_right = 336.0
+margin_bottom = 20.0
+size_flags_horizontal = 3
+text = "64"
+items = [ "32", null, false, 0, null, "64", null, false, 1, null, "128", null, false, 2, null, "256", null, false, 3, null ]
+selected = 1
+
+[node name="VolumetricShadows" type="HBoxContainer" parent="GUI/Panel/VBox"]
+margin_top = 139.0
+margin_right = 336.0
+margin_bottom = 163.0
+
+[node name="Label" type="Label" parent="GUI/Panel/VBox/VolumetricShadows"]
+margin_top = 5.0
+margin_right = 135.0
+margin_bottom = 19.0
+rect_min_size = Vector2( 135, 0 )
+hint_tooltip = "Enabling this allows volumes in view to cast shadows on themselves (Not on geometry though)."
+mouse_filter = 0
+text = "Volumetric Shadows"
+
+[node name="CheckBox" type="CheckBox" parent="GUI/Panel/VBox/VolumetricShadows"]
+margin_left = 139.0
+margin_right = 336.0
+margin_bottom = 24.0
+size_flags_horizontal = 3
+text = "On"
+
+[node name="HSeparator2" type="HSeparator" parent="GUI/Panel/VBox"]
+margin_top = 167.0
+margin_right = 336.0
+margin_bottom = 172.0
+custom_constants/separation = 5
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="TexturedFog" type="HBoxContainer" parent="GUI/Panel/VBox"]
+margin_top = 176.0
+margin_right = 336.0
+margin_bottom = 200.0
+
+[node name="Label" type="Label" parent="GUI/Panel/VBox/TexturedFog"]
+margin_top = 5.0
+margin_right = 135.0
+margin_bottom = 19.0
+rect_min_size = Vector2( 135, 0 )
+hint_tooltip = "Whether to texture the global fog."
+mouse_filter = 0
+text = "Textured Fog"
+
+[node name="CheckBox" type="CheckBox" parent="GUI/Panel/VBox/TexturedFog"]
+margin_left = 139.0
+margin_right = 336.0
+margin_bottom = 24.0
+size_flags_horizontal = 3
+pressed = true
+text = "On"
+
+[node name="HeightFog" type="HBoxContainer" parent="GUI/Panel/VBox"]
+margin_top = 204.0
+margin_right = 336.0
+margin_bottom = 228.0
+
+[node name="Label" type="Label" parent="GUI/Panel/VBox/HeightFog"]
+margin_top = 5.0
+margin_right = 135.0
+margin_bottom = 19.0
+rect_min_size = Vector2( 135, 0 )
+hint_tooltip = "Whether the local height fog should be visible."
+mouse_filter = 0
+text = "Height Fog"
+
+[node name="CheckBox" type="CheckBox" parent="GUI/Panel/VBox/HeightFog"]
+margin_left = 139.0
+margin_right = 336.0
+margin_bottom = 24.0
+size_flags_horizontal = 3
+pressed = true
+text = "On"
+
+[node name="EmissiveFog" type="HBoxContainer" parent="GUI/Panel/VBox"]
+margin_top = 232.0
+margin_right = 336.0
+margin_bottom = 256.0
+
+[node name="Label" type="Label" parent="GUI/Panel/VBox/EmissiveFog"]
+margin_top = 5.0
+margin_right = 135.0
+margin_bottom = 19.0
+rect_min_size = Vector2( 135, 0 )
+hint_tooltip = "Whether the local ball of fog should emit light."
+mouse_filter = 0
+text = "Emissive Fog"
+
+[node name="CheckBox" type="CheckBox" parent="GUI/Panel/VBox/EmissiveFog"]
+margin_left = 139.0
+margin_right = 336.0
+margin_bottom = 24.0
+size_flags_horizontal = 3
+text = "On"
+
+[node name="Tween" type="Tween" parent="GUI"]
+[connection signal="toggled" from="GUI/Panel/VBox/AnimatedLights/CheckBox" to="GUI" method="_on_value_changed" binds= [ "AnimatedLights" ]]
+[connection signal="item_selected" from="GUI/Panel/VBox/LightType/OptionButton" to="GUI" method="_on_value_changed" binds= [ "LightType" ]]
+[connection signal="value_changed" from="GUI/Panel/VBox/TemporalBlending/SpinBox" to="GUI" method="_on_value_changed" binds= [ "TemporalBlending" ]]
+[connection signal="item_selected" from="GUI/Panel/VBox/TileSize/OptionButton" to="GUI" method="_on_value_changed" binds= [ "TileSize" ]]
+[connection signal="item_selected" from="GUI/Panel/VBox/Samples/OptionButton" to="GUI" method="_on_value_changed" binds= [ "Samples" ]]
+[connection signal="toggled" from="GUI/Panel/VBox/VolumetricShadows/CheckBox" to="GUI" method="_on_value_changed" binds= [ "VolumetricShadows" ]]
+[connection signal="toggled" from="GUI/Panel/VBox/TexturedFog/CheckBox" to="GUI" method="_on_value_changed" binds= [ "TexturedFog" ]]
+[connection signal="toggled" from="GUI/Panel/VBox/HeightFog/CheckBox" to="GUI" method="_on_value_changed" binds= [ "HeightFog" ]]
+[connection signal="toggled" from="GUI/Panel/VBox/EmissiveFog/CheckBox" to="GUI" method="_on_value_changed" binds= [ "EmissiveFog" ]]
