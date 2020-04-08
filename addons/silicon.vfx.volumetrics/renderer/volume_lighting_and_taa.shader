@@ -224,7 +224,6 @@ void calculate_light(int light_index, vec3 wpos, vec3 wdir, float anisotropy, ma
 	}
 	
 	float phase = phase_function(wdir, light_dir.xyz / light_dir.w, anisotropy);
-	
 	lighting += attenuation * phase;
 }
 
@@ -248,14 +247,13 @@ void fragment() {
 	if(is_transmission) {
 		COLOR.rgb = volume_sample;
 	} else {
-		float anisotropy = texture(phase_volume, SCREEN_UV).r / max(1.0, texture(phase_volume, SCREEN_UV).g);
-		
 		COLOR.rgb = volume_sample * ambient_light / (4.0 * M_PI);
 		COLOR.rgb += texture(emission_volume, SCREEN_UV).rgb;
 		
-		if(use_light_data) {
+		if(use_light_data && any(greaterThan(volume_sample, vec3(1e-5)))) {
 			mat4 view_projection_matrix = projection_matrix * inverse(curr_view_matrix);
 			
+			float anisotropy = texture(phase_volume, SCREEN_UV).r / max(1.0, texture(phase_volume, SCREEN_UV).g);
 			ivec2 light_data_size = textureSize(light_data, 0);
 			vec3 wdir = normalize(wpos.xyz - curr_view_matrix[3].xyz);
 			vec3 lighting = vec3(0.0);

@@ -14,6 +14,7 @@ var bounds_fade := Vector3.ZERO setget set_bounds_fade
 
 var vol_id := -1
 var vis_notifier := VisibilityNotifier.new()
+var in_view = true
 
 func _get_property_list() -> Array:
 	var properties := [
@@ -31,8 +32,7 @@ func _get_property_list() -> Array:
 	return properties
 
 func _enter_tree() -> void:
-	if not vis_notifier.is_inside_tree():
-		add_child(vis_notifier)
+	set_disable_scale(true)
 	
 	vol_id = VolumetricServer.add_volume(get_viewport())
 	set_material(material)
@@ -40,8 +40,11 @@ func _enter_tree() -> void:
 	set_extents(extents)
 	set_bounds_fade(bounds_fade)
 
+func _ready() -> void:
+	if not vis_notifier.is_inside_tree():
+		add_child(vis_notifier)
+
 func _process(delta : float) -> void:
-	scale = Vector3.ONE
 	var vol_visible := is_visible_in_tree()
 	if bounds_mode != GLOBAL:
 		vol_visible = vol_visible and vis_notifier.is_on_screen()
@@ -107,3 +110,5 @@ func set_bounds_fade(value : Vector3) -> void:
 	bounds_fade.y = clamp(value.y, 0.0, 1.0)
 	bounds_fade.z = clamp(value.z, 0.0, 1.0)
 	VolumetricServer.volume_set_param(vol_id, "bounds_fade", bounds_fade)
+
+

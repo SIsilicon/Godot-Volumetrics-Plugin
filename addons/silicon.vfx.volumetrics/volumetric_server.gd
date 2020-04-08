@@ -196,9 +196,16 @@ func update_nodes_in_viewport(node : Node, viewport : Viewport) -> void:
 
 func update_light(light : Light) -> void:
 	var renderer = lights[light]
+	var camera : Camera = renderer.camera
 	
 	var is_volumetric = light.has_meta("volumetric")
 	is_volumetric = true if not is_volumetric else light.get_meta("volumetric")
+	
+	if camera and not light is DirectionalLight:
+		var light_aabb : AABB = light.get_transformed_aabb()
+		var frustum_intersection = FrustumAABBIntersection.new(camera)
+		is_volumetric = is_volumetric and frustum_intersection.is_inside_frustum(light_aabb)
+	
 	if is_volumetric and not light.has_meta("_vol_id"):
 		_on_node_added(light)
 	elif not is_volumetric and light.has_meta("_vol_id"):

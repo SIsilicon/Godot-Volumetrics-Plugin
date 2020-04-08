@@ -83,7 +83,12 @@ After setting up the texture (Each label has a tooltip for you), press the `Crea
 
 ![volumetrics demo](doc_images/volumetrics_demo.png)
 
-The project comes with a demo to see what can be done with the plugin. You look around with the mouse and move with the arrow keys. To see your mouse again, press the `Esc` key. You can also hide the GUI with `G`. Each setting on the top right has a tooltip to tell you about what they do.
+The project comes with a demo to see what can be done with the plugin. Each setting on the top right has a tooltip to tell you about what they do.
+
+* You look around with the mouse and move with the arrow keys.
+* To see your mouse again, press the `Esc` key.
+* You can also hide the GUI with `G`.
+* To exit the demo, you press `Shift+Esc`. 
 
 ## Other stuff
 
@@ -93,13 +98,13 @@ By default, all lights added to the scene affect volumes at the same strength, b
 set_meta("volumetric", energy_you_wanna_set_as)
 ```
 
-Speaking of geometry, transparent geometries do not blend with volumetrics by default. You need to enable `Apply Volumetrics` to do that [*](#transparent-limit). Like `Volumetric Energy`, this too is set as a meta value.
+Speaking of geometry, transparent geometries do not blend with volumetrics by default. You need to enable `Apply Volumetrics` to do that[*](#transparent-limit). Like `Volumetric Energy`, this too is set as a meta value.
 
 ```GDScript
 set_meta("apply_volumetrics", wanna_apply_it)
 ```
 
-Friendly tip, the volumes are displayed in the last render layer (Layer 20), and their render priorities are -16 and -17.
+_*Friendly tip, the volumes are displayed in the last render layer (Layer 20), and their render priorities are -16 and -17._
 
 ## Limitations
 

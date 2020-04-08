@@ -22,7 +22,7 @@ func _get_property_list() -> Array:
 		{name="Volumetric Fog", type=TYPE_NIL, usage=PROPERTY_USAGE_CATEGORY},
 		{name="start", type=TYPE_REAL},
 		{name="end", type=TYPE_REAL},
-		{name="tile_size", type=TYPE_INT, hint=PROPERTY_HINT_ENUM, hint_string="2x,4x,8x,16x"},
+		{name="tile_size", type=TYPE_INT, hint=PROPERTY_HINT_ENUM, hint_string="4x,8x,16x"},
 		{name="samples", type=TYPE_INT, hint=PROPERTY_HINT_ENUM, hint_string="32,64,128,256"},
 		{name="distribution", type=TYPE_REAL, hint=PROPERTY_HINT_RANGE, hint_string="0,1,0.01"},
 		{name="temporal_blending", type=TYPE_REAL, hint=PROPERTY_HINT_RANGE, hint_string="0,0.95,0.01"},
@@ -66,7 +66,7 @@ func set_tile_size(value : int) -> void:
 	tile_size = value
 	if renderer_id == -1:
 		yield(self, "ready")
-	VolumetricServer.renderer_set_tile_size(renderer_id, [2,4,8,16][tile_size])
+	VolumetricServer.renderer_set_tile_size(renderer_id, [4,8,16][tile_size])
 
 func set_samples(value : int) -> void:
 	samples = value

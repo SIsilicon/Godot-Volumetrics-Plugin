@@ -170,17 +170,17 @@ func _process(delta) -> void:
 	$LightScatter/ColorRect.material.set_shader_param("blend", blend * float(frames_till_blending == 0))
 	$LightTransmit/ColorRect.material.set_shader_param("blend", blend * float(frames_till_blending == 0))
 	
-	# Apply all changes to light texture
-	if temp_light_img:
-		temp_light_img.unlock()
-		light_texture.create_from_image(temp_light_img, 0)
-		temp_light_img = null
-	
 	# Directional light shadow matrices need an update every frame.
 	for key in lights:
 		if lights[key].type == VolumetricServer.DIRECTIONAL_LIGHT and lights[key].shadows:
 			var shadow_matrix : Matrix4 = shadow_manager.get_shadow_data(key).shadow_matrix
 			pass_light_data(14, lights[key].index, shadow_matrix.get_data())
+	
+	# Apply all changes to light texture
+	if temp_light_img:
+		temp_light_img.unlock()
+		light_texture.create_from_image(temp_light_img, 0)
+		temp_light_img = null
 	
 	frames_till_blending = max(frames_till_blending - 1, 0)
 	prev_cam_transform = camera.get_camera_transform()

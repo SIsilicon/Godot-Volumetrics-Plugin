@@ -21,9 +21,9 @@ func _on_value_changed(value, control : String) -> void:
 			$Tween.interpolate_property(anim_player, "playback_speed", anim_player.playback_speed, new_speed, 0.5, 0, 0)
 			$Tween.start()
 		"LightType":
-			$"../DirectionalLight".visible = bool(value)
-			$"../OmniLight".visible = not bool(value)
-			$"../OmniLight2".visible = not bool(value)
+			$"../Lights/DirectionalLight".visible = bool(value)
+			$"../Lights/OmniLight".visible = not bool(value)
+			$"../Lights/OmniLight2".visible = not bool(value)
 		"TemporalBlending":
 			volume_fog.temporal_blending = value
 		"TileSize":
