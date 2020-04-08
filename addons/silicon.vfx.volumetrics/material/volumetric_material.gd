@@ -2,7 +2,7 @@ tool
 extends Resource
 class_name VolumetricMaterial, "volumetric_material.svg"
 
-const SHADER_TEMPLATE = preload("../Renderer/volume_injection.shader")
+const SHADER_TEMPLATE = preload("../renderer/volume_injection.shader")
 
 signal shader_changed
 

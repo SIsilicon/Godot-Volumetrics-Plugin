@@ -89,7 +89,7 @@ func add_renderer(viewport : Viewport) -> int:
 		id_counter += 1
 		return id_counter - 1
 	
-	var renderer = preload("Renderer/volumetric_renderer.tscn").instance()
+	var renderer = preload("renderer/volumetric_renderer.tscn").instance()
 	renderers[id_counter] = {node=renderer, viewport=viewport}
 	
 	
