@@ -6,13 +6,15 @@ Hello fellow Godot user. This plugin will enable to create well lit volumetric f
 
 ## What is it exactly?
 
+![volumetric_techniques](doc_images/volumetric_techniques.svg)
+
 Well as you may know, there are different ways of achieving volumetric effects; each one has their one advantages and disadvantages.
 
 * **Analytic fog** :- An oldy but a goody, this blends a solid colour onto the scene based on depth, and sometimes height. It's easy to calculate, but usually doesn't interact with lights in the scene.
 
 * **Billboard sprites** :- Semi-transparent sprites that always face the viewer can do a good job of simulating fire, clouds and smoke. The illusion can break however if viewed from multiple angles, or intersects any geometry, revealing the true nature of the billboard sprites.
-* **Raymarching** :- Doing what offline ray-tracers have always done, this technique is pretty versatile and allows you to render a bunch of volumetric effects. Like an offline ray-tracer however, it can be pretty slow when implemented naively.
-* **Voxel-based volumetric fog** :- The technique implemented here.
+* **Screen space postprocessing** :- Using what's on screen, this technique is pretty versatile and allows you to render a variety of volumetric effects. However, as the name implies, the effect is limited by what's visible.
+* **Voxel based volumetric fog** :- The technique implemented here.
 
 This technique, based on [frostbite's implementation](https://www.ea.com/frostbite/news/physically-based-unified-volumetric-rendering-in-frostbite), uses a bunch of frustum-aligned 3D textures to hold the participating media in clip-space. This media is then used to calculate lights in 3D space in a more unified manner. Local fog can easily be blended with each other, global fog, and to an extent in this case, transparent objects.
 
@@ -24,7 +26,7 @@ Whether it's downloaded from the asset library, or directly from the GitHub repo
 
 ## How to use
 
-### Volumetric Fog
+### Volumetric Fog <img src="addons/silicon.vfx.volumetrics/volumetric_fog.svg" alt="volumetric_fog" style="zoom:200%;" />
 
 To start adding volumetric fog to your scene, you need to first add a `VolumetricFog` node to your scene (**One per viewport**). This node holds the properties responsible for _how_ volumes in the scene get rendered.
 
@@ -39,7 +41,7 @@ To start adding volumetric fog to your scene, you need to first add a `Volumetri
 * `Ambient Light Color` :- The color of the ambient light applied to volumes.
 * `Ambient Light Energy` :- How much the ambient light is applied to volumes.
 
-### Volume Proxy
+### Volume Proxy <img src="addons/silicon.vfx.volumetrics/volume_proxy.svg" alt="volume_proxy" style="zoom: 200%;" />
 
 After you've added the node mentioned above, the `VolumeProxy` node should now work for you and can be added to the scene. It has two properties.
 
@@ -51,7 +53,7 @@ After you've added the node mentioned above, the `VolumeProxy` node should now w
 * `Extents` :- The region in which the volume is rendered (with a local bounds mode).
 * `Bounds Fade` :- How faded the bounds of the volume is.
 
-### Volumetric Material
+### Volumetric Material <img src="addons/silicon.vfx.volumetrics/material/volumetric_material.svg" alt="volumetric_material" style="zoom:200%;" />
 
 `VolumeProxys` use a `VolumetricMaterial` to change the way they appear. They are pretty basic right now, but should do for most practical situations. They have the following properties.
 
@@ -81,7 +83,7 @@ After setting up the texture (Each label has a tooltip for you), press the `Crea
 
 ![volumetrics demo](doc_images/volumetrics_demo.png)
 
-The project comes with a demo to see what can be done with the plugin. You look around with the mouse and move with the arrow keys. To see your mouse again, press the `Esc` key. Each setting on the top right has a tooltip to tell you about what they do.
+The project comes with a demo to see what can be done with the plugin. You look around with the mouse and move with the arrow keys. To see your mouse again, press the `Esc` key. You can also hide the GUI with `G`. Each setting on the top right has a tooltip to tell you about what they do.
 
 ## Other stuff
 
@@ -91,11 +93,18 @@ By default, all lights added to the scene affect volumes at the same strength, b
 set_meta("volumetric", energy_you_wanna_set_as)
 ```
 
-Speaking of geometry, transparent geometries do not blend with volumetrics by default. You need to enable `Apply Volumetrics` to do that. The support is quite limited though, as only _some_ of the material properties are supported. The ones that are supported are: `Material Override`, `Material` in `CSGPrimitives`, and `Materials` in `MeshInstances`(Not to be confused with the material inside meshes). Like `Volumetric Energy`, this too is set as a meta value.
+Speaking of geometry, transparent geometries do not blend with volumetrics by default. You need to enable `Apply Volumetrics` to do that [*](#transparent-limit). Like `Volumetric Energy`, this too is set as a meta value.
 
 ```GDScript
 set_meta("apply_volumetrics", wanna_apply_it)
 ```
+
+Friendly tip, the volumes are displayed in the last render layer (Layer 20), and their render priorities are -16 and -17.
+
+## Limitations
+
+* Orthographic camera projection is not supported.
+*  <a name="transparent-limit"></a>The support of transparent materials is limited, as only _some_ of the material properties are supported. The ones that are supported are: `Material Override`, `Material` in `CSGPrimitives`, and `Materials` in `MeshInstances`(Not to be confused with the material inside meshes). 
 
 ## Special Thanks
 

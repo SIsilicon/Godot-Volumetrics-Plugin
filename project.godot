@@ -57,6 +57,11 @@ VolumetricServer="*res://addons/silicon.vfx.volumetrics/volumetric_server.gd"
 
 settings/fps/force_fps=60
 
+[display]
+
+window/size/width=1280
+window/size/height=720
+
 [editor_plugins]
 
 enabled=PoolStringArray( "silicon.vfx.volumetrics" )
@@ -116,4 +121,5 @@ vram_compression/import_etc=true
 vram_compression/import_etc2=false
 quality/directional_shadow/size=2048
 quality/shadow_atlas/size=2048
+quality/filters/msaa=1
 environment/default_environment="res://default_env.tres"
