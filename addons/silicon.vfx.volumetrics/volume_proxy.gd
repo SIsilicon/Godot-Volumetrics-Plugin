@@ -18,7 +18,7 @@ var in_view = true
 
 func _get_property_list() -> Array:
 	var properties := [
-		{name="VolumeSprite", type=TYPE_NIL, usage=PROPERTY_USAGE_CATEGORY},
+		{name="VolumeProxy", type=TYPE_NIL, usage=PROPERTY_USAGE_CATEGORY},
 		{name="material", type=TYPE_OBJECT, hint=PROPERTY_HINT_RESOURCE_TYPE, hint_string="VolumetricMaterial"},
 		{name="bounds_mode", type=TYPE_INT, hint=PROPERTY_HINT_ENUM, hint_string="Global,Local Box,Local Sphere"},
 	]

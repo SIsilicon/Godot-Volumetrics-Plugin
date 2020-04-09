@@ -19,7 +19,7 @@ var ambient_light_energy := 1.0 setget set_ambient_light_energy
 
 func _get_property_list() -> Array:
 	return [
-		{name="Volumetric Fog", type=TYPE_NIL, usage=PROPERTY_USAGE_CATEGORY},
+		{name="VolumetricFog", type=TYPE_NIL, usage=PROPERTY_USAGE_CATEGORY},
 		{name="start", type=TYPE_REAL},
 		{name="end", type=TYPE_REAL},
 		{name="tile_size", type=TYPE_INT, hint=PROPERTY_HINT_ENUM, hint_string="4x,8x,16x"},

@@ -150,7 +150,7 @@ material/35 = null
 material/36 = null
 material/37 = null
 __meta__ = {
-"_vol_id": 4,
+"_vol_id": 15,
 "apply_volumetrics": false
 }
 
@@ -190,7 +190,7 @@ shadow_enabled = true
 omni_range = 18.0
 omni_attenuation = 2.73208
 __meta__ = {
-"_vol_id": 5,
+"_vol_id": 16,
 "volumetric": 4.07
 }
 
@@ -201,7 +201,7 @@ shadow_enabled = true
 omni_range = 18.0
 omni_attenuation = 2.73208
 __meta__ = {
-"_vol_id": 6,
+"_vol_id": 17,
 "volumetric": 4.07
 }
 
@@ -210,7 +210,7 @@ transform = Transform( 1, 0, 0, 0, -0.0680631, 0.997681, 0, -0.997681, -0.068063
 visible = false
 shadow_enabled = true
 __meta__ = {
-"_vol_id": 7,
+"_vol_id": 18,
 "volumetric": 2.0
 }
 
