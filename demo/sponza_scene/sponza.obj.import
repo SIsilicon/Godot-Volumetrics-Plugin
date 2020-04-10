@@ -1,0 +1,19 @@
+[remap]
+
+importer="wavefront_obj"
+type="Mesh"
+path="res://.import/sponza.obj-f619ca89f0a938c044293e4a08d6b721.mesh"
+
+[deps]
+
+files=[ "res://.import/sponza.obj-f619ca89f0a938c044293e4a08d6b721.mesh" ]
+
+source_file="res://demo/sponza_scene/sponza.obj"
+dest_files=[ "res://.import/sponza.obj-f619ca89f0a938c044293e4a08d6b721.mesh", "res://.import/sponza.obj-f619ca89f0a938c044293e4a08d6b721.mesh" ]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3( 1, 1, 1 )
+offset_mesh=Vector3( 0, 0, 0 )
+optimize_mesh=true

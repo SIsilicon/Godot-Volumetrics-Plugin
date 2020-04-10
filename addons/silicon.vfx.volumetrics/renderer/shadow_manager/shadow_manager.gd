@@ -1,6 +1,12 @@
 tool
 extends Node
 
+enum {
+	OMNI_LIGHT,
+	SPOT_LIGHT,
+	DIRECTIONAL_LIGHT,
+}
+
 signal atlas_changed(key)
 
 var shadows := {}
@@ -44,7 +50,7 @@ func _process(_delta : float) -> void:
 		var canvas : TextureRect = shadow_dat.canvas
 		var coords : Rect2 = atlas_spaces[i]
 		
-		if shadow_dat.type == VolumetricServer.DIRECTIONAL_LIGHT:
+		if shadow_dat.type == DIRECTIONAL_LIGHT:
 			shadow_dat.shadow.scene_aabb = scene_aabb
 		
 		canvas.anchor_left = coords.position.x
@@ -60,20 +66,20 @@ func _process(_delta : float) -> void:
 func add_shadow(key, light : Dictionary) -> void:
 	var shadow_map : Node
 	
-	if light.type == VolumetricServer.SPOT_LIGHT:
+	if light.type == SPOT_LIGHT:
 		shadow_map = preload("spot_light_shadow.tscn").instance()
 		add_child(shadow_map)
 		shadow_map.position = light.position
 		shadow_map.direction = light.direction
 		shadow_map.spot_range = light.range
 		shadow_map.spot_angle = light.spot_angle
-	elif light.type == VolumetricServer.OMNI_LIGHT:
+	elif light.type == OMNI_LIGHT:
 		shadow_map = preload("omni_light_shadow.tscn").instance()
 		add_child(shadow_map)
 		shadow_map._ready()
 		shadow_map.position = light.position
 		shadow_map.omni_range = light.range
-	elif light.type == VolumetricServer.DIRECTIONAL_LIGHT:
+	elif light.type == DIRECTIONAL_LIGHT:
 		shadow_map = preload("directional_light_shadow.tscn").instance()
 		add_child(shadow_map)
 		shadow_map.direction = light.position
@@ -89,10 +95,10 @@ func add_shadow(key, light : Dictionary) -> void:
 		texture_rect.anchor_bottom = 0
 		texture_rect.anchor_right = 0
 		
-		if light.type in [VolumetricServer.SPOT_LIGHT, VolumetricServer.DIRECTIONAL_LIGHT]:
+		if light.type in [SPOT_LIGHT, DIRECTIONAL_LIGHT]:
 			var shadow_texture : ViewportTexture = shadow_map.get_texture()
 			texture_rect.texture = shadow_texture
-		elif light.type == VolumetricServer.OMNI_LIGHT:
+		elif light.type == OMNI_LIGHT:
 			texture_rect.texture = AnimatedTexture.new() # Placeholder
 			texture_rect.material = ShaderMaterial.new()
 			texture_rect.material.shader = preload("cube_to_dualparabloid.shader")
@@ -190,7 +196,7 @@ class ShadowSort:
 		var priority_diff := get_shadow_priority(s2) - get_shadow_priority(s1)
 		
 		if priority_diff == 0:
-			if s1.type == VolumetricServer.DIRECTIONAL_LIGHT:
+			if s1.type == DIRECTIONAL_LIGHT:
 				return s2.shadow.energy - s1.shadow.energy < 0
 			
 			var cam_distance1 : float = s1.camera.distance_squared_to(s1.shadow.position)
@@ -202,8 +208,8 @@ class ShadowSort:
 	
 	static func get_shadow_priority(shadow) -> int:
 		match shadow.type:
-			VolumetricServer.DIRECTIONAL_LIGHT: return 2
-			VolumetricServer.OMNI_LIGHT: return 1
-			VolumetricServer.SPOT_LIGHT: return 0
+			DIRECTIONAL_LIGHT: return 2
+			OMNI_LIGHT: return 1
+			SPOT_LIGHT: return 0
 			_: return -1
 

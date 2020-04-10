@@ -31,15 +31,15 @@ func _ready() -> void:
 			load(folder + "volume_proxy.gd"), icon
 	)
 	
-	inspector_plugin = preload("editor/inspector_plugin.gd").new()
+	inspector_plugin = load(folder + "editor/inspector_plugin.gd").new()
 	add_inspector_plugin(inspector_plugin)
 	
-	gizmo_plugin = preload("editor/volume_proxy_gizmo_plugin.gd").new()
+	gizmo_plugin = load(folder + "editor/volume_proxy_gizmo_plugin.gd").new()
 	gizmo_plugin.editor_selection = get_editor_interface().get_selection()
 	gizmo_plugin.undo_redo = get_undo_redo()
 	add_spatial_gizmo_plugin(gizmo_plugin)
 	
-	texture_3d_creator = preload("editor/texture_3d_creator/texture_3d_creator.tscn").instance()
+	texture_3d_creator = load(folder + "editor/texture_3d_creator/texture_3d_creator.tscn").instance()
 	texture_3d_creator.editor_file_system = get_editor_interface().get_resource_filesystem()
 	get_editor_interface().get_base_control().add_child(texture_3d_creator)
 	add_tool_menu_item("Create 3D Texture...", texture_3d_creator, "popup_centered_ratio", 0.0)
@@ -68,5 +68,4 @@ func handles(object) -> bool:
 func edit(object) -> void:
 	if object is preload("volume_proxy.gd"):
 		gizmo_plugin.current_volume = object
-
 

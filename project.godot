@@ -52,8 +52,8 @@ _global_script_class_icons={
 
 config/name="Volumetrics Plugin Demo"
 config/description="This project demonstrates what you can be done with the Volumetrics Plugin."
-run/main_scene="res://volumetrics_demo.tscn"
-config/icon="res://icon.png"
+run/main_scene="res://demo/volumetrics_demo.tscn"
+config/icon="res://demo/icon.png"
 
 [autoload]
 

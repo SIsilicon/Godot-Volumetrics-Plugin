@@ -6,7 +6,6 @@
 script = ExtResource( 1 )
 scatter_color = Color( 0.75, 0.75, 0.75, 1 )
 density = 1.0
-scatter_texture = null
 absorption_color = Color( 0, 0, 0, 1 )
 anisotropy = 0.0
 emission_enabled = false

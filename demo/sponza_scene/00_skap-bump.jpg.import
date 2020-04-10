@@ -1,0 +1,36 @@
+[remap]
+
+importer="texture"
+type="StreamTexture"
+path.s3tc="res://.import/00_skap-bump.jpg-62083e168040aff5131a21eff6372754.s3tc.stex"
+path.etc="res://.import/00_skap-bump.jpg-62083e168040aff5131a21eff6372754.etc.stex"
+metadata={
+"imported_formats": [ "s3tc", "etc" ],
+"vram_texture": true
+}
+
+[deps]
+
+source_file="res://demo/sponza_scene/00_skap-bump.jpg"
+dest_files=[ "res://.import/00_skap-bump.jpg-62083e168040aff5131a21eff6372754.s3tc.stex", "res://.import/00_skap-bump.jpg-62083e168040aff5131a21eff6372754.etc.stex" ]
+
+[params]
+
+compress/mode=2
+compress/lossy_quality=0.7
+compress/hdr_mode=0
+compress/bptc_ldr=0
+compress/normal_map=1
+flags/repeat=true
+flags/filter=true
+flags/mipmaps=true
+flags/anisotropic=false
+flags/srgb=1
+process/fix_alpha_border=true
+process/premult_alpha=false
+process/HDR_as_SRGB=false
+process/invert_color=false
+stream=false
+size_limit=0
+detect_3d=false
+svg/scale=1.0

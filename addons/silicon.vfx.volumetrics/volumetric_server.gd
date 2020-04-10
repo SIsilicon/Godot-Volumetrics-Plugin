@@ -172,7 +172,7 @@ func renderer_set_volumetric_shadows(id : int, value : bool) -> void:
 	renderers[id].node.volumetric_shadows = value
 
 func renderer_set_shadow_atlas_size(id : int, value : int) -> void:
-	renderers[id].node.shadow_size = value
+	renderers[id].node.shadow_manager.size = value
 
 func get_renderer_by_viewport(viewport : Viewport) -> int:
 	for id in renderers:

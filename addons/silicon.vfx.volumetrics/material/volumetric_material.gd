@@ -13,15 +13,6 @@ enum {
 	MAX_FLAG = 512
 }
 
-var material_flags := MAX_FLAG
-var material_flags_dirty := false
-
-# One shader per v-buffer (Scatter, Extinction, Emission, Phase, Motion)
-# See volume_renderer.gd (add_volume)
-var shaders := [Shader.new(), Shader.new(), Shader.new(), Shader.new(), Shader.new()]
-
-var volumes = []
-
 var scatter_color := Color.gray setget set_scatter_color
 var density := 1.0 setget set_density
 var scatter_texture : Texture3D setget set_scatter_texture
@@ -35,6 +26,14 @@ var emission_texture : Texture3D setget set_emission_texture
 
 var uvw_scale := Vector3.ONE setget set_uvw_scale
 var uvw_offset := Vector3.ZERO setget set_uvw_offset
+
+var material_flags := MAX_FLAG
+var material_flags_dirty := false
+
+# One shader per v-buffer (Scatter, Extinction, Emission, Phase, Motion)
+# See volume_renderer.gd (add_volume)
+var shaders := [Shader.new(), Shader.new(), Shader.new(), Shader.new(), Shader.new()]
+var volumes = []
 
 func _get_property_list() -> Array:
 	var properties := [
@@ -84,18 +83,18 @@ func set_scatter_color(value : Color) -> void:
 	scatter_color = value
 	var scatter := Vector3(scatter_color.r, scatter_color.g, scatter_color.b);
 	for volume in volumes:
-		VolumetricServer.volume_set_param(volume, "scatter", scatter)
+		_get_volumetric_server().volume_set_param(volume, "scatter", scatter)
 
 func set_density(value : float) -> void:
 	density = max(value, 0.0)
 	for volume in volumes:
-		VolumetricServer.volume_set_param(volume, "density", density)
+		_get_volumetric_server().volume_set_param(volume, "density", density)
 
 func set_absorption_color(value : Color) -> void:
 	absorption_color = value
 	var absorption := Vector3(absorption_color.r, absorption_color.g, absorption_color.b);
 	for volume in volumes:
-		VolumetricServer.volume_set_param(volume, "absorption", absorption)
+		_get_volumetric_server().volume_set_param(volume, "absorption", absorption)
 
 func set_scatter_texture(value : Texture3D) -> void:
 	scatter_texture = value
@@ -105,7 +104,7 @@ func set_scatter_texture(value : Texture3D) -> void:
 		set_material_flags(material_flags & ~SCATTER_TEX)
 	
 	for volume in volumes:
-		VolumetricServer.volume_set_param(volume, "scatter_texture", scatter_texture)
+		_get_volumetric_server().volume_set_param(volume, "scatter_texture", scatter_texture)
 
 func set_emission_enabled(value : bool) -> void:
 	emission_enabled = value
@@ -119,13 +118,13 @@ func set_emission_color(value : Color) -> void:
 	emission_color = value
 	var emission := Vector3(emission_color.r, emission_color.g, emission_color.b) * emission_strength;
 	for volume in volumes:
-		VolumetricServer.volume_set_param(volume, "emission", emission)
+		_get_volumetric_server().volume_set_param(volume, "emission", emission)
 
 func set_emission_strength(value : float) -> void:
 	emission_strength = max(value, 0.0)
 	var emission := Vector3(emission_color.r, emission_color.g, emission_color.b) * emission_strength;
 	for volume in volumes:
-		VolumetricServer.volume_set_param(volume, "emission", emission)
+		_get_volumetric_server().volume_set_param(volume, "emission", emission)
 
 func set_emission_texture(value : Texture3D) -> void:
 	emission_texture = value
@@ -135,22 +134,22 @@ func set_emission_texture(value : Texture3D) -> void:
 		set_material_flags(material_flags & ~EMISSION_TEX)
 	
 	for volume in volumes:
-		VolumetricServer.volume_set_param(volume, "emission_texture", emission_texture)
+		_get_volumetric_server().volume_set_param(volume, "emission_texture", emission_texture)
 
 func set_anisotropy(value : float) -> void:
 	anisotropy = value
 	for volume in volumes:
-		VolumetricServer.volume_set_param(volume, "anisotropy", anisotropy * 0.99)
+		_get_volumetric_server().volume_set_param(volume, "anisotropy", anisotropy * 0.99)
 
 func set_uvw_scale(value : Vector3) -> void:
 	uvw_scale = value
 	for volume in volumes:
-		VolumetricServer.volume_set_param(volume, "uvw_scale", uvw_scale)
+		_get_volumetric_server().volume_set_param(volume, "uvw_scale", uvw_scale)
 
 func set_uvw_offset(value : Vector3) -> void:
 	uvw_offset = value
 	for volume in volumes:
-		VolumetricServer.volume_set_param(volume, "uvw_offset", uvw_offset)
+		_get_volumetric_server().volume_set_param(volume, "uvw_offset", uvw_offset)
 
 func set_material_flags(value : int) -> void:
 	if material_flags != value or material_flags & MAX_FLAG:
@@ -237,9 +236,12 @@ func update_shaders() -> void:
 		shaders[idx].code = code
 	
 	for volume in volumes:
-		VolumetricServer.volume_set_param(volume, "shader", shaders)
+		_get_volumetric_server().volume_set_param(volume, "shader", shaders)
 	
 	set_all_params()
 	material_flags_dirty = false
 	
 	emit_signal("shader_changed")
+
+func _get_volumetric_server() -> Node:
+	return Engine.get_main_loop().root.get_node("/root/VolumetricServer")

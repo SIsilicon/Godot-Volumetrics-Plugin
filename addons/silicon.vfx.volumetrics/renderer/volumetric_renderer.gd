@@ -1,6 +1,12 @@
 tool
 extends Node
 
+enum {
+	OMNI_LIGHT,
+	SPOT_LIGHT,
+	DIRECTIONAL_LIGHT,
+}
+
 const LIGHT_DATA_SIZE = 34
 
 var default_material = preload("../material/default_material.tres")
@@ -90,6 +96,8 @@ func _process(delta) -> void:
 		size *= get_viewport().size / tile_size
 		viewport = get_viewport()
 		camera = viewport.get_camera()
+		if not camera:
+			return
 		camera.force_update_transform()
 	camera_transform = camera.get_camera_transform()
 	
@@ -172,7 +180,7 @@ func _process(delta) -> void:
 	
 	# Directional light shadow matrices need an update every frame.
 	for key in lights:
-		if lights[key].type == VolumetricServer.DIRECTIONAL_LIGHT and lights[key].shadows:
+		if lights[key].type == DIRECTIONAL_LIGHT and lights[key].shadows:
 			var shadow_matrix : Matrix4 = shadow_manager.get_shadow_data(key).shadow_matrix
 			pass_light_data(14, lights[key].index, shadow_matrix.get_data())
 	
@@ -316,14 +324,14 @@ func add_light(key, type : int, data := {}) -> void:
 	pass_light_data(4, light_data.index, light_data.color * light_data.energy)
 	
 	# If not directional light...
-	if type != VolumetricServer.DIRECTIONAL_LIGHT:
+	if type != DIRECTIONAL_LIGHT:
 		if not light_data.has("range"):
 			light_data.range = 5.0
 			light_data.falloff = 2.0
 		pass_light_data(7, light_data.index, light_data.range)
 		pass_light_data(8, light_data.index, light_data.falloff)
 		
-		if type == VolumetricServer.SPOT_LIGHT:
+		if type == SPOT_LIGHT:
 			if not light_data.has("direction"):
 				light_data.direction = Vector3.FORWARD
 				light_data.spot_angle = deg2rad(45.0)
@@ -390,7 +398,7 @@ func set_light_param(key, param : String, value) -> void:
 		"range":
 			if light_data.range != value:
 				shadow_data_update = true
-				param = "spot_range" if light_data.type == VolumetricServer.SPOT_LIGHT else "omni_range"
+				param = "spot_range" if light_data.type == SPOT_LIGHT else "omni_range"
 			light_data.range = value
 			
 			pass_light_data(7, index, light_data.range)
@@ -425,7 +433,7 @@ func set_light_param(key, param : String, value) -> void:
 			light_data.shadows = value
 	
 	if shadow_data_update and light_data.shadows:
-		if light_data.type == VolumetricServer.DIRECTIONAL_LIGHT and param == "position":
+		if light_data.type == DIRECTIONAL_LIGHT and param == "position":
 			param = "direction"
 		shadow_manager.set_shadow_param(key, param, value)
 		var shadow_matrix : Matrix4 = shadow_manager.get_shadow_data(key).shadow_matrix
