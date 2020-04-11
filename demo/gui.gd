@@ -33,7 +33,7 @@ func _on_value_changed(value, control : String) -> void:
 		"VolumetricShadows":
 			volume_fog.volumetric_shadows = value
 		"TexturedFog":
-			$"../VolumeProxy".material.scatter_texture = preload("res://test_volume.png") if value else null
+			$"../VolumeProxy".material.scatter_texture = preload("test_volume.png") if value else null
 			$"../VolumeProxy".material.density = 0.15 if value else 0.06
 		"HeightFog":
 			$"../VolumeProxy2".visible = value
