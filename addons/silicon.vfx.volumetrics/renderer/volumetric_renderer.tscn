@@ -40,7 +40,7 @@ viewport_path = NodePath("Emission")
 [sub_resource type="ViewportTexture" id=9]
 viewport_path = NodePath("Extinction")
 
-[sub_resource type="Image" id=33]
+[sub_resource type="Image" id=10]
 data = {
 "data": PoolByteArray( 0, 0, 0, 0 ),
 "format": "RFloat",
@@ -52,7 +52,7 @@ data = {
 [sub_resource type="ImageTexture" id=11]
 flags = 0
 flags = 0
-image = SubResource( 33 )
+image = SubResource( 10 )
 size = Vector2( 1, 1 )
 
 [sub_resource type="ViewportTexture" id=12]
@@ -74,15 +74,15 @@ resource_local_to_scene = true
 shader = ExtResource( 3 )
 shader_param/is_transmission = false
 shader_param/blend = 0.0
-shader_param/tile_factor = Vector2( 8, 8 )
+shader_param/tile_factor = Vector2( 8, 16 )
 shader_param/vol_depth_params = Vector3( 0.98447, -0.155303, 0.351208 )
 shader_param/sample_offset = Vector3( 0, 0, 0 )
-shader_param/projection_matrix0 = Plane( 0.998973, 0, 0, 0 )
+shader_param/projection_matrix0 = Plane( 0.593724, 0, 0, 0 )
 shader_param/projection_matrix1 = Plane( 0, 1.42815, 0, 0 )
 shader_param/projection_matrix2 = Plane( 0, 0, -1.0002, -1 )
 shader_param/projection_matrix3 = Plane( 0, 0, -0.10001, 0 )
-shader_param/curr_view_matrix = Transform( -0.960008, 0.162772, -0.227794, 0.131215, 0.980319, 0.147506, 0.24732, 0.111717, -0.962472, -11.6782, 5.88451, 1.91738 )
-shader_param/prev_inv_view_matrix = Transform( 0.12519, 0, 0.992133, 0.131215, 0.991216, -0.0165572, -0.983417, 0.132256, 0.124091, -0.220151, -2.13436, -6.25035 )
+shader_param/curr_view_matrix = Transform( -0.150365, 0.24332, -0.95822, 0, 0.96924, 0.246118, 0.988631, 0.0370074, -0.145739, 5.14094, 5.85464, 12.3547 )
+shader_param/prev_inv_view_matrix = Transform( -0.150365, -3.72529e-09, 0.988631, 0.24332, 0.96924, 0.0370074, -0.95822, 0.246118, -0.145739, -11.4412, -7.38266, 5.2858 )
 shader_param/use_light_data = false
 shader_param/volumetric_shadows = false
 shader_param/ambient_light = Vector3( 1, 1, 1 )
@@ -110,15 +110,15 @@ resource_local_to_scene = true
 shader = ExtResource( 3 )
 shader_param/is_transmission = true
 shader_param/blend = 0.0
-shader_param/tile_factor = Vector2( 8, 8 )
+shader_param/tile_factor = Vector2( 8, 16 )
 shader_param/vol_depth_params = Vector3( 0.98447, -0.155303, 0.351208 )
 shader_param/sample_offset = null
-shader_param/projection_matrix0 = Plane( 0.998973, 0, 0, 0 )
+shader_param/projection_matrix0 = Plane( 0.593724, 0, 0, 0 )
 shader_param/projection_matrix1 = Plane( 0, 1.42815, 0, 0 )
 shader_param/projection_matrix2 = Plane( 0, 0, -1.0002, -1 )
 shader_param/projection_matrix3 = Plane( 0, 0, -0.10001, 0 )
-shader_param/curr_view_matrix = Transform( -0.960008, 0.162772, -0.227794, 0.131215, 0.980319, 0.147506, 0.24732, 0.111717, -0.962472, -11.6782, 5.88451, 1.91738 )
-shader_param/prev_inv_view_matrix = Transform( 0.12519, 0, 0.992133, 0.131215, 0.991216, -0.0165572, -0.983417, 0.132256, 0.124091, -0.220151, -2.13436, -6.25035 )
+shader_param/curr_view_matrix = Transform( -0.150365, 0.24332, -0.95822, 0, 0.96924, 0.246118, 0.988631, 0.0370074, -0.145739, 5.14094, 5.85464, 12.3547 )
+shader_param/prev_inv_view_matrix = Transform( -0.150365, -3.72529e-09, 0.988631, 0.24332, 0.96924, 0.0370074, -0.95822, 0.246118, -0.145739, -11.4412, -7.38266, 5.2858 )
 shader_param/use_light_data = false
 shader_param/volumetric_shadows = true
 shader_param/ambient_light = null
@@ -134,7 +134,7 @@ resource_local_to_scene = true
 shader = ExtResource( 2 )
 shader_param/is_transmittance = false
 shader_param/shader_pass = null
-shader_param/tile_factor = Vector2( 8, 8 )
+shader_param/tile_factor = Vector2( 8, 16 )
 shader_param/vol_depth_params = Vector3( 0.98447, -0.155303, 0.351208 )
 shader_param/volume_scattering = SubResource( 1 )
 shader_param/volume_transmittance = SubResource( 21 )
@@ -155,7 +155,7 @@ resource_local_to_scene = true
 shader = ExtResource( 2 )
 shader_param/is_transmittance = true
 shader_param/shader_pass = null
-shader_param/tile_factor = Vector2( 8, 8 )
+shader_param/tile_factor = Vector2( 8, 16 )
 shader_param/vol_depth_params = Vector3( 0.98447, -0.155303, 0.351208 )
 shader_param/volume_scattering = SubResource( 1 )
 shader_param/volume_transmittance = SubResource( 21 )
@@ -172,7 +172,7 @@ viewport_path = NodePath("ResolveTransmit")
 resource_local_to_scene = true
 render_priority = -16
 shader = ExtResource( 4 )
-shader_param/tile_factor = Vector2( 8, 8 )
+shader_param/tile_factor = Vector2( 8, 16 )
 shader_param/vol_depth_params = Vector3( 0.98447, -0.155303, 0.351208 )
 shader_param/is_transparent_pass = false
 shader_param/volume_scattering = SubResource( 27 )
@@ -279,7 +279,7 @@ resource_local_to_scene = true
 render_priority = -17
 shader = SubResource( 31 )
 shader_param/volume_size = Vector2( 101, 68 )
-shader_param/tile_factor = Vector2( 8, 8 )
+shader_param/tile_factor = Vector2( 8, 16 )
 shader_param/vol_depth_params = Vector3( 0.98447, -0.155303, 0.351208 )
 shader_param/volume_transmittance = SubResource( 28 )
 
@@ -293,7 +293,7 @@ distribution = 0.922
 enabled = false
 
 [node name="PrevScatter" type="Viewport" parent="."]
-size = Vector2( 391, 273 )
+size = Vector2( 400, 333 )
 own_world = true
 transparent_bg = true
 keep_3d_linear = true
@@ -309,7 +309,7 @@ __meta__ = {
 }
 
 [node name="PrevTransmit" type="Viewport" parent="."]
-size = Vector2( 391, 273 )
+size = Vector2( 400, 333 )
 own_world = true
 transparent_bg = true
 keep_3d_linear = true
@@ -325,7 +325,7 @@ __meta__ = {
 }
 
 [node name="Scatter" type="Viewport" parent="."]
-size = Vector2( 391, 273 )
+size = Vector2( 400, 333 )
 own_world = true
 world = SubResource( 6 )
 keep_3d_linear = true
@@ -333,14 +333,14 @@ debug_draw = 1
 render_target_update_mode = 0
 
 [node name="Camera" type="Camera" parent="Scatter"]
-process_priority = 16384
-transform = Transform( -0.960008, 0.162772, -0.227794, 0.131215, 0.980319, 0.147506, 0.24732, 0.111717, -0.962472, -11.6782, 5.88451, 1.91738 )
+process_priority = -5
+transform = Transform( -0.150365, 0.24332, -0.95822, 0, 0.96924, 0.246118, 0.988631, 0.0370074, -0.145739, 5.14094, 5.85464, 12.3547 )
 current = true
 near = 0.1
 far = 40.0
 
 [node name="Extinction" type="Viewport" parent="."]
-size = Vector2( 391, 273 )
+size = Vector2( 400, 333 )
 own_world = true
 world = SubResource( 6 )
 keep_3d_linear = true
@@ -349,13 +349,13 @@ render_target_update_mode = 0
 
 [node name="Camera" type="Camera" parent="Extinction"]
 process_priority = 16384
-transform = Transform( -0.960008, 0.162772, -0.227794, 0.131215, 0.980319, 0.147506, 0.24732, 0.111717, -0.962472, -11.6782, 5.88451, 1.91738 )
+transform = Transform( -0.150365, 0.24332, -0.95822, 0, 0.96924, 0.246118, 0.988631, 0.0370074, -0.145739, 5.14094, 5.85464, 12.3547 )
 current = true
 near = 0.1
 far = 40.0
 
 [node name="Emission" type="Viewport" parent="."]
-size = Vector2( 391, 273 )
+size = Vector2( 400, 333 )
 own_world = true
 world = SubResource( 6 )
 keep_3d_linear = true
@@ -364,13 +364,13 @@ render_target_update_mode = 0
 
 [node name="Camera" type="Camera" parent="Emission"]
 process_priority = 16384
-transform = Transform( -0.960008, 0.162772, -0.227794, 0.131215, 0.980319, 0.147506, 0.24732, 0.111717, -0.962472, -11.6782, 5.88451, 1.91738 )
+transform = Transform( -0.150365, 0.24332, -0.95822, 0, 0.96924, 0.246118, 0.988631, 0.0370074, -0.145739, 5.14094, 5.85464, 12.3547 )
 current = true
 near = 0.1
 far = 40.0
 
 [node name="Phase" type="Viewport" parent="."]
-size = Vector2( 391, 273 )
+size = Vector2( 400, 333 )
 own_world = true
 world = SubResource( 6 )
 keep_3d_linear = true
@@ -379,13 +379,13 @@ render_target_update_mode = 0
 
 [node name="Camera" type="Camera" parent="Phase"]
 process_priority = 16384
-transform = Transform( -0.960008, 0.162772, -0.227794, 0.131215, 0.980319, 0.147506, 0.24732, 0.111717, -0.962472, -11.6782, 5.88451, 1.91738 )
+transform = Transform( -0.150365, 0.24332, -0.95822, 0, 0.96924, 0.246118, 0.988631, 0.0370074, -0.145739, 5.14094, 5.85464, 12.3547 )
 current = true
 near = 0.1
 far = 40.0
 
 [node name="Motion" type="Viewport" parent="."]
-size = Vector2( 391, 273 )
+size = Vector2( 400, 333 )
 own_world = true
 world = SubResource( 6 )
 keep_3d_linear = true
@@ -394,13 +394,13 @@ render_target_update_mode = 0
 
 [node name="Camera" type="Camera" parent="Motion"]
 process_priority = 16384
-transform = Transform( -0.960008, 0.162772, -0.227794, 0.131215, 0.980319, 0.147506, 0.24732, 0.111717, -0.962472, -11.6782, 5.88451, 1.91738 )
+transform = Transform( -0.150365, 0.24332, -0.95822, 0, 0.96924, 0.246118, 0.988631, 0.0370074, -0.145739, 5.14094, 5.85464, 12.3547 )
 current = true
 near = 0.1
 far = 40.0
 
 [node name="LightScatter" type="Viewport" parent="."]
-size = Vector2( 391, 273 )
+size = Vector2( 400, 333 )
 own_world = true
 transparent_bg = true
 keep_3d_linear = true
@@ -416,7 +416,7 @@ __meta__ = {
 }
 
 [node name="LightTransmit" type="Viewport" parent="."]
-size = Vector2( 391, 273 )
+size = Vector2( 400, 333 )
 own_world = true
 transparent_bg = true
 keep_3d_linear = true
@@ -432,7 +432,7 @@ __meta__ = {
 }
 
 [node name="ResolveScatter" type="Viewport" parent="."]
-size = Vector2( 391, 273 )
+size = Vector2( 400, 333 )
 own_world = true
 world = SubResource( 6 )
 keep_3d_linear = true
@@ -441,7 +441,7 @@ render_target_update_mode = 0
 
 [node name="Camera" type="Camera" parent="ResolveScatter"]
 process_priority = 16384
-transform = Transform( -0.960008, 0.162772, -0.227794, 0.131215, 0.980319, 0.147506, 0.24732, 0.111717, -0.962472, -11.6782, 5.88451, 1.91738 )
+transform = Transform( -0.150365, 0.24332, -0.95822, 0, 0.96924, 0.246118, 0.988631, 0.0370074, -0.145739, 5.14094, 5.85464, 12.3547 )
 current = true
 near = 0.1
 far = 40.0
@@ -456,7 +456,7 @@ __meta__ = {
 }
 
 [node name="ResolveTransmit" type="Viewport" parent="."]
-size = Vector2( 391, 273 )
+size = Vector2( 400, 333 )
 own_world = true
 world = SubResource( 25 )
 keep_3d_linear = true
@@ -465,7 +465,7 @@ render_target_update_mode = 0
 
 [node name="Camera" type="Camera" parent="ResolveTransmit"]
 process_priority = 16384
-transform = Transform( -0.960008, 0.162772, -0.227794, 0.131215, 0.980319, 0.147506, 0.24732, 0.111717, -0.962472, -11.6782, 5.88451, 1.91738 )
+transform = Transform( -0.150365, 0.24332, -0.95822, 0, 0.96924, 0.246118, 0.988631, 0.0370074, -0.145739, 5.14094, 5.85464, 12.3547 )
 current = true
 near = 0.1
 far = 40.0

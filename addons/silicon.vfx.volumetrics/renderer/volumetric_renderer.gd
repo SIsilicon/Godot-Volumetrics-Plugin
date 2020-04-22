@@ -66,7 +66,6 @@ func _ready() -> void:
 	shadow_manager.connect("atlas_changed", self, "_on_shadow_atlas_changed")
 	
 	$LightScatter/ColorRect.material.set_shader_param("light_data", light_texture)
-	$ShadowManager/TextureRect.visible = false # not Engine.editor_hint
 	
 	resize(Vector2.ONE)
 	
@@ -98,12 +97,12 @@ func _process(delta) -> void:
 		camera = viewport.get_camera()
 		if not camera:
 			return
-		camera.force_update_transform()
+	camera.force_update_transform()
 	camera_transform = camera.get_camera_transform()
 	
-	# For some VERY odd reason, the camera transform here seems to lag with the viewport's camera transform (editor AND runtime).
-	# This is a hack to compensate for the delay.
-	camera_transform = prev_cam_transform.interpolate_with(camera_transform, 2)
+#	# This is a hack to compensate for the delay in the editor camera.
+#	if true or Engine.editor_hint:
+#		camera_transform = prev_cam_transform.interpolate_with(camera_transform, 2)
 	
 	resize(size)
 	shadow_manager.viewport_camera = camera
@@ -117,6 +116,8 @@ func _process(delta) -> void:
 			viewport_camera.fov = camera.fov
 			viewport_camera.near = start
 			viewport_camera.far = end
+			viewport.process_priority = -512
+	process_priority = -512
 	
 	var sample_distribution = 4.0 * (max(1.0 - sqrt(distribution) * 0.95, 1e-2))
 	var near = min(-start, -camera.near - 1e-4)
@@ -130,7 +131,7 @@ func _process(delta) -> void:
 	for viewport in [$LightScatter, $LightTransmit]:
 		viewport.get_child(0).material.set_shader_param("tile_factor", tiling)
 		viewport.get_child(0).material.set_shader_param("vol_depth_params", vol_depth_params)
-		viewport.get_child(0).material.set_shader_param("prev_inv_view_matrix", camera.get_camera_transform().inverse())#prev_cam_transform.inverse())
+		viewport.get_child(0).material.set_shader_param("prev_inv_view_matrix", prev_cam_transform.affine_inverse())
 		viewport.get_child(0).material.set_shader_param("curr_view_matrix", camera_transform)
 		camera_projection.set_shader_param(viewport.get_child(0).material, "projection_matrix")
 	$LightScatter/ColorRect.material.set_shader_param("volumetric_shadows", volumetric_shadows)

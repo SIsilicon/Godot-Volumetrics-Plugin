@@ -5,6 +5,9 @@
 
 [node name="OmniLightShadow" type="Node"]
 script = ExtResource( 2 )
+__meta__ = {
+"_omni_light": true
+}
 
 [node name="Front" type="Viewport" parent="."]
 keep_3d_linear = true

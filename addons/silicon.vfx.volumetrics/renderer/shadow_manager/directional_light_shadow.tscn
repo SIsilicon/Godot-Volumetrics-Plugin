@@ -6,6 +6,7 @@
 [node name="DirectionalLightShadow" type="Viewport"]
 keep_3d_linear = true
 debug_draw = 1
+render_target_update_mode = 3
 script = ExtResource( 1 )
 __meta__ = {
 "_directional_light": true,

@@ -118,6 +118,8 @@ _*Friendly tip, the volumes are displayed in the last render layer (Layer 20), a
 
 * Orthographic camera projection is not supported.
 *  <a name="transparent-limit"></a>The support of transparent materials is limited, as only _some_ of the material properties are supported. The ones that are supported are: `Material Override`, `Material` in `CSGPrimitives`, and `Materials` in `MeshInstances`(Not to be confused with the material inside meshes). 
+*  It doesn't show up in reflection probes.
+*  It doesn't get lit by indirect light sources (`GIProbes `and `BakedLights`).
 
 ## Credits and Special Thanks
 

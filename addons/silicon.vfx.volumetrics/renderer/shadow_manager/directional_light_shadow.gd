@@ -21,7 +21,7 @@ func _process(_delta) -> void:
 	var camera : Camera = viewport.get_camera()
 	var near : float = get_parent().get_parent().start
 	var far : float = get_parent().get_parent().end
-
+	
 	if scene_aabb.size.length() > 0.0:
 		var frustum_center := camera.project_position(
 			get_parent().get_viewport().size / 2.0,
@@ -49,7 +49,7 @@ func _process(_delta) -> void:
 		ortho.position.z = 1.0
 		ortho.end.z = view_scene_aabb.end.z - view_scene_aabb.position.z + 1.0
 		
-		$Camera.size = frustum_length / sqrt(2.0)
+		$Camera.size = frustum_length
 		$Camera.near = ortho.position.z
 		$Camera.far = ortho.end.z
 

@@ -11,13 +11,13 @@
 [ext_resource path="res://demo/gui.gd" type="Script" id=10]
 [ext_resource path="res://demo/sponza_scene/sponza.obj" type="ArrayMesh" id=11]
 
-[sub_resource type="Environment" id=2]
+[sub_resource type="Environment" id=1]
 background_mode = 1
 background_color = Color( 0.105882, 0.105882, 0.105882, 1 )
 ambient_light_color = Color( 0.2, 0.2, 0.2, 1 )
 dof_blur_far_amount = 0.13
 
-[sub_resource type="Animation" id=3]
+[sub_resource type="Animation" id=2]
 length = 6.0
 loop = true
 tracks/0/type = "value"
@@ -57,7 +57,7 @@ tracks/2/keys = {
 "values": [ Vector3( -120, 0, 0 ), Vector3( -60, 0, 0 ) ]
 }
 
-[sub_resource type="Resource" id=4]
+[sub_resource type="Resource" id=3]
 script = ExtResource( 1 )
 scatter_color = Color( 0.75, 0.75, 0.75, 1 )
 density = 0.15
@@ -68,7 +68,7 @@ emission_enabled = false
 uvw_scale = Vector3( 0.177, 0.174, 0.155 )
 uvw_offset = Vector3( 0, 0, 0 )
 
-[sub_resource type="Resource" id=5]
+[sub_resource type="Resource" id=4]
 script = ExtResource( 1 )
 scatter_color = Color( 0.568627, 0.501961, 0.894118, 1 )
 density = 0.379
@@ -78,7 +78,7 @@ emission_enabled = false
 uvw_scale = Vector3( 1, 1, 1 )
 uvw_offset = Vector3( 0, 0, 0 )
 
-[sub_resource type="Resource" id=6]
+[sub_resource type="Resource" id=5]
 script = ExtResource( 1 )
 scatter_color = Color( 0.572549, 0.572549, 0.572549, 1 )
 density = 4.0
@@ -90,7 +90,7 @@ emission_strength = 0.0
 uvw_scale = Vector3( 1, 1, 1 )
 uvw_offset = Vector3( 0, 0, 0 )
 
-[sub_resource type="StyleBoxFlat" id=7]
+[sub_resource type="StyleBoxFlat" id=6]
 bg_color = Color( 0.141388, 0.135132, 0.160156, 1 )
 border_width_right = 3
 border_width_bottom = 3
@@ -143,7 +143,8 @@ material/35 = null
 material/36 = null
 material/37 = null
 __meta__ = {
-"_vol_id": 37,
+"_edit_lock_": true,
+"_vol_id": 4,
 "apply_volumetrics": false
 }
 
@@ -155,7 +156,7 @@ pitch_limit = 175
 max_speed = Vector3( 2, 2, 5 )
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
-environment = SubResource( 2 )
+environment = SubResource( 1 )
 
 [node name="VolumetricFog" type="Node" parent="WorldEnvironment"]
 process_priority = 512
@@ -183,7 +184,7 @@ shadow_enabled = true
 omni_range = 18.0
 omni_attenuation = 2.73208
 __meta__ = {
-"_vol_id": 38,
+"_vol_id": 5,
 "volumetric": 4.07
 }
 
@@ -194,7 +195,7 @@ shadow_enabled = true
 omni_range = 18.0
 omni_attenuation = 2.73208
 __meta__ = {
-"_vol_id": 39,
+"_vol_id": 6,
 "volumetric": 4.07
 }
 
@@ -203,23 +204,23 @@ transform = Transform( 1, 0, 0, 0, -0.0680631, 0.997681, 0, -0.997681, -0.068063
 visible = false
 shadow_enabled = true
 __meta__ = {
-"_vol_id": 40,
+"_vol_id": 7,
 "volumetric": 2.0
 }
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
 autoplay = "omni lights"
 playback_speed = 0.0
-"anims/omni lights" = SubResource( 3 )
+"anims/omni lights" = SubResource( 2 )
 
 [node name="VolumeProxy" type="Spatial" parent="."]
 script = ExtResource( 9 )
-material = SubResource( 4 )
+material = SubResource( 3 )
 bounds_mode = 0
 
 [node name="VolumeProxy2" type="Spatial" parent="."]
 script = ExtResource( 9 )
-material = SubResource( 5 )
+material = SubResource( 4 )
 bounds_mode = 1
 extents = Vector3( 16.605, 1.63871, 7.77037 )
 bounds_fade = Vector3( 0, 0.584, 0 )
@@ -227,7 +228,7 @@ bounds_fade = Vector3( 0, 0.584, 0 )
 [node name="VolumeProxy3" type="Spatial" parent="."]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.33799, 0 )
 script = ExtResource( 9 )
-material = SubResource( 6 )
+material = SubResource( 5 )
 bounds_mode = 2
 extents = Vector3( 1.5, 1.5, 1.5 )
 bounds_fade = Vector3( 0, 0.5, 0 )
@@ -257,7 +258,7 @@ __meta__ = {
 [node name="Panel" type="Panel" parent="GUI"]
 margin_right = 358.0
 margin_bottom = 276.0
-custom_styles/panel = SubResource( 7 )
+custom_styles/panel = SubResource( 6 )
 __meta__ = {
 "_edit_use_anchors_": false
 }

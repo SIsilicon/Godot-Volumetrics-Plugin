@@ -26,13 +26,16 @@ func _enter_tree() -> void:
 func _ready() -> void:
 	$ShadowAtlas.size = Vector2(size, size)
 	$ShadowRenderer.layers = 1 << 20
+	
+	if true or Engine.editor_hint:
+		$TextureRect.visible = false
 
 func _process(_delta : float) -> void:
 	var subdivs := [1, 4, 16, 64, 256, 1024]
-	var s1 : int = subdivs[max(get_viewport().shadow_atlas_quad_0, 1)]
-	var s2 : int = subdivs[max(get_viewport().shadow_atlas_quad_1, 1)]
-	var s3 : int = subdivs[max(get_viewport().shadow_atlas_quad_2, 1)]
-	var s4 : int = subdivs[max(get_viewport().shadow_atlas_quad_3, 1)]
+	var s1 : int = subdivs[max(get_viewport().shadow_atlas_quad_0, 1) - 1]
+	var s2 : int = subdivs[max(get_viewport().shadow_atlas_quad_1, 1) - 1]
+	var s3 : int = subdivs[max(get_viewport().shadow_atlas_quad_2, 1) - 1]
+	var s4 : int = subdivs[max(get_viewport().shadow_atlas_quad_3, 1) - 1]
 	set_atlas_subdivs(s1, s2, s3, s4)
 	
 	var scene_aabb : AABB = scene_bounds.get_aabb()
