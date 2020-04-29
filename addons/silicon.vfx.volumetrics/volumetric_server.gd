@@ -331,8 +331,9 @@ func unregister_node(node : Node) -> void:
 	if lights.has(node):
 		var renderer = lights[node]
 		lights.erase(node)
-		renderer.remove_light(node.get_meta("_vol_id"))
-		node.remove_meta("_vol_id")
+		if node.has_meta("_vol_id"):
+			renderer.remove_light(node.get_meta("_vol_id"))
+			node.remove_meta("_vol_id")
 	elif geom_instances.has(node):
 		var renderer = geom_instances[node].renderer
 		if renderer:

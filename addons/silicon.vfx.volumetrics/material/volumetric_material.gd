@@ -200,7 +200,7 @@ func update_shaders() -> void:
 			("uniform sampler3D emission_texture;" if has_emission_tex else "")) if emission_enabled else "",
 		fragment_code =\
 			"UVW = mod(UVW * uvw_scale - uvw_offset, 1.0);" +\
-			("ALBEDO = textureLod(emission_texture, UVW, 0.0) * emission * FADE;"
+			("ALBEDO = textureLod(emission_texture, UVW, 0.0).rgb * emission * FADE;"
 			if has_emission_tex else "ALBEDO = emission * FADE;") if emission_enabled else "discard;"
 	},{
 		# Phase shader
@@ -224,7 +224,7 @@ func update_shaders() -> void:
 		# Motion shader
 		globals = "render_mode blend_mix; uniform mat4 prev_world_matrix;",
 		fragment_code = """
-			vec3 prev_wpos = (prev_world_matrix * vec4(UVW * 2.0 - 1.0, 1.0)).xyz;
+			vec3 prev_wpos = (prev_world_matrix * vec4((UVW - 0.5) * 2.0 * bounds_extents, 1.0)).xyz;
 			ALBEDO = WORLD - prev_wpos;
 		"""
 	}]
