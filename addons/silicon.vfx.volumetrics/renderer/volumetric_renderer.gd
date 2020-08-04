@@ -107,8 +107,8 @@ func _process(delta) -> void:
 	resize(size)
 	shadow_manager.viewport_camera = camera
 	
-	for viewport in get_viewports():
-		var viewport_camera = viewport.get_child(0)
+	for view in get_viewports():
+		var viewport_camera = view.get_child(0)
 		
 		if viewport_camera is Camera:
 			viewport_camera.global_transform = camera_transform
@@ -116,7 +116,7 @@ func _process(delta) -> void:
 			viewport_camera.fov = camera.fov
 			viewport_camera.near = start
 			viewport_camera.far = end
-			viewport.process_priority = -512
+			view.process_priority = -512
 	process_priority = -512
 	
 	var sample_distribution = 4.0 * (max(1.0 - sqrt(distribution) * 0.95, 1e-2))
@@ -128,12 +128,12 @@ func _process(delta) -> void:
 	vol_depth_params.z = sample_distribution
 	
 	var camera_projection : Matrix4 = Matrix4.new().get_camera_projection(camera)
-	for viewport in [$LightScatter, $LightTransmit]:
-		viewport.get_child(0).material.set_shader_param("tile_factor", tiling)
-		viewport.get_child(0).material.set_shader_param("vol_depth_params", vol_depth_params)
-		viewport.get_child(0).material.set_shader_param("prev_inv_view_matrix", prev_cam_transform.affine_inverse())
-		viewport.get_child(0).material.set_shader_param("curr_view_matrix", camera_transform)
-		camera_projection.set_shader_param(viewport.get_child(0).material, "projection_matrix")
+	for view in [$LightScatter, $LightTransmit]:
+		view.get_child(0).material.set_shader_param("tile_factor", tiling)
+		view.get_child(0).material.set_shader_param("vol_depth_params", vol_depth_params)
+		view.get_child(0).material.set_shader_param("prev_inv_view_matrix", prev_cam_transform.affine_inverse())
+		view.get_child(0).material.set_shader_param("curr_view_matrix", camera_transform)
+		camera_projection.set_shader_param(view.get_child(0).material, "projection_matrix")
 	$LightScatter/ColorRect.material.set_shader_param("volumetric_shadows", volumetric_shadows)
 	
 	for resolver in [$ResolveScatter/Canvas, $ResolveTransmit/Canvas, $SolidTransmit, $SolidScatter]:
