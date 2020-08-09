@@ -343,7 +343,7 @@ func add_light(key, type : int, data := {}) -> void:
 	
 	if light_data.shadows:
 		shadow_manager.add_shadow(key, light_data)
-		var shadow_coords : Rect2 = shadow_manager.get_shadow_data(key).coords
+		var shadow_coords : Rect2 = shadow_manager.get_shadow_data(key).shadow_coords
 		var shadow_matrix : Matrix4 = shadow_manager.get_shadow_data(key).shadow_matrix
 		pass_light_data(14, light_data.index, shadow_matrix.get_data())
 		pass_light_data(30, light_data.index, shadow_coords)
