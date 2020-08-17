@@ -85,6 +85,9 @@ func volume_set_param(id : int, param : String, value) -> void:
 		volume.renderer.set_volume_param(id, param, value)
 
 func add_renderer(viewport : Viewport) -> int:
+	if get_renderer_by_viewport(viewport) != -1:
+		return -1
+	
 	if not can_function:
 		id_counter += 1
 		return id_counter - 1
@@ -165,6 +168,9 @@ func renderer_set_distribution(id : int, value : float) -> void:
 func renderer_set_ambient_light(id : int, value : Vector3) -> void:
 	renderers[id].node.ambient_light = value
 
+func renderer_set_cull_mask(id : int, value : int) -> void:
+	renderers[id].node.cull_mask = value
+
 func renderer_set_temporal_blending(id : int, value : float) -> void:
 	renderers[id].node.blend = value
 
@@ -201,14 +207,16 @@ func update_light(light : Light) -> void:
 	var is_volumetric = light.has_meta("volumetric")
 	is_volumetric = true if not is_volumetric else light.get_meta("volumetric")
 	
+	var in_cull_mask = (renderer.cull_mask & light.layers) != 0
+	
 	if camera and not light is DirectionalLight:
 		var light_aabb : AABB = light.get_transformed_aabb()
 		var frustum_intersection = FrustumAABBIntersection.new(camera)
 		is_volumetric = is_volumetric and frustum_intersection.is_inside_frustum(light_aabb)
 	
-	if is_volumetric and not light.has_meta("_vol_id"):
+	if is_volumetric and not light.has_meta("_vol_id") and in_cull_mask:
 		_on_node_added(light)
-	elif not is_volumetric and light.has_meta("_vol_id"):
+	elif (not is_volumetric or not in_cull_mask) and light.has_meta("_vol_id"):
 		renderer.remove_light(light.get_meta("_vol_id"))
 		light.remove_meta("_vol_id")
 	

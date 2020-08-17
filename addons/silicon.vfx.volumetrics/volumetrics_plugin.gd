@@ -43,8 +43,6 @@ func _ready() -> void:
 	texture_3d_creator.editor_file_system = get_editor_interface().get_resource_filesystem()
 	get_editor_interface().get_base_control().add_child(texture_3d_creator)
 	add_tool_menu_item("Create 3D Texture...", texture_3d_creator, "popup_centered_ratio", 0.0)
-	
-	print("Volumetrics plugin enter tree")
 
 func _exit_tree() -> void:
 	remove_custom_type("LocalVolume")
@@ -54,8 +52,6 @@ func _exit_tree() -> void:
 	remove_spatial_gizmo_plugin(gizmo_plugin)
 	remove_tool_menu_item("Create 3D Texture...")
 	texture_3d_creator.queue_free()
-	
-	print("Volumetrics plugin exit tree")
 
 func forward_spatial_gui_input(p_camera : Camera, p_event : InputEvent) -> bool:
 	if not editor_camera:

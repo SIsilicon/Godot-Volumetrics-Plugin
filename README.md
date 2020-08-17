@@ -42,6 +42,7 @@ To start adding volumetric fog to your scene, you need to first add a `Volumetri
 * `Shadow Atlas Size` :- How much resolution is used to render the shadows of lights. **Does not affect `Volumetric Shadows`**.
 * `Ambient Light Color` :- The color of the ambient light applied to volumes.
 * `Ambient Light Energy` :- How much the ambient light is applied to volumes.
+* `Cull Mask` :- This determines what lights get processed in the effect. Lights whose layers don't match up with this will not show up in the fog.
 
 ### Volume Proxy <img src="addons/silicon.vfx.volumetrics/volume_proxy.svg" alt="volume_proxy" style="zoom: 200%;" />
 

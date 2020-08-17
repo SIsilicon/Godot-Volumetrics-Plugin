@@ -144,7 +144,7 @@ material/36 = null
 material/37 = null
 __meta__ = {
 "_edit_lock_": true,
-"_vol_id": 4,
+"_vol_id": 22,
 "apply_volumetrics": false
 }
 
@@ -159,21 +159,18 @@ max_speed = Vector3( 2, 2, 5 )
 environment = SubResource( 1 )
 
 [node name="VolumetricFog" type="Node" parent="WorldEnvironment"]
-process_priority = 512
 script = ExtResource( 7 )
-__meta__ = {
-"_editor_description_": ""
-}
 start = 0.1
-end = 60.0
+end = 100.0
 tile_size = 2
 samples = 1
-distribution = 0.82
-temporal_blending = 0.83
+distribution = 1.0
+temporal_blending = 0.8
 volumetric_shadows = true
-shadow_atlas_size = 512
-ambient_light_color = Color( 0.0823529, 0.0823529, 0.0823529, 1 )
+shadow_atlas_size = 1024
+ambient_light_color = Color( 0.184314, 0.184314, 0.184314, 1 )
 ambient_light_energy = 1.0
+cull_mask = 1048575
 
 [node name="Lights" type="Spatial" parent="."]
 
@@ -184,7 +181,7 @@ shadow_enabled = true
 omni_range = 18.0
 omni_attenuation = 2.73208
 __meta__ = {
-"_vol_id": 5,
+"_vol_id": 23,
 "volumetric": 4.07
 }
 
@@ -195,7 +192,7 @@ shadow_enabled = true
 omni_range = 18.0
 omni_attenuation = 2.73208
 __meta__ = {
-"_vol_id": 6,
+"_vol_id": 24,
 "volumetric": 4.07
 }
 
@@ -204,7 +201,7 @@ transform = Transform( 1, 0, 0, 0, -0.0680631, 0.997681, 0, -0.997681, -0.068063
 visible = false
 shadow_enabled = true
 __meta__ = {
-"_vol_id": 7,
+"_vol_id": 25,
 "volumetric": 2.0
 }
 

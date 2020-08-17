@@ -23,6 +23,8 @@ export var volumetric_shadows := false
 
 export var ambient_light := Vector3.ONE
 
+export var cull_mask := (1 << 20) - 1
+
 var tiling := Vector2(8, 16)
 
 export var blend := 0.0
