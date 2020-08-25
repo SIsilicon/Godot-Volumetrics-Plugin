@@ -51,7 +51,7 @@ var temp_light_img : Image = null
 
 var halton : Array 
 
-func _enter_tree() -> void:
+func _init() -> void:
 	halton = Halton.genearate_sequence_3D(Vector3(2,5,3), 128)
 	halton.shuffle()
 	
@@ -60,7 +60,8 @@ func _enter_tree() -> void:
 	light_texture.create_from_image(image, 0)
 	
 	canvas.size = Vector2(2, 2)
-	
+
+func _enter_tree() -> void:
 	add_child(shadow_manager)
 
 func _ready() -> void:
@@ -74,13 +75,14 @@ func _ready() -> void:
 	yield(get_tree(), "idle_frame")
 	$LightScatter/ColorRect.material.set_shader_param("shadow_atlas", shadow_manager.get_shadow_atlas())
 
-func _process(delta) -> void:
+func _process(delta: float) -> void:
 	set_enabled(not volumes.empty())
-	
+
 	# Get the camera, viewport and its size with tiling in account.
 	var size = tiling
-	var viewport : Viewport
-	if Engine.editor_hint:
+	var viewport: Viewport
+	var edited_scene_root := get_tree().edited_scene_root
+	if Engine.editor_hint and (edited_scene_root and get_viewport().is_a_parent_of(edited_scene_root)):
 		if not has_node("/root/EditorNode/VolumetricsPlugin"):
 			return
 		if not plugin:
@@ -101,9 +103,9 @@ func _process(delta) -> void:
 			return
 	camera.force_update_transform()
 	camera_transform = camera.get_camera_transform()
-	
-#	# This is a hack to compensate for the delay in the editor camera.
-#	if true or Engine.editor_hint:
+
+	# This is a hack to compensate for the delay in the editor camera.
+#	if Engine.editor_hint:
 #		camera_transform = prev_cam_transform.interpolate_with(camera_transform, 2)
 	
 	resize(size)
@@ -269,17 +271,22 @@ func add_volume(key) -> void:
 	# V-buffers may not be initialized immediately after entering the scene tree
 	if not v_buffers and is_inside_tree():
 		v_buffers = [$Scatter, $Extinction, $Emission, $Phase, $Motion]
-	
-	for buffer in v_buffers:
+
+	for buffer in 5:
 		var canvas_inst := MeshInstance.new()
 		canvas_inst.extra_cull_margin = 16384
 		canvas_inst.mesh = canvas
 		canvas_inst.material_override = ShaderMaterial.new()
 		canvas_inst.material_override.shader = preload("volume_injection.shader")
-		buffer.add_child(canvas_inst)
 		meshes.append(canvas_inst)
-	
 	volumes[key] = meshes
+
+	if not v_buffers:
+		yield(self, "ready")
+
+	for buffer in 5:
+		v_buffers[buffer].add_child(volumes[key][buffer])
+
 
 func remove_volume(key) -> void:
 	for mesh in volumes[key]:

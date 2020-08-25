@@ -56,6 +56,7 @@ func _exit_tree() -> void:
 	if material:
 		material.volumes.erase(vol_id)
 	vol_id == -1
+	remove_child(vis_notifier)
 
 func set_material(value : VolumetricMaterial) -> void:
 	if not is_inside_tree():
@@ -118,6 +119,7 @@ func set_bounds_fade(value : Vector3) -> void:
 	bounds_fade.y = clamp(value.y, 0.0, 1.0)
 	bounds_fade.z = clamp(value.z, 0.0, 1.0)
 	_get_volumetric_server().volume_set_param(vol_id, "bounds_fade", bounds_fade)
+
 
 func _get_volumetric_server() -> Node:
 	return get_tree().root.get_node("/root/VolumetricServer")

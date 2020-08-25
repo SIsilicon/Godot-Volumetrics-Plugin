@@ -101,7 +101,7 @@ func add_renderer(viewport : Viewport) -> int:
 	if viewport == get_parent():
 		add_child(renderer)
 	else:
-		viewport.add_child(renderer)
+		viewport.call_deferred("add_child", renderer)
 	renderer.enabled = true
 	
 	var ids = orphan_volumes.keys()
@@ -295,25 +295,25 @@ func update_geometry_instance(geom : GeometryInstance) -> void:
 
 func register_node(node : Node) -> void:
 	assert(node.is_inside_tree())
-	
+
 	var viewport := node.get_viewport()
 	var r_id := get_renderer_by_viewport(viewport)
 	if r_id == -1:
 		return
 	var renderer = renderers[r_id].node
-	
+
 	if node is Light:
 		if not lights.has(node):
 			lights[node] = renderer
 		elif node.has_meta("_vol_id"):
 			return
-		
+
 		var type : int
 		match node.get_class():
 			"OmniLight": type = OMNI_LIGHT
 			"SpotLight": type = SPOT_LIGHT
 			"DirectionalLight": type = DIRECTIONAL_LIGHT
-		
+
 		renderer.add_light(id_counter, type)
 		node.set_meta("_vol_id", id_counter)
 		id_counter += 1
