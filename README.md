@@ -1,5 +1,7 @@
 # Godot Volumetrics Plugin
 
+[![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=XXXJ5ETNT5PSN)
+
 ![volumetrics plugin](doc_images/volumetrics_plugin.png)
 
 Hello fellow Godot user. This plugin will enable to create well lit volumetric fog in the game engine. **GLES 3 only**.
